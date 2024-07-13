@@ -10,9 +10,6 @@ import 'package:online_barber_app/views/user/faqs.dart';
 import 'package:online_barber_app/views/user/help.dart';
 import 'package:online_barber_app/views/user/privacy_policy.dart';
 import 'package:online_barber_app/views/user/show_appointments.dart';
-
-import 'controllers/appointment_controller.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();

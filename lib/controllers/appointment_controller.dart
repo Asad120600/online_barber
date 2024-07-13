@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_barber_app/models/appointment.dart';
+import 'package:online_barber_app/models/appointment_model.dart';
 
 class AppointmentController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;

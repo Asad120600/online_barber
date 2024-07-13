@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
-import 'package:online_barber_app/models/appointment.dart';
+import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/views/admin/admin_drawer.dart';
 
 class AdminPanel extends StatefulWidget {

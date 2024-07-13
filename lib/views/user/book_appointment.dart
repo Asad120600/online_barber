@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
-import 'package:online_barber_app/models/appointment.dart';
-import 'package:online_barber_app/models/service.dart';
+import 'package:online_barber_app/models/appointment_model.dart';
+import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/utils/button.dart'; // Adjusted import for Button widget
 

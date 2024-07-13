@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:online_barber_app/models/appointment.dart';
+import 'package:online_barber_app/models/appointment_model.dart';
 
 class BookingScreen extends StatelessWidget {
   final Future<List<Appointment>> appointmentsFuture;

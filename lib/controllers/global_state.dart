@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../models/service.dart';
+import '../models/service_model.dart';
 
 class Appointment {
   final DateTime date;

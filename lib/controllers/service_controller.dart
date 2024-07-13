@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/service.dart';
+import '../models/service_model.dart';
 
 class ServiceController {
   final CollectionReference _servicesCollection =

@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_barber_app/models/service.dart';
+import 'package:online_barber_app/models/service_model.dart';
 
 class Appointment {
   String id;

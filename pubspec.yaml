@@ -48,18 +48,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/img/background.jpg
-    - assets/img/one.jpg
-    - assets/img/two.jpg
-    - assets/img/three.jpg
-    - assets/img/login.png
-    - assets/img/done.png
-    - assets/img/done.jpg
-    - assets/img/haircut1.jpeg
-    - assets/img/haircut2.jpeg
-    - assets/img/beard1.jpeg
-    - assets/img/beard2.jpeg
-    - assets/img/google_logo.png
+    - assets/img/
   # fonts:
   fonts:
       - family: Acumin Pro

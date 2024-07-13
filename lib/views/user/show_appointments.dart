@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
-import 'package:online_barber_app/models/appointment.dart';
+import 'package:online_barber_app/models/appointment_model.dart';
 
 class AppointmentsShow extends StatefulWidget {
   final String uid;
