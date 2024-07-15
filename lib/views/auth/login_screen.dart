@@ -5,7 +5,6 @@ import 'package:online_barber_app/utils/shared_pref.dart';
   import 'package:online_barber_app/views/admin/admin_panel.dart';
   import 'package:online_barber_app/views/auth/signup_screen.dart';
   import 'package:online_barber_app/views/user/home_screen.dart';
-  import 'package:sign_in_button/sign_in_button.dart';
   import '../../utils/button.dart';
 
   class LoginScreen extends StatefulWidget {

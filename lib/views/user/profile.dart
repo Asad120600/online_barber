@@ -94,7 +94,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ? NetworkImage(_currentUser!.photoURL!)
                     : null,
                 child: _currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty
-                    ? Icon(Icons.person, size: 40, color: Colors.white)
+                    ? const Icon(Icons.person, size: 40, color: Colors.white)
                     : null,
               ),
               const SizedBox(height: 16),

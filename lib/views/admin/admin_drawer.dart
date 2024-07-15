@@ -63,15 +63,15 @@ class _AdminDrawerState extends State<AdminDrawer> {
               child: Row(
                 children: [
                   const CircleAvatar(
-                    child: Icon(Icons.supervisor_account, size: 50, color: Colors.black),
                     backgroundColor: Colors.orange,
                     radius: 30,
+                    child: Icon(Icons.supervisor_account, size: 50, color: Colors.black),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Hello 👋, ${_firstName ?? 'Admin'}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                       ),
@@ -132,7 +132,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>PrivacySettings()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const PrivacySettings()));
                     // Navigate to PrivacySettings screen
                   },
                 ),
@@ -142,7 +142,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>HelpSettings()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const HelpSettings()));
                     // Navigate to NotificationSettings screen
                   },
                 ),
@@ -152,7 +152,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   ),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>FAQsSettings()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const FAQsSettings()));
                     // Navigate to FAQsSettings screen
                   },
                 ),
@@ -212,7 +212,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  ManageService(),
+                        builder: (context) =>  const ManageService(),
                       ),
                     );
                   },
@@ -227,7 +227,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  ServiceList(),
+                        builder: (context) =>  const ServiceList(),
                       ),
                     );
                   },

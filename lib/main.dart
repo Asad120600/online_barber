@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
       home: const SplashScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/profile': (context) =>  ProfileScreen(),
+        '/profile': (context) =>  const ProfileScreen(),
         '/faqs': (context) => const FAQ(),
         '/help': (context) => const Help(),
         '/privacy_policy': (context) => const PrivacyPolicy(),

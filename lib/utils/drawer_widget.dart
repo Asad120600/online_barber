@@ -13,7 +13,7 @@ import '../views/user/show_appointments.dart';
 class AppDrawer extends StatefulWidget {
   final double screenWidth;
 
-  const AppDrawer({Key? key, required this.screenWidth}) : super(key: key);
+  const AppDrawer({super.key, required this.screenWidth});
 
   @override
   State<AppDrawer> createState() => _AppDrawerState();
@@ -136,7 +136,7 @@ class _AppDrawerState extends State<AppDrawer> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.orange,
               ),
               child: Row(
@@ -147,14 +147,14 @@ class _AppDrawerState extends State<AppDrawer> {
                         ? NetworkImage(_currentUser!.photoURL!)
                         : null,
                     child: _currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty
-                        ? Icon(Icons.person, size: 40, color: Colors.white)
+                        ? const Icon(Icons.person, size: 40, color: Colors.white)
                         : null,
                   ),
-                  SizedBox(width: 10),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'Hello 👋, ${_firstName ?? 'User'}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
                       ),
@@ -172,7 +172,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  ProfileScreen(),
+                    builder: (context) =>  const ProfileScreen(),
                   ),
                 );
               },
