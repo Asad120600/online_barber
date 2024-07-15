@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/views/admin/service_list.dart';
@@ -8,26 +9,49 @@ import 'package:online_barber_app/views/admin/faqs_settings.dart';
 import 'package:online_barber_app/views/admin/help_settings.dart';
 import 'package:online_barber_app/views/admin/privacy_settings.dart';
 import 'package:online_barber_app/views/admin/admin_profile.dart';
-
 import 'barber_screen.dart';
 import 'manage_barber.dart';
 import 'manage_services.dart';
 
-class AdminDrawer extends StatelessWidget {
-  const AdminDrawer({
-    Key? key,
-    required this.screenWidth,
-  }) : super(key: key);
+class AdminDrawer extends StatefulWidget {
+  const AdminDrawer({super.key,required this.screenWidth,});
 
   final double screenWidth;
 
   @override
-  Widget build(BuildContext context) {
-    final User? user = FirebaseAuth.instance.currentUser;
-    String firstName = user?.displayName ?? 'Admin'; // Get the first name
+  State<AdminDrawer> createState() => _AdminDrawerState();
+}
 
+class _AdminDrawerState extends State<AdminDrawer> {
+
+  User? _currentUser;
+  String? _firstName;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUser = FirebaseAuth.instance.currentUser;
+    _fetchFirstName();
+  }
+  Future<void> _fetchFirstName() async {
+    if (_currentUser != null) {
+      try {
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('admins').doc(_currentUser!.uid).get();
+        if (snapshot.exists) {
+          setState(() {
+            _firstName = snapshot['firstName'];
+          });
+        }
+      } catch (e) {
+        print('Error fetching first name: $e');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
-      width: screenWidth * 0.75,
+      width: widget.screenWidth * 0.75,
       child: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -39,18 +63,17 @@ class AdminDrawer extends StatelessWidget {
               child: Row(
                 children: [
                   const CircleAvatar(
-                    child: Icon(Icons.account_circle, size: 50, color: Colors.black),
+                    child: Icon(Icons.supervisor_account, size: 50, color: Colors.black),
                     backgroundColor: Colors.orange,
                     radius: 30,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Hello 👋, $firstName',
-                      style: const TextStyle(
+                      'Hello 👋, ${_firstName ?? 'Admin'}',
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -87,7 +110,6 @@ class AdminDrawer extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>ActiveUsers()));
                   },
                 ),
-
                 ListTile(
                   leading: const Icon(Icons.group_off),
                   title: const Text('Deleted Users'),
@@ -96,7 +118,6 @@ class AdminDrawer extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>DeletedUsers()));
                   },
                 ),
-
               ],
             ),
             ExpansionTile(
@@ -173,7 +194,6 @@ class AdminDrawer extends StatelessWidget {
                     );
                   },
                 ),
-
               ],
             ),
             ExpansionTile(
@@ -214,9 +234,6 @@ class AdminDrawer extends StatelessWidget {
                 ),
               ],
             ),
-
-
-
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(

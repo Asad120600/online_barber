@@ -57,10 +57,20 @@ class AuthController {
 
       if (user != null) {
         DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
-        if (!userDoc.exists) {
-          // Handle the case where the user document does not exist
-          // For now, we can log this incident
+        DocumentSnapshot adminDoc = await _firestore.collection('admins').doc(user.uid).get();
+
+        if (adminDoc.exists) {
+          // User is an admin
+          print("Admin logged in");
+          // Redirect or perform admin-specific actions
+        } else if (userDoc.exists) {
+          // User is a regular user
+          print("Regular user logged in");
+          // Redirect or perform regular user actions
+        } else {
+          // Handle the case where neither document exists
           print("User document does not exist for uid: ${user.uid}");
+          // You might want to handle this case differently based on your application's logic
         }
       }
       return user;
@@ -69,6 +79,7 @@ class AuthController {
       return null;
     }
   }
+
 
   Future<User?> signInWithGoogle(BuildContext context) async {
     try {
