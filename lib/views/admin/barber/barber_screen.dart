@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../controllers/barber_service.dart';
-import '../../models/barber_model.dart';
-import '../../utils/barber_card.dart';
+import '../../../controllers/barber_service.dart';
+import '../../../models/barber_model.dart';
+import '../../../utils/barber_card.dart';
 
 class BarberListScreen extends StatelessWidget {
   final BarberService _barberService = BarberService();

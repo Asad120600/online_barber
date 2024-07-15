@@ -3,9 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 
-import '../../controllers/barber_service.dart';
-import '../../models/barber_model.dart';
-import '../../utils/button.dart';
+import '../../../controllers/barber_service.dart';
+import '../../../models/barber_model.dart';
+import '../../../utils/button.dart';
 
 class ManageBarbersScreen extends StatefulWidget {
   @override
@@ -101,9 +101,11 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                         ? Text('No image selected.')
                         : Image.file(_imageFile!, height: 100),
                     SizedBox(height: 20),
-                    ElevatedButton(
+                    IconButton(
                       onPressed: _pickImage,
-                      child: Text('Pick Image'),
+                      icon:Icon(Icons.image),
+                      iconSize: 35,
+                      color: Colors.orange,
                     ),
                     SizedBox(height: 20),
                     Button(
