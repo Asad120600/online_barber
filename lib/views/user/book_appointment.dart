@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -39,6 +39,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     _selectedServices = widget.selectedServices;
     _addressController.addListener(_onAddressChanged);
     _phoneNumberController.addListener(_onPhoneNumberChanged);
+    _getPhoneNumber(); // Fetch phone number on screen initialization
   }
 
   @override
@@ -82,8 +83,26 @@ class _BookAppointmentState extends State<BookAppointment> {
     // Simulated location selection for demo purposes
     LatLng selectedLocation = const LatLng(37.4219999, -122.0840575);
     _addressController.text =
-        'Selected Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}';
+    'Selected Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}';
     FocusScope.of(context).unfocus(); // Hide keyboard
+  }
+
+  Future<void> _getPhoneNumber() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> document =
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      final data = document.data()!;
+      if (data.containsKey('phone')) {
+        setState(() {
+          _phoneNumberController.text = data['phone'];
+        });
+      }
+    } catch (e) {
+      print('Error fetching phone number: $e');
+    }
   }
 
   @override
@@ -283,30 +302,23 @@ class _BookAppointmentState extends State<BookAppointment> {
               ),
               const SizedBox(height: 8),
               ..._predictions.map((prediction) => ListTile(
-                    title: Text(
-                      prediction,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                    onTap: () {
-                      _addressController.text = prediction;
-                      FocusScope.of(context).unfocus();
-                      setState(() {
-                        _predictions = [];
-                      });
-                    },
-                  )),
+                title: Text(
+                  prediction,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onTap: () {
+                  _addressController.text = prediction;
+                  FocusScope.of(context).unfocus();
+                  setState(() {
+                    _predictions = [];
+                  });
+                },
+              )),
             ],
             const SizedBox(height: 16),
             Center(
               child: Button(
                 onPressed: () async {
-                  DocumentSnapshot<Map<String, dynamic>> document =
-                      await FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(FirebaseAuth.instance.currentUser!.uid)
-                          .get();
-                  final data = document.data()!;
-                  String userName = data['firstName'];
                   try {
                     if (_selectedDay == null || timeController.text.isEmpty) {
                       throw Exception('Please select a date and time slot');
@@ -317,6 +329,15 @@ class _BookAppointmentState extends State<BookAppointment> {
                     if (_phoneNumberController.text.isEmpty) {
                       throw Exception('Phone number cannot be empty');
                     }
+
+                    // Fetch user's first name from Firestore
+                    DocumentSnapshot<Map<String, dynamic>> document =
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .get();
+                    final data = document.data()!;
+                    String userName = data['firstName'];
 
                     // Create and save the appointment
                     final appointment = Appointment(

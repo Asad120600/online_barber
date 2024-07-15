@@ -6,6 +6,7 @@ class BaseUserModel {
   String firstName;
   String lastName;
   String userType;
+  String phone;
 
   BaseUserModel({
     required this.uid,
@@ -13,6 +14,8 @@ class BaseUserModel {
     required this.firstName,
     required this.lastName,
     required this.userType,
+    required this.phone,
+
   });
 
   factory BaseUserModel.fromFirestore(DocumentSnapshot doc) {
@@ -23,6 +26,7 @@ class BaseUserModel {
       firstName: data['firstName'] ?? '',
       lastName: data['lastName'] ?? '',
       userType: data['userType'] ?? '3',
+      phone: data['phone'] ?? '',
     );
   }
 
@@ -33,6 +37,7 @@ class BaseUserModel {
       'firstName': firstName,
       'lastName': lastName,
       'userType': userType,
+      'phone' : phone,
     };
   }
 }

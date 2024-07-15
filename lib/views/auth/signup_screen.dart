@@ -22,11 +22,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController userEmailController = TextEditingController();
   final TextEditingController userPasswordController = TextEditingController();
   final TextEditingController userConfirmPasswordController = TextEditingController();
+  final TextEditingController userPhoneNumberController = TextEditingController(); // Add this line
   final TextEditingController adminFirstNameController = TextEditingController();
   final TextEditingController adminLastNameController = TextEditingController();
   final TextEditingController adminEmailController = TextEditingController();
   final TextEditingController adminPasswordController = TextEditingController();
   final TextEditingController adminConfirmPasswordController = TextEditingController();
+  final TextEditingController adminPhoneNumberController = TextEditingController(); // Add this line
 
   final AuthController _authController = AuthController(); // Initialize AuthController
 
@@ -105,6 +107,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String email = isUserSelected ? userEmailController.text.trim() : adminEmailController.text.trim();
     String password = isUserSelected ? userPasswordController.text.trim() : adminPasswordController.text.trim();
     String confirmPassword = isUserSelected ? userConfirmPasswordController.text.trim() : adminConfirmPasswordController.text.trim();
+    String phoneNumber = isUserSelected ? userPhoneNumberController.text.trim() : adminPhoneNumberController.text.trim(); // Add this line
     String userType = isUserSelected ? '3' : '1'; // Determine user type based on selection
 
     if (password != confirmPassword) {
@@ -116,28 +119,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    User? user = await _authController.signUpWithEmail(email, password, firstName, lastName, userType, context);
+    User? user = await _authController.signUpWithEmail(email, password, firstName, lastName, phoneNumber, userType, context);
 
     if (user != null) {
-      // Save additional data to Firestore based on user type
-      if (isUserSelected) {
-        // Save as regular user (type 3)
-        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': email,
-          'userType': '3', // Regular user
-        });
-      } else {
-        // Save as admin (type 1)
-        await FirebaseFirestore.instance.collection('admins').doc(user.uid).set({
-          'firstName': firstName,
-          'lastName': lastName,
-          'email': email,
-          'userType': '1', // Admin user
-        });
-      }
-
       _showLoadingDialog(context);
     } else {
       // Show error message
@@ -220,6 +204,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: isUserSelected ? userEmailController : adminEmailController,
                 decoration: InputDecoration(
                   labelText: isUserSelected ? 'Email' : 'Admin Email',
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: isUserSelected ? userPhoneNumberController : adminPhoneNumberController, // Add this TextField
+                decoration: InputDecoration(
+                  labelText: isUserSelected ? 'Phone Number' : 'Admin Phone Number',
                 ),
               ),
               const SizedBox(height: 20),

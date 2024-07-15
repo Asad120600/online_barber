@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../models/admin_model.dart';
@@ -12,7 +11,7 @@ class AuthController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<User?> signUpWithEmail(String email, String password, String firstName, String lastName, String userType, BuildContext context) async {
+  Future<User?> signUpWithEmail(String email, String password, String firstName, String lastName, String phone, String userType, BuildContext context) async {
     try {
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
       User? user = userCredential.user;
@@ -23,6 +22,7 @@ class AuthController {
           firstName: firstName,
           lastName: lastName,
           userType: userType,
+          phone: phone,
         ).toMap();
 
         if (userType == '1') {
@@ -32,6 +32,7 @@ class AuthController {
             firstName: firstName,
             lastName: lastName,
             userType: userType,
+            phone: phone,
             // Initialize additional admin-specific fields
           ).toMap();
         }

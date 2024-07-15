@@ -1,9 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-
 import '../views/auth/login_screen.dart';
 import '../views/user/faqs.dart';
 import '../views/user/help.dart';
@@ -23,11 +22,28 @@ class AppDrawer extends StatefulWidget {
 class _AppDrawerState extends State<AppDrawer> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   User? _currentUser;
+  String? _firstName;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
+    _fetchFirstName();
+  }
+
+  Future<void> _fetchFirstName() async {
+    if (_currentUser != null) {
+      try {
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('users').doc(_currentUser!.uid).get();
+        if (snapshot.exists) {
+          setState(() {
+            _firstName = snapshot['firstName'];
+          });
+        }
+      } catch (e) {
+        print('Error fetching first name: $e');
+      }
+    }
   }
 
   Future<void> _signOut(BuildContext context) async {
@@ -126,12 +142,18 @@ class _AppDrawerState extends State<AppDrawer> {
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundImage: NetworkImage(_currentUser?.photoURL ?? ''),
+                    radius: 30,
+                    backgroundImage: _currentUser?.photoURL != null && _currentUser!.photoURL!.isNotEmpty
+                        ? NetworkImage(_currentUser!.photoURL!)
+                        : null,
+                    child: _currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty
+                        ? Icon(Icons.person, size: 40, color: Colors.white)
+                        : null,
                   ),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Hello 👋, ${_currentUser?.displayName ?? 'User'}',
+                      'Hello 👋, ${_firstName ?? 'User'}',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 24,

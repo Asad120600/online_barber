@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../utils/button.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({Key? key}) : super(key: key);
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -13,33 +13,40 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late User? _currentUser;
   late TextEditingController _phoneController;
-  late TextEditingController _dobController;
-  String? _firstName; // Variable to hold the first name
+  String? _firstName;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
-    _firstName = _currentUser?.displayName; // Initialize first name after _currentUser is assigned
-    _phoneController = TextEditingController(text: _currentUser?.phoneNumber ?? '');
-    _dobController = TextEditingController(text: ''); // Initialize with current DOB if available
+    _firstName = _currentUser?.displayName;
+    _phoneController = TextEditingController();
     _fetchProfileData();
   }
 
   void _fetchProfileData() async {
-    // Fetch additional profile data from Firestore if needed
+    print('Fetching profile data for user: ${_currentUser?.uid}');
     try {
       DocumentSnapshot snapshot = await _firestore.collection('users').doc(_currentUser?.uid).get();
       if (snapshot.exists) {
+        print('Snapshot exists');
         setState(() {
           _firstName = snapshot['firstName'] ?? 'User';
-          _phoneController.text = snapshot['phone'] ?? '';
-          _dobController.text = snapshot['dob'] ?? '';
+          _phoneController.text = snapshot['phone'] ?? (_currentUser?.phoneNumber ?? '');
+        });
+        print('Fetched data: firstName: $_firstName, phone: ${_phoneController.text}');
+      } else {
+        print('Snapshot does not exist, using currentUser phone number');
+        setState(() {
+          _phoneController.text = _currentUser?.phoneNumber ?? '';
         });
       }
     } catch (e) {
       print('Error fetching profile data: $e');
+      setState(() {
+        _phoneController.text = _currentUser?.phoneNumber ?? '';
+      });
     }
   }
 
@@ -47,7 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _firestore.collection('users').doc(_currentUser?.uid).set({
         'phone': _phoneController.text,
-        'dob': _dobController.text,
       }, SetOptions(merge: true));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
@@ -63,13 +69,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _dobController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // Fetch the viewInsets (keyboard space) from MediaQuery
     final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Scaffold(
@@ -78,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.only(bottom: viewInsets.bottom), // Add padding equal to the bottom viewInsets
+        padding: EdgeInsets.only(bottom: viewInsets.bottom),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -86,8 +90,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(_currentUser?.photoURL ?? ''),
-                backgroundColor: Colors.orange,
+                backgroundImage: _currentUser?.photoURL != null && _currentUser!.photoURL!.isNotEmpty
+                    ? NetworkImage(_currentUser!.photoURL!)
+                    : null,
+                child: _currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty
+                    ? Icon(Icons.person, size: 40, color: Colors.white)
+                    : null,
               ),
               const SizedBox(height: 16),
               Text(
@@ -106,6 +114,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
+              Text(
+                _phoneController.text,
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 16),
               TextField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
@@ -114,19 +130,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              TextField(
-                controller: _dobController,
-                decoration: const InputDecoration(
-                  labelText: 'Date of Birth',
-                  icon: Icon(Icons.cake, color: Colors.orange),
-                ),
-              ),
-              const SizedBox(height: 16),
               Button(
                 onPressed: _updateProfile,
                 child: const Text('Save Changes'),
               ),
-              const SizedBox(height: 16), // Added some spacing to avoid hiding content under the keyboard
+              const SizedBox(height: 16),
             ],
           ),
         ),
