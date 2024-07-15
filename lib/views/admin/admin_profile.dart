@@ -14,15 +14,14 @@ class AdminProfile extends StatefulWidget {
 class _AdminProfileState extends State<AdminProfile> {
   late User? _currentUser;
   late TextEditingController _phoneController;
-  late TextEditingController _dobController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String? _firstName;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
     _phoneController = TextEditingController();
-    _dobController = TextEditingController();
     _fetchAdminData();
   }
 
@@ -33,7 +32,7 @@ class _AdminProfileState extends State<AdminProfile> {
       if (snapshot.exists) {
         setState(() {
           _phoneController.text = snapshot['phone'] ?? '';
-          _dobController.text = snapshot['dob'] ?? '';
+          _firstName = snapshot['firstName']; // Assuming 'firstname' is the field name in Firestore
         });
       }
     } catch (e) {
@@ -45,7 +44,7 @@ class _AdminProfileState extends State<AdminProfile> {
     try {
       await _firestore.collection('admins').doc(_currentUser?.uid).set({
         'phone': _phoneController.text,
-        'dob': _dobController.text,
+        'firstname': _firstName, // Update the 'firstname' field in Firestore
       }, SetOptions(merge: true));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
@@ -61,7 +60,6 @@ class _AdminProfileState extends State<AdminProfile> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _dobController.dispose();
     super.dispose();
   }
 
@@ -87,10 +85,9 @@ class _AdminProfileState extends State<AdminProfile> {
               ),
             ),
             const SizedBox(height: 16),
-              Text(
-               _currentUser?.displayName ?? 'Admin',
-
-               style: TextStyle(
+            Text(
+              _firstName ?? 'Admin ', // Display first name or fallback to 'Admin'
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -109,14 +106,6 @@ class _AdminProfileState extends State<AdminProfile> {
               decoration: const InputDecoration(
                 labelText: 'Phone Number',
                 icon: Icon(Icons.phone, color: Colors.orange),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _dobController,
-              decoration: const InputDecoration(
-                labelText: 'Date of Birth',
-                icon: Icon(Icons.cake, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 16),
