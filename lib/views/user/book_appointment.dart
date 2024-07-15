@@ -14,10 +14,10 @@ class BookAppointment extends StatefulWidget {
   final String uid;
 
   const BookAppointment({
-    Key? key,
+    super.key,
     required this.selectedServices,
     required this.uid,
-  }) : super(key: key);
+  });
 
   @override
   _BookAppointmentState createState() => _BookAppointmentState();
@@ -290,31 +290,31 @@ class _BookAppointmentState extends State<BookAppointment> {
               ),
             ),
             const SizedBox(height: 16),
-            if (_predictions.isNotEmpty) ...[
-              const Divider(),
-              const Text(
-                'Predictions',
-                style: TextStyle(
-                  fontFamily: 'Acumin Pro',
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              ..._predictions.map((prediction) => ListTile(
-                title: Text(
-                  prediction,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                onTap: () {
-                  _addressController.text = prediction;
-                  FocusScope.of(context).unfocus();
-                  setState(() {
-                    _predictions = [];
-                  });
-                },
-              )),
-            ],
+            // if (_predictions.isNotEmpty) ...[
+            //   const Divider(),
+            //   const Text(
+            //     'Predictions',
+            //     style: TextStyle(
+            //       fontFamily: 'Acumin Pro',
+            //       fontSize: 16,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            //   const SizedBox(height: 8),
+            //   ..._predictions.map((prediction) => ListTile(
+            //     title: Text(
+            //       prediction,
+            //       style: const TextStyle(fontSize: 12),
+            //     ),
+            //     onTap: () {
+            //       _addressController.text = prediction;
+            //       FocusScope.of(context).unfocus();
+            //       setState(() {
+            //         _predictions = [];
+            //       });
+            //     },
+            //   )),
+            // ],
             const SizedBox(height: 16),
             Center(
               child: Button(
