@@ -14,10 +14,10 @@ class BookAppointment extends StatefulWidget {
   final String uid;
 
   const BookAppointment({
-    Key? key,
+    super.key,
     required this.selectedServices,
     required this.uid,
-  }) : super(key: key);
+  });
 
   @override
   _BookAppointmentState createState() => _BookAppointmentState();
@@ -27,7 +27,8 @@ class _BookAppointmentState extends State<BookAppointment> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   List<Service> _selectedServices = [];
-  List<DocumentSnapshot> barbers = [];
+  List<String> _predictions = [];
+
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController timeController = TextEditingController();
@@ -39,7 +40,6 @@ class _BookAppointmentState extends State<BookAppointment> {
     _addressController.addListener(_onAddressChanged);
     _phoneNumberController.addListener(_onPhoneNumberChanged);
     _getPhoneNumber(); // Fetch phone number on screen initialization
-    fetchBarbers(); // Fetch barbers on initialization
   }
 
   @override
@@ -56,14 +56,15 @@ class _BookAppointmentState extends State<BookAppointment> {
       _getPlacePredictions(_addressController.text);
     } else {
       setState(() {
-        // Clear predictions if address is empty
-        // _predictions = [];
+        _predictions = [];
       });
     }
   }
 
   void _onPhoneNumberChanged() {
-    // Optional: Handle phone number change if needed
+    setState(() {
+      // No specific action needed here, just to refresh UI if needed
+    });
   }
 
   Future<void> _getPlacePredictions(String input) async {
@@ -74,7 +75,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     ];
 
     setState(() {
-      // _predictions = predictions;
+      _predictions = predictions;
     });
   }
 
@@ -101,19 +102,6 @@ class _BookAppointmentState extends State<BookAppointment> {
       }
     } catch (e) {
       print('Error fetching phone number: $e');
-    }
-  }
-
-  Future<void> fetchBarbers() async {
-    try {
-      QuerySnapshot barberSnapshot =
-      await FirebaseFirestore.instance.collection('barbers').get();
-
-      setState(() {
-        barbers = barberSnapshot.docs;
-      });
-    } catch (e) {
-      print('Error fetching barbers: $e');
     }
   }
 
@@ -302,59 +290,54 @@ class _BookAppointmentState extends State<BookAppointment> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Select Barber',
-              style: TextStyle(
-                fontFamily: 'Acumin Pro',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField(
-              value: null,
-              onChanged: (barber) {
-                // Optional: Handle selected barber
-              },
-              items: barbers.map((barber) {
-                return DropdownMenuItem(
-                  value: barber,
-                  child: Text(barber['name']),
-                );
-              }).toList(),
-              decoration: const InputDecoration(
-                hintText: 'Select barber',
-                border: OutlineInputBorder(),
-              ),
-            ),
+            // if (_predictions.isNotEmpty) ...[
+            //   const Divider(),
+            //   const Text(
+            //     'Predictions',
+            //     style: TextStyle(
+            //       fontFamily: 'Acumin Pro',
+            //       fontSize: 16,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            //   const SizedBox(height: 8),
+            //   ..._predictions.map((prediction) => ListTile(
+            //     title: Text(
+            //       prediction,
+            //       style: const TextStyle(fontSize: 12),
+            //     ),
+            //     onTap: () {
+            //       _addressController.text = prediction;
+            //       FocusScope.of(context).unfocus();
+            //       setState(() {
+            //         _predictions = [];
+            //       });
+            //     },
+            //   )),
+            // ],
             const SizedBox(height: 16),
             Center(
               child: Button(
                 onPressed: () async {
                   try {
-                    if (_selectedDay == null ||
-                        timeController.text.isEmpty ||
-                        _addressController.text.isEmpty ||
-                        _phoneNumberController.text.isEmpty) {
-                      throw Exception(
-                          'Please fill out all fields and select a date/time');
+                    if (_selectedDay == null || timeController.text.isEmpty) {
+                      throw Exception('Please select a date and time slot');
+                    }
+                    if (_addressController.text.isEmpty) {
+                      throw Exception('Address cannot be empty');
+                    }
+                    if (_phoneNumberController.text.isEmpty) {
+                      throw Exception('Phone number cannot be empty');
                     }
 
                     // Fetch user's first name from Firestore
-                    DocumentSnapshot<Map<String, dynamic>> userDocument =
+                    DocumentSnapshot<Map<String, dynamic>> document =
                     await FirebaseFirestore.instance
                         .collection('users')
                         .doc(FirebaseAuth.instance.currentUser!.uid)
                         .get();
-                    final userData = userDocument.data()!;
-                    String userName = userData['firstName'];
-
-                    // Fetch selected barber details
-                    DocumentSnapshot? selectedBarber; // Replace with actual selection logic
-                    String barberId = selectedBarber?.id ?? '';
-                    String barberName = selectedBarber?['name'] ?? '';
-                    String barberImageUrl =
-                        selectedBarber?['imageUrl'] ?? '';
+                    final data = document.data()!;
+                    String userName = data['firstName'];
 
                     // Create and save the appointment
                     final appointment = Appointment(
@@ -363,24 +346,19 @@ class _BookAppointmentState extends State<BookAppointment> {
                       services: _selectedServices,
                       address: _addressController.text,
                       phoneNumber: _phoneNumberController.text,
-                      uid: FirebaseAuth.instance.currentUser!.uid,
+                      uid: LocalStorage.getUserID().toString(),
                       time: timeController.text,
                       clientName: userName,
-                      barberId: barberId,
-                      barberName: barberName,
-                      barberImageUrl: barberImageUrl,
                     );
 
-                    await AppointmentController()
-                        .bookAppointment(appointment);
+                    await AppointmentController().bookAppointment(appointment);
                     Navigator.pop(context, 'Appointment booked successfully');
 
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Success'),
-                        content: const Text(
-                            'Appointment booked successfully!'),
+                        content: const Text('Appointment booked successfully!'),
                         actions: [
                           TextButton(
                             onPressed: () {

@@ -18,7 +18,7 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
   final _nameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _addressController = TextEditingController();
-  final _uuid = Uuid();
+  final _uuid = const Uuid();
   File? _imageFile;
 
   void _addBarber() async {
@@ -66,11 +66,11 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Manage Barbers'),
+        title: const Text('Manage Barbers'),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -80,48 +80,43 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                   children: [
                     TextFormField(
                       controller: _nameController,
-                      decoration: InputDecoration(labelText: 'Name'),
+                      decoration: const InputDecoration(labelText: 'Name'),
                       validator: (value) =>
                       value!.isEmpty ? 'Please enter a name' : null,
                     ),
                     TextFormField(
                       controller: _phoneNumberController,
                       decoration:
-                      InputDecoration(labelText: 'Phone Number'),
+                      const InputDecoration(labelText: 'Phone Number'),
                       validator: (value) => value!.isEmpty
                           ? 'Please enter a phone number'
                           : null,
                     ),
                     TextFormField(
                       controller: _addressController,
-                      decoration: InputDecoration(labelText: 'Address'),
+                      decoration: const InputDecoration(labelText: 'Address'),
                       validator: (value) =>
                       value!.isEmpty ? 'Please enter an address' : null,
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _imageFile == null
-                        ? Text('No image selected.')
+                        ? const Text('No image selected.')
                         : Image.file(_imageFile!, height: 100),
-                    SizedBox(height: 20),
-                    ElevatedButton(
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
                       onPressed: _pickImage,
-<<<<<<< HEAD:lib/views/admin/barber/manage_barber.dart
-                      icon: Icon(Icons.image),
-                      iconSize: 35,
-                      color: Colors.orange,
-=======
-                      child: Text('Pick Image'),
->>>>>>> parent of 8f3ed48 (admin and user is completed with auth error):lib/views/admin/manage_barber.dart
+                      icon: const Icon(Icons.image),
+                      label: const Text('Pick Image'),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Button(
                       onPressed: _addBarber,
-                      child: Text('Add Barber'),
+                      child: const Text('Add Barber'),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               StreamBuilder<List<Barber>>(
                 stream: _barberService.getBarbers(),
                 builder: (context, snapshot) {
@@ -129,19 +124,19 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   final barbers = snapshot.data ?? [];
 
                   return ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: barbers.length,
                     itemBuilder: (context, index) {
                       return ListTile(
                         leading: barbers[index].imageUrl.isEmpty
-                            ? CircleAvatar(
+                            ? const CircleAvatar(
                           child: Icon(Icons.person),
                         )
                             : CircleAvatar(
@@ -151,7 +146,7 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                         title: Text(barbers[index].name),
                         subtitle: Text(barbers[index].phoneNumber),
                         trailing: IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: const Icon(Icons.delete),
                           onPressed: () {
                             _barberService.removeBarber(barbers[index].id);
                           },

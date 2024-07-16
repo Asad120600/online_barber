@@ -1,58 +1,43 @@
 import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/barber_model.dart';
 
 class BarberService {
-  final CollectionReference _barberCollection =
-  FirebaseFirestore.instance.collection('barbers');
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  Future<void> addBarber(Barber barber, {File? imageFile}) async {
+  Future<String> uploadImage(File image) async {
     try {
-      String imageUrl = '';
-
-      // Check if image file is provided and upload to Firebase Storage
-      if (imageFile != null) {
-        imageUrl = await uploadImage(imageFile);
-      }
-
-      // Add barber with image URL to Firestore
-      await _barberCollection.doc(barber.id).set({
-        ...barber.toMap(),
-        'imageUrl': imageUrl,
-      });
+      final storageRef = _storage.ref().child('barber_images/${DateTime.now().toIso8601String()}');
+      final uploadTask = storageRef.putFile(image);
+      final snapshot = await uploadTask.whenComplete(() => {});
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+      return downloadUrl;
     } catch (e) {
-      throw Exception('Failed to add barber: $e');
+      print(e);
+      return '';
+    }
+  }
+
+  Future<void> addBarber(Barber barber) async {
+    try {
+      await _firestore.collection('barbers').doc(barber.id).set(barber.toMap());
+    } catch (e) {
+      print(e);
     }
   }
 
   Future<void> removeBarber(String id) async {
-    await _barberCollection.doc(id).delete();
+    try {
+      await _firestore.collection('barbers').doc(id).delete();
+    } catch (e) {
+      print(e);
+    }
   }
 
   Stream<List<Barber>> getBarbers() {
-    return _barberCollection.snapshots().map((snapshot) => snapshot.docs
-        .map((doc) => Barber.fromSnapshot(doc))
-        .toList());
-  }
-
-  Future<String> uploadImage(File imageFile) async {
-    try {
-      // Generate a unique image path in Firebase Storage
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('barber_images/${DateTime.now().millisecondsSinceEpoch}');
-
-      // Upload image file
-      await storageRef.putFile(imageFile);
-
-      // Get download URL
-      final downloadUrl = await storageRef.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      throw Exception('Failed to upload image: $e');
-    }
+    return _firestore.collection('barbers').snapshots().map((snapshot) =>
+        snapshot.docs.map((doc) => Barber.fromMap(doc.data())).toList());
   }
 }

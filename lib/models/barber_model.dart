@@ -7,7 +7,6 @@ class Barber {
   final String address;
   final String imageUrl;
 
-
   Barber({
     required this.id,
     required this.name,
@@ -15,6 +14,26 @@ class Barber {
     required this.address,
     required this.imageUrl,
   });
+
+  factory Barber.fromSnapshot(DocumentSnapshot doc) {
+    return Barber(
+      id: doc['id'] ?? '',
+      name: doc['name'] ?? '',
+      phoneNumber: doc['phoneNumber'] ?? '',
+      address: doc['address'] ?? '',
+      imageUrl: doc['imageUrl'] ?? '',
+    );
+  }
+
+  factory Barber.fromMap(Map<String, dynamic> data) {
+    return Barber(
+      id: data['id'] ?? '',
+      name: data['name'] ?? '',
+      phoneNumber: data['phoneNumber'] ?? '',
+      address: data['address'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -24,33 +43,5 @@ class Barber {
       'address': address,
       'imageUrl': imageUrl,
     };
-  }
-
-  factory Barber.fromSnapshot(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-
-    return Barber(
-      id: doc.id,
-      name: data['name'] ?? 'Unknown', // Default to 'Unknown' if name is missing
-      phoneNumber: data['phoneNumber'] ?? '', // Default to empty string if phoneNumber is missing
-      address: data['address'] ?? '', // Default to empty string if address is missing
-      imageUrl: data['imageUrl'] ?? '', // Default to empty string if imageUrl is missing
-    );
-  }
-
-  Barber copyWith({
-    String? id,
-    String? name,
-    String? phoneNumber,
-    String? address,
-    String? imageUrl,
-  }) {
-    return Barber(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      address: address ?? this.address,
-      imageUrl: imageUrl ?? this.imageUrl,
-    );
   }
 }

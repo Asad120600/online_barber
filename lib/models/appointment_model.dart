@@ -10,9 +10,6 @@ class Appointment {
   String uid;
   String time;
   String clientName;
-  String barberId;
-  String barberName;
-  String barberImageUrl;
 
   Appointment({
     required this.id,
@@ -23,9 +20,6 @@ class Appointment {
     required this.uid,
     required this.time,
     required this.clientName,
-    required this.barberId,
-    required this.barberName,
-    required this.barberImageUrl,
   });
 
   // Convert Appointment object to a map for Firestore
@@ -33,16 +27,13 @@ class Appointment {
     return {
       'id': id,
       'date':
-          Timestamp.fromDate(date), // Convert DateTime to Firestore Timestamp
+      Timestamp.fromDate(date), // Convert DateTime to Firestore Timestamp
       'services': services.map((service) => service.toMap()).toList(),
       'address': address,
       'phoneNumber': phoneNumber,
       'uid': uid,
       'time': time,
       'clientName': clientName,
-      'barberId': barberId,
-      'barberName': barberName,
-      'barberImageUrl': barberImageUrl,
     };
   }
 
@@ -61,9 +52,6 @@ class Appointment {
       uid: data['uid'] ?? '',
       time: data['time'] ?? '',
       clientName: data['clientName'] ?? '',
-      barberId: data['barberId'] ?? '',
-      barberName: data['barberName'] ?? '',
-      barberImageUrl: data['barberImageUrl'] ?? '',
     );
   }
 }
