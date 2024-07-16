@@ -1,18 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_barber_app/views/admin/app%20settings/help_settings.dart';
-import 'package:online_barber_app/views/admin/app%20settings/privacy_settings.dart';
-import 'package:online_barber_app/views/admin/barber/barber_screen.dart';
-import 'package:online_barber_app/views/admin/services/service_list.dart';
-import 'package:online_barber_app/views/admin/users/active_users.dart';
+import 'package:online_barber_app/views/admin/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
-import 'package:online_barber_app/views/admin/users/deleted_users.dart';
-import 'package:online_barber_app/views/admin/app%20settings/faqs_settings.dart';
-
+import 'package:online_barber_app/views/admin/active_users.dart';
+import 'package:online_barber_app/views/admin/deleted_users.dart';
+import 'package:online_barber_app/views/admin/faqs_settings.dart';
+import 'package:online_barber_app/views/admin/help_settings.dart';
+import 'package:online_barber_app/views/admin/privacy_settings.dart';
 import 'package:online_barber_app/views/admin/admin_profile.dart';
-import 'barber/manage_barber.dart';
-import 'services/manage_services.dart';
+import 'barber_screen.dart';
+import 'manage_barber.dart';
+import 'manage_services.dart';
 
 class AdminDrawer extends StatefulWidget {
   const AdminDrawer({super.key,required this.screenWidth,});

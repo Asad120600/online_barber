@@ -68,6 +68,8 @@ class _AdminPanelState extends State<AdminPanel> {
                     } else if (userNameSnapshot.hasError) {
                       return Center(child: Text('Error: ${userNameSnapshot.error}'));
                     } else {
+                      String userName = userNameSnapshot.data ?? 'Unknown User';
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Container(

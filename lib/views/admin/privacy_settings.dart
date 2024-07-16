@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_barber_app/utils/button.dart';
+import '../../utils/button.dart';
 
 class PrivacySettings extends StatefulWidget {
   const PrivacySettings({super.key});
