@@ -36,6 +36,8 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
         phoneNumber: _phoneNumberController.text,
         address: _addressController.text,
         imageUrl: imageUrl,
+        email: 'email', userType: 'userType',
+
       );
       await _barberService.addBarber(barber);
       _clearForm();

@@ -15,6 +15,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isUserSelected = true;
   bool isAdminSelected = false;
+  bool isBarberSelected = false; // Add this line
   bool isPasswordVisible = false;
 
   final TextEditingController userFirstNameController = TextEditingController();
@@ -29,6 +30,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController adminPasswordController = TextEditingController();
   final TextEditingController adminConfirmPasswordController = TextEditingController();
   final TextEditingController adminPhoneNumberController = TextEditingController(); // Add this line
+  final TextEditingController barberFirstNameController = TextEditingController(); // Add this line
+  final TextEditingController barberLastNameController = TextEditingController(); // Add this line
+  final TextEditingController barberEmailController = TextEditingController(); // Add this line
+  final TextEditingController barberPasswordController = TextEditingController(); // Add this line
+  final TextEditingController barberConfirmPasswordController = TextEditingController(); // Add this line
+  final TextEditingController barberPhoneNumberController = TextEditingController(); // Add this line
 
   final AuthController _authController = AuthController(); // Initialize AuthController
 
@@ -102,13 +109,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _handleSignUp() async {
-    String firstName = isUserSelected ? userFirstNameController.text.trim() : adminFirstNameController.text.trim();
-    String lastName = isUserSelected ? userLastNameController.text.trim() : adminLastNameController.text.trim();
-    String email = isUserSelected ? userEmailController.text.trim() : adminEmailController.text.trim();
-    String password = isUserSelected ? userPasswordController.text.trim() : adminPasswordController.text.trim();
-    String confirmPassword = isUserSelected ? userConfirmPasswordController.text.trim() : adminConfirmPasswordController.text.trim();
-    String phoneNumber = isUserSelected ? userPhoneNumberController.text.trim() : adminPhoneNumberController.text.trim(); // Add this line
-    String userType = isUserSelected ? '3' : '1'; // Determine user type based on selection
+    String firstName = isUserSelected
+        ? userFirstNameController.text.trim()
+        : isAdminSelected
+        ? adminFirstNameController.text.trim()
+        : barberFirstNameController.text.trim();
+    String lastName = isUserSelected
+        ? userLastNameController.text.trim()
+        : isAdminSelected
+        ? adminLastNameController.text.trim()
+        : barberLastNameController.text.trim();
+    String email = isUserSelected
+        ? userEmailController.text.trim()
+        : isAdminSelected
+        ? adminEmailController.text.trim()
+        : barberEmailController.text.trim();
+    String password = isUserSelected
+        ? userPasswordController.text.trim()
+        : isAdminSelected
+        ? adminPasswordController.text.trim()
+        : barberPasswordController.text.trim();
+    String confirmPassword = isUserSelected
+        ? userConfirmPasswordController.text.trim()
+        : isAdminSelected
+        ? adminConfirmPasswordController.text.trim()
+        : barberConfirmPasswordController.text.trim();
+    String phoneNumber = isUserSelected
+        ? userPhoneNumberController.text.trim()
+        : isAdminSelected
+        ? adminPhoneNumberController.text.trim()
+        : barberPhoneNumberController.text.trim();
+    String userType = isUserSelected ? '3' : isAdminSelected ? '1' : '2'; // Barber user type
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -119,10 +150,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    User? user = await _authController.signUpWithEmail(email, password, firstName, lastName, phoneNumber, userType, context);
+    User? user = await _authController.signUpWithEmail(
+      email,
+      password,
+      firstName,
+      lastName,
+      phoneNumber,
+      userType,
+      context,
+    );
 
     if (user != null) {
       _showLoadingDialog(context);
+      // Navigate to login screen after successful signup
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+        );
+      });
     } else {
       // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -163,6 +211,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       setState(() {
                         isUserSelected = true;
                         isAdminSelected = false;
+                        isBarberSelected = false;
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -176,6 +225,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       setState(() {
                         isUserSelected = false;
                         isAdminSelected = true;
+                        isBarberSelected = false;
                       });
                     },
                     style: ElevatedButton.styleFrom(
@@ -183,42 +233,56 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     child: const Text("Admin"),
                   ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        isUserSelected = false;
+                        isAdminSelected = false;
+                        isBarberSelected = true;
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isBarberSelected ? Colors.orange : Colors.grey,
+                    ),
+                    child: const Text("Barber"),
+                  ),
                 ],
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isUserSelected ? userFirstNameController : adminFirstNameController,
-                decoration: const InputDecoration(
-                  labelText: 'First Name',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: isUserSelected ? userLastNameController : adminLastNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Last Name',
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: isUserSelected ? userEmailController : adminEmailController,
+                controller: isBarberSelected ? barberFirstNameController : (isUserSelected ? userFirstNameController : adminFirstNameController),
                 decoration: InputDecoration(
-                  labelText: isUserSelected ? 'Email' : 'Admin Email',
+                  labelText: isBarberSelected ? 'First Name' : (isUserSelected ? 'First Name' : 'Admin First Name'),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isUserSelected ? userPhoneNumberController : adminPhoneNumberController, // Add this TextField
+                controller: isBarberSelected ? barberLastNameController : (isUserSelected ? userLastNameController : adminLastNameController),
                 decoration: InputDecoration(
-                  labelText: isUserSelected ? 'Phone Number' : 'Admin Phone Number',
+                  labelText: isBarberSelected ? 'Last Name' : (isUserSelected ? 'Last Name' : 'Admin Last Name'),
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isUserSelected ? userPasswordController : adminPasswordController,
+                controller: isBarberSelected ? barberEmailController : (isUserSelected ? userEmailController : adminEmailController),
+                decoration: InputDecoration(
+                  labelText: isBarberSelected ? 'Email' : (isUserSelected ? 'Email' : 'Admin Email'),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: isBarberSelected ? barberPhoneNumberController : (isUserSelected ? userPhoneNumberController : adminPhoneNumberController),
+                decoration: InputDecoration(
+                  labelText: isBarberSelected ? 'Phone Number' : (isUserSelected ? 'Phone Number' : 'Admin Phone Number'),
+                ),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                controller: isBarberSelected ? barberPasswordController : (isUserSelected ? userPasswordController : adminPasswordController),
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: isUserSelected ? 'Password' : 'Admin Password',
+                  labelText: isBarberSelected ? 'Password' : (isUserSelected ? 'Password' : 'Admin Password'),
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -233,7 +297,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isUserSelected ? userConfirmPasswordController : adminConfirmPasswordController,
+                controller: isBarberSelected ? barberConfirmPasswordController : (isUserSelected ? userConfirmPasswordController : adminConfirmPasswordController),
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
@@ -252,7 +316,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
               Button(
                 onPressed: _handleSignUp,
-                child: const Text("Sign Up"),
+                child: Text('Sign Up'),
+
               ),
               const SizedBox(height: 10),
               Row(
