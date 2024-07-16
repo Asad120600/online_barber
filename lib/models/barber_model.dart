@@ -7,6 +7,7 @@ class Barber {
   final String address;
   final String imageUrl;
 
+
   Barber({
     required this.id,
     required this.name,
@@ -28,13 +29,12 @@ class Barber {
   factory Barber.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    // Null check and provide default values if necessary
     return Barber(
-      id: data['id'] ?? '', // Provide a default empty string
-      name: data['name'] ?? 'Unknown', // Provide a default name
-      phoneNumber: data['phoneNumber'] ?? 'No phone number', // Provide a default phone number
-      address: data['address'] ?? 'No address', // Provide a default address
-      imageUrl: data['imageUrl'] ?? '', // Provide a default empty string
+      id: doc.id,
+      name: data['name'] ?? 'Unknown', // Default to 'Unknown' if name is missing
+      phoneNumber: data['phoneNumber'] ?? '', // Default to empty string if phoneNumber is missing
+      address: data['address'] ?? '', // Default to empty string if address is missing
+      imageUrl: data['imageUrl'] ?? '', // Default to empty string if imageUrl is missing
     );
   }
 

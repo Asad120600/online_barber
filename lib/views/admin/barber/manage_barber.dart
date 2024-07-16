@@ -18,7 +18,7 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
   final _nameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _addressController = TextEditingController();
-  final Uuid _uuid = Uuid();
+  final _uuid = Uuid();
   File? _imageFile;
 
   void _addBarber() async {
@@ -86,9 +86,11 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                     ),
                     TextFormField(
                       controller: _phoneNumberController,
-                      decoration: InputDecoration(labelText: 'Phone Number'),
-                      validator: (value) =>
-                      value!.isEmpty ? 'Please enter a phone number' : null,
+                      decoration:
+                      InputDecoration(labelText: 'Phone Number'),
+                      validator: (value) => value!.isEmpty
+                          ? 'Please enter a phone number'
+                          : null,
                     ),
                     TextFormField(
                       controller: _addressController,
@@ -103,7 +105,7 @@ class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
                     SizedBox(height: 20),
                     IconButton(
                       onPressed: _pickImage,
-                      icon:Icon(Icons.image),
+                      icon: Icon(Icons.image),
                       iconSize: 35,
                       color: Colors.orange,
                     ),
