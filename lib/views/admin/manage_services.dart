@@ -94,70 +94,74 @@ class _ManageServiceState extends State<ManageService> {
       appBar: AppBar(
         title: Text(widget.service == null ? 'Add Service' : 'Edit Service'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(labelText: 'Service Name'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a service name';
-                  }
-                  return null;
-                },
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: 'Service Name'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a service name';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    controller: _priceController,
+                    decoration: const InputDecoration(labelText: 'Price'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a price';
+                      }
+                      return null;
+                    },
+                  ),
+                  DropdownButtonFormField<String>(
+                    value: _category,
+                    items: ['Hair Styles', 'Beard Styles'].map((String category) {
+                      return DropdownMenuItem<String>(
+                        value: category,
+                        child: Text(category),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        _category = newValue!;
+                      });
+                    },
+                    decoration: const InputDecoration(labelText: 'Category'),
+                  ),
+                  const SizedBox(height: 20),
+                  if (_image != null)
+                    Image.file(
+                      _image!,
+                      height: 150,
+                    )
+                  else if (_imageUrl != null)
+                    Image.network(
+                      _imageUrl!,
+                      height: 150,
+                    ),
+                  TextButton(
+                    onPressed: _pickImage,
+                    child: const Text('Pick Image'),
+                  ),
+                  const SizedBox(height: 20),
+                  Button(
+                    onPressed: _saveService,
+                    child: Text(widget.service == null ? 'Add Service' : 'Save Changes'),
+                  ),
+                ],
               ),
-              TextFormField(
-                controller: _priceController,
-                decoration: const InputDecoration(labelText: 'Price'),
-                keyboardType: TextInputType.number,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a price';
-                  }
-                  return null;
-                },
-              ),
-              DropdownButtonFormField<String>(
-                value: _category,
-                items: ['Hair Styles', 'Beard Styles'].map((String category) {
-                  return DropdownMenuItem<String>(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                onChanged: (newValue) {
-                  setState(() {
-                    _category = newValue!;
-                  });
-                },
-                decoration: const InputDecoration(labelText: 'Category'),
-              ),
-              const SizedBox(height: 20),
-              if (_image != null)
-                Image.file(
-                  _image!,
-                  height: 150,
-                )
-              else if (_imageUrl != null)
-                Image.network(
-                  _imageUrl!,
-                  height: 150,
-                ),
-              TextButton(
-                onPressed: _pickImage,
-                child: const Text('Pick Image'),
-              ),
-              const SizedBox(height: 20),
-              Button(
-                onPressed: _saveService,
-                child: Text(widget.service == null ? 'Add Service' : 'Save Changes'),
-              ),
-            ],
+            ),
           ),
         ),
       ),

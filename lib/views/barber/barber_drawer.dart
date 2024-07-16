@@ -3,16 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/views/admin/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
-import 'package:online_barber_app/views/admin/active_users.dart';
-import 'package:online_barber_app/views/admin/deleted_users.dart';
-import 'package:online_barber_app/views/admin/faqs_settings.dart';
-import 'package:online_barber_app/views/admin/help_settings.dart';
-import 'package:online_barber_app/views/admin/privacy_settings.dart';
-import 'package:online_barber_app/views/admin/admin_profile.dart';
+import 'package:online_barber_app/views/barber/barber_profile.dart';
 
 
 class BarberDrawer extends StatefulWidget {
-  const BarberDrawer({super.key,required this.screenWidth,});
+  const BarberDrawer({Key? key, required this.screenWidth}) : super(key: key);
 
   final double screenWidth;
 
@@ -24,24 +19,27 @@ class _BarberDrawerState extends State<BarberDrawer> {
 
   User? _currentUser;
   String? _firstName;
+  String? _imageUrl; // Add this variable to hold the barber's image URL
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
-    _fetchFirstName();
+    _fetchBarberData();
   }
-  Future<void> _fetchFirstName() async {
+
+  Future<void> _fetchBarberData() async {
     if (_currentUser != null) {
       try {
         DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('barbers').doc(_currentUser!.uid).get();
         if (snapshot.exists) {
           setState(() {
             _firstName = snapshot['name'];
+            _imageUrl = snapshot['imageUrl']; // Fetch image URL from Firestore
           });
         }
       } catch (e) {
-        print('Error fetching first name: $e');
+        print('Error fetching barber data: $e');
       }
     }
   }
@@ -60,21 +58,25 @@ class _BarberDrawerState extends State<BarberDrawer> {
               ),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    backgroundColor: Colors.orange,
+                  CircleAvatar(
                     radius: 30,
-                    child: Icon(Icons.supervisor_account, size: 50, color: Colors.black),
+                    backgroundImage: _imageUrl != null
+                        ? NetworkImage(_imageUrl!)
+                        : _currentUser?.photoURL != null && _currentUser!.photoURL!.isNotEmpty
+                        ? NetworkImage(_currentUser!.photoURL!)
+                        : null,
+                    child: _imageUrl == null && (_currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty)
+                        ? const Icon(Icons.person, size: 40, color: Colors.white)
+                        : null,
                   ),
                   const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      'Hello 👋, ${_firstName ?? 'Admin'}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                  Text(
+                    'Hello 👋, ${_firstName ?? 'Barber'}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -86,12 +88,12 @@ class _BarberDrawerState extends State<BarberDrawer> {
               ),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
-                // Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //     builder: (context) => const AdminProfile(),
-                // ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BarberProfile(),
+                  ),
+                );
               },
             ),
             ExpansionTile(

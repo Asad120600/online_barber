@@ -18,7 +18,7 @@ class _BarberPanelState extends State<BarberPanel> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Admin Panel'),
+        title: const Text('Barber Panel'),
       ),
       endDrawer: BarberDrawer(screenWidth:screenWidth ),
     );

@@ -430,7 +430,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
-              if (!isAdminSelected) // Only show Google sign-in button if Admin is not selected
+              if (!isAdminSelected && !isBarberSelected ) // Only show Google sign-in button if Admin is not selected
                 TextButton(
                   onPressed: _handleGoogleSignIn,
                   child: Row(

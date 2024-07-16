@@ -124,27 +124,28 @@ class AuthController {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
-      final OAuthCredential credential = GoogleAuthProvider.credential(
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
+
       UserCredential userCredential = await _auth.signInWithCredential(credential);
       User? user = userCredential.user;
 
       if (user != null) {
-        // Check if the user already exists in Firestore
-        DocumentSnapshot userDoc = await _firestore.collection('users').doc(user.uid).get();
-        DocumentSnapshot barberDoc = await _firestore.collection('barbers').doc(user.uid).get();
+        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        if (!userDoc.exists) {
+          var userData = {
+            'uid': user.uid,
+            'email': user.email,
+            'firstName': user.displayName?.split(" ")[0] ?? '',
+            'lastName': user.displayName?.split(" ")[1] ?? '',
+            'userType': '3', // Default userType for Google sign-in
+            'phone': user.phoneNumber ?? '',
+          };
 
-        if (barberDoc.exists) {
-          print("Barber logged in");
-          // Navigate to barber dashboard or perform barber-specific actions
-        } else if (userDoc.exists) {
-          print(" user logged in");
-          // Navigate to user home screen or perform user-specific actions
-        } else {
-          // New user, handle accordingly
-          print("New user logged in");
+          await _firestore.collection('users').doc(user.uid).set(userData);
         }
       }
       return user;
@@ -153,6 +154,7 @@ class AuthController {
       return null;
     }
   }
+
 
   Future<void> signOut() async {
     try {
