@@ -30,6 +30,46 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final AuthController _authController = AuthController();
 
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String? userType = await LocalStorage.getUserType(); // Assuming you have a method to get user type
+
+      switch (userType) {
+        case '1': // Admin
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AdminPanel(),
+            ),
+          );
+          break;
+        case '2': // Barber
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BarberPanel(barberId: user.uid),
+            ),
+          );
+          break;
+        default: // Regular user
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
+          break;
+      }
+    }
+  }
+
   Future<void> _handleLogin() async {
     String email = isUserSelected
         ? userEmailController.text.trim()
@@ -56,8 +96,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
           if (isBarberSelected) {
             print(user.uid);
-            LocalStorage.setBarberId(user.uid);  // Save barber ID here
+            LocalStorage.setBarberId(user.uid); // Save barber ID here
           }
+
+          LocalStorage.setUserType(userType); // Save user type here
 
           switch (userType) {
             case '1': // Admin
@@ -119,6 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
         if (isBarberSelected) {
           LocalStorage.setBarberId(user.uid);
         }
+
+        LocalStorage.setUserType(userType); // Save user type here
 
         switch (userType) {
           case '1': // Admin

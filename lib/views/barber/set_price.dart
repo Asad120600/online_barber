@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';  // Import Firebase Auth
+import 'package:online_barber_app/utils/button.dart';
 import '../../models/service_model.dart';
 
 class SetServicePrices extends StatefulWidget {
@@ -120,7 +121,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
               }).toList(),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: ElevatedButton(
+                child: Button(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
                       _savePrices();

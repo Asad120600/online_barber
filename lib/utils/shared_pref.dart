@@ -13,8 +13,7 @@ class LocalStorage {
   }
 
   static String? getUserID() {
-    String? userID = prefs.getString('userID');
-    return userID;
+    return prefs.getString('userID');
   }
 
   static void setBarberId(String barberId) {
@@ -33,6 +32,14 @@ class LocalStorage {
   String getCurrentUserId() {
     final user = FirebaseAuth.instance.currentUser;
     return user?.uid ?? '';
+  }
+
+  static void setUserType(String userType) {
+    prefs.setString('userType', userType);
+  }
+
+  static String? getUserType() {
+    return prefs.getString('userType');
   }
 
   static void logout() {

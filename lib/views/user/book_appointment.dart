@@ -125,10 +125,6 @@ class _BookAppointmentState extends State<BookAppointment> {
                     widget.selectedServices[index].name,
                     style: const TextStyle(fontSize: 14),
                   ),
-                  subtitle: Text(
-                    'Price: ${widget.selectedServices[index].price}',
-                    style: const TextStyle(fontSize: 12),
-                  ),
                 );
               },
             ),
