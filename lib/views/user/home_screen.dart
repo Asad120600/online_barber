@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/barber_list.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
 import '../../utils/drawer_widget.dart';
@@ -100,12 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       selectedServices.add(_beardStyles[i]);
                     }
                   }
-
                   // Navigate to book appointment screen with selected services
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => BookAppointment(selectedServices: selectedServices, uid: LocalStorage.getUserID().toString()),
+                  //   ),
+                  // );
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BookAppointment(selectedServices: selectedServices, uid: ''),
+                      builder: (context) => BarberList(selectedServices: selectedServices),
                     ),
                   );
                 },

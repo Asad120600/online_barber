@@ -6,7 +6,7 @@ import 'package:online_barber_app/models/appointment_model.dart';
 class AppointmentsShow extends StatefulWidget {
   final String uid;
 
-  const AppointmentsShow({Key? key, required this.uid}) : super(key: key);
+  const AppointmentsShow({super.key, required this.uid});
 
   @override
   _AppointmentsShowState createState() => _AppointmentsShowState();
@@ -45,6 +45,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
+            // Print detailed error information
+            print('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No Appointments found.'));
@@ -76,24 +78,31 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          // Safely convert Timestamp to DateTime
                           Text(
-                            'Date: ${DateFormat.yMd().format(appointment.date)}',
+                            'Date: ${appointment.date != null ? DateFormat.yMd().format(appointment.date.toDate()) : 'N/A'}', // Convert Timestamp to DateTime
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),
-
                           const SizedBox(height: 8),
                           Text(
-                            'Address: ${appointment.address}',
+                            'Barber Name: ${appointment.barberName ?? 'N/A'}', // Show barber name
                             style: const TextStyle(
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Phone Number: ${appointment.phoneNumber}',
+                            'Address: ${appointment.address ?? 'N/A'}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Phone Number: ${appointment.phoneNumber ?? 'N/A'}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),
@@ -101,11 +110,13 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
-                            children: appointment.services.map((service) {
+                            children: appointment.services != null
+                                ? appointment.services.map((service) {
                               return Chip(
-                                label: Text(service.name),
+                                label: Text(service.name ?? 'Unknown'),
                               );
-                            }).toList(),
+                            }).toList()
+                                : [const Chip(label: Text('No services'))],
                           ),
                         ],
                       ),

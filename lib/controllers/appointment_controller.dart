@@ -30,10 +30,20 @@ class AppointmentController {
     });
   }
 
+  Stream<List<Appointment>> getAppointmentsByBarberID(String barberId) {
+    return appointmentsCollection
+        .where('barberId', isEqualTo: barberId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return Appointment.fromSnapshot(doc);
+      }).toList();
+    });
+  }
+
   Stream<List<Appointment>> getAllAppointments() {
     return appointmentsCollection.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList();
     });
   }
-
 }

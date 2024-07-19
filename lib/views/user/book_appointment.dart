@@ -1,22 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
-import 'package:online_barber_app/utils/shared_pref.dart';
-import 'package:online_barber_app/utils/button.dart'; // Adjusted import for Button widget
+import 'package:online_barber_app/utils/button.dart';
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
   final String uid;
+  final String selectedBarberName;
+  final String selectedBarberAddress;
+  final String selectedBarberId;
 
   const BookAppointment({
     super.key,
     required this.selectedServices,
     required this.uid,
+    required this.selectedBarberName,
+    required this.selectedBarberAddress,
+    required this.selectedBarberId,
   });
 
   @override
@@ -26,82 +31,61 @@ class BookAppointment extends StatefulWidget {
 class _BookAppointmentState extends State<BookAppointment> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-  List<Service> _selectedServices = [];
-  List<String> _predictions = [];
-
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
-  final TextEditingController timeController = TextEditingController();
+  final TextEditingController _timeController = TextEditingController();
+  String _userName = '';
 
   @override
   void initState() {
     super.initState();
-    _selectedServices = widget.selectedServices;
-    _addressController.addListener(_onAddressChanged);
     _phoneNumberController.addListener(_onPhoneNumberChanged);
-    _getPhoneNumber(); // Fetch phone number on screen initialization
+    _getPhoneNumber();
+    _getUserName();
   }
 
   @override
   void dispose() {
-    _addressController.removeListener(_onAddressChanged);
     _addressController.dispose();
     _phoneNumberController.removeListener(_onPhoneNumberChanged);
     _phoneNumberController.dispose();
+    _timeController.dispose();
     super.dispose();
-  }
-
-  void _onAddressChanged() {
-    if (_addressController.text.isNotEmpty) {
-      _getPlacePredictions(_addressController.text);
-    } else {
-      setState(() {
-        _predictions = [];
-      });
-    }
   }
 
   void _onPhoneNumberChanged() {
     setState(() {
-      // No specific action needed here, just to refresh UI if needed
+      // Refresh UI if needed
     });
-  }
-
-  Future<void> _getPlacePredictions(String input) async {
-    // Simulated prediction data for demo purposes
-    List<String> predictions = [
-      'Address 1',
-      'Address 2',
-    ];
-
-    setState(() {
-      _predictions = predictions;
-    });
-  }
-
-  Future<void> _openGoogleMapsPopup() async {
-    // Simulated location selection for demo purposes
-    LatLng selectedLocation = const LatLng(37.4219999, -122.0840575);
-    _addressController.text =
-    'Selected Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}';
-    FocusScope.of(context).unfocus(); // Hide keyboard
   }
 
   Future<void> _getPhoneNumber() async {
     try {
-      DocumentSnapshot<Map<String, dynamic>> document =
-      await FirebaseFirestore.instance
+      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
       final data = document.data()!;
-      if (data.containsKey('phone')) {
-        setState(() {
-          _phoneNumberController.text = data['phone'];
-        });
-      }
+      setState(() {
+        _phoneNumberController.text = data['phone'] ?? '';
+      });
     } catch (e) {
       print('Error fetching phone number: $e');
+    }
+  }
+
+  Future<void> _getUserName() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      final data = document.data()!;
+      setState(() {
+        _userName = '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}';
+      });
+    } catch (e) {
+      print('Error fetching user name: $e');
     }
   }
 
@@ -134,15 +118,15 @@ class _BookAppointmentState extends State<BookAppointment> {
             const SizedBox(height: 8),
             ListView.builder(
               shrinkWrap: true,
-              itemCount: _selectedServices.length,
+              itemCount: widget.selectedServices.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(
-                    _selectedServices[index].name,
+                    widget.selectedServices[index].name,
                     style: const TextStyle(fontSize: 14),
                   ),
                   subtitle: Text(
-                    'Price: ${_selectedServices[index].price}',
+                    'Price: ${widget.selectedServices[index].price}',
                     style: const TextStyle(fontSize: 12),
                   ),
                 );
@@ -162,9 +146,7 @@ class _BookAppointmentState extends State<BookAppointment> {
               firstDay: DateTime.now(),
               lastDay: DateTime(2025, 12, 31),
               focusedDay: _focusedDay,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
+              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
                   _selectedDay = selectedDay;
@@ -194,7 +176,7 @@ class _BookAppointmentState extends State<BookAppointment> {
             ),
             const SizedBox(height: 8),
             TextField(
-              controller: timeController,
+              controller: _timeController,
               readOnly: true,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.symmetric(
@@ -213,7 +195,6 @@ class _BookAppointmentState extends State<BookAppointment> {
                   ),
                 ),
                 hintText: "Select a time",
-                focusColor: Colors.black,
                 hintStyle: const TextStyle(
                   color: Color(0xFF828A89),
                   fontSize: 14,
@@ -221,15 +202,7 @@ class _BookAppointmentState extends State<BookAppointment> {
                 ),
                 prefixIcon: const Icon(
                   Icons.watch_later,
-                  color: Colors.black,
-                ),
-                border: const OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: Colors.black,
-                  ),
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(16),
-                  ),
+                  color: Colors.orange,
                 ),
               ),
               onTap: () async {
@@ -239,14 +212,14 @@ class _BookAppointmentState extends State<BookAppointment> {
                 );
                 if (picked != null) {
                   setState(() {
-                    timeController.text = picked.format(context);
+                    _timeController.text = picked.format(context);
                   });
                 }
               },
             ),
             const SizedBox(height: 16),
             const Text(
-              'Enter Your Address',
+              'Address',
               style: TextStyle(
                 fontFamily: 'Acumin Pro',
                 fontSize: 16,
@@ -254,22 +227,12 @@ class _BookAppointmentState extends State<BookAppointment> {
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(
-                      hintText: 'Enter your address',
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.location_on),
-                  onPressed: _openGoogleMapsPopup,
-                ),
-              ],
+            TextFormField(
+              controller: _addressController,
+              decoration: const InputDecoration(
+                hintText: 'Enter your address',
+                border: OutlineInputBorder(),
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -284,44 +247,25 @@ class _BookAppointmentState extends State<BookAppointment> {
             TextFormField(
               controller: _phoneNumberController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'Enter your phone number',
                 border: OutlineInputBorder(),
+                prefixIcon: const Icon(
+                  Icons.phone,
+                  color: Colors.orange,
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            // if (_predictions.isNotEmpty) ...[
-            //   const Divider(),
-            //   const Text(
-            //     'Predictions',
-            //     style: TextStyle(
-            //       fontFamily: 'Acumin Pro',
-            //       fontSize: 16,
-            //       fontWeight: FontWeight.bold,
-            //     ),
-            //   ),
-            //   const SizedBox(height: 8),
-            //   ..._predictions.map((prediction) => ListTile(
-            //     title: Text(
-            //       prediction,
-            //       style: const TextStyle(fontSize: 12),
-            //     ),
-            //     onTap: () {
-            //       _addressController.text = prediction;
-            //       FocusScope.of(context).unfocus();
-            //       setState(() {
-            //         _predictions = [];
-            //       });
-            //     },
-            //   )),
-            // ],
             const SizedBox(height: 16),
             Center(
               child: Button(
                 onPressed: () async {
                   try {
-                    if (_selectedDay == null || timeController.text.isEmpty) {
-                      throw Exception('Please select a date and time slot');
+                    if (_selectedDay == null) {
+                      throw Exception('Please select a date');
+                    }
+                    if (_timeController.text.isEmpty) {
+                      throw Exception('Please select a time slot');
                     }
                     if (_addressController.text.isEmpty) {
                       throw Exception('Address cannot be empty');
@@ -330,39 +274,36 @@ class _BookAppointmentState extends State<BookAppointment> {
                       throw Exception('Phone number cannot be empty');
                     }
 
-                    // Fetch user's first name from Firestore
-                    DocumentSnapshot<Map<String, dynamic>> document =
-                    await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(FirebaseAuth.instance.currentUser!.uid)
-                        .get();
-                    final data = document.data()!;
-                    String userName = data['firstName'];
-
                     // Create and save the appointment
                     final appointment = Appointment(
-                      id: DateTime.now().toString(),
-                      date: _selectedDay!,
-                      services: _selectedServices,
+                      id: DateTime.now().toIso8601String(), // Use ISO8601 string for ID
+                      date: Timestamp.fromDate(_selectedDay!), // Convert to Timestamp
+                      services: widget.selectedServices,
                       address: _addressController.text,
                       phoneNumber: _phoneNumberController.text,
-                      uid: LocalStorage.getUserID().toString(),
-                      time: timeController.text,
-                      clientName: userName,
+                      uid: widget.uid,
+                      time: _timeController.text,
+                      clientName: _userName,
+                      barberName: widget.selectedBarberName,
+                      barberAddress: widget.selectedBarberAddress,
+                      barberId: widget.selectedBarberId,
                     );
 
                     await AppointmentController().bookAppointment(appointment);
-                    Navigator.pop(context, 'Appointment booked successfully');
 
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text('Success'),
-                        content: const Text('Appointment booked successfully!'),
+                        content: const Text('Appointment booked successfully'),
                         actions: [
                           TextButton(
                             onPressed: () {
-                              Navigator.pop(context);
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(builder: (context) => HomeScreen()),
+                                    (Route<dynamic> route) => false, // Remove all previous routes
+                              );
                             },
                             child: const Text('OK'),
                           ),
@@ -387,7 +328,7 @@ class _BookAppointmentState extends State<BookAppointment> {
                     );
                   }
                 },
-                child: const Text('Book Appointment'),
+                child: Text('Book Appointment'),
               ),
             ),
           ],

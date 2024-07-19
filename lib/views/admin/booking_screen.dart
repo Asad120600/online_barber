@@ -36,7 +36,7 @@ class BookingScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               Appointment appointment = appointments[index];
               String formattedDate = appointment.date != null
-                  ? DateFormat('yyyy-MM-dd').format(appointment.date!)
+                  ? DateFormat('yyyy-MM-dd').format(appointment.date! as DateTime)
                   : 'Not provided';
               String serviceNames = appointment.services != null
                   ? appointment.services!.map((s) => s.name).join(', ')

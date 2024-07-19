@@ -3,9 +3,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:io';
 
-import '../../controllers/barber_service.dart';
-import '../../models/barber_model.dart';
-import '../../utils/button.dart';
+import '../../../controllers/barber_controller.dart';
+import '../../../models/barber_model.dart';
+import '../../../utils/button.dart';
 
 class ManageBarbersScreen extends StatefulWidget {
   @override
@@ -14,7 +14,7 @@ class ManageBarbersScreen extends StatefulWidget {
 
 class _ManageBarbersScreenState extends State<ManageBarbersScreen> {
   final _formKey = GlobalKey<FormState>();
-  final BarberService _barberService = BarberService();
+  final BarberController _barberService = BarberController();
   final _nameController = TextEditingController();
   final _phoneNumberController = TextEditingController();
   final _addressController = TextEditingController();

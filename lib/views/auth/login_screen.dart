@@ -9,7 +9,7 @@ import 'package:online_barber_app/views/barber/barber_panel.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -52,9 +52,8 @@ class _LoginScreenState extends State<LoginScreen> {
         User? user = await _authController.signInWithEmail(email, password, userType);
 
         if (user != null) {
-          print("========");
-          print(user.uid);
           LocalStorage.setUserID(userID: user.uid);
+
           switch (userType) {
             case '1': // Admin
               Navigator.pushReplacement(
@@ -64,13 +63,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               );
               break;
-            case '2':
+            case '2': // Barber
               Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const BarberPanel(),
-              ),
-            );
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>  BarberPanel(barberId: user.uid),
+                ),
+              );
               break;
             default: // Regular user
               Navigator.pushReplacement(
@@ -89,7 +88,6 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
-        print('Error during login: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error during login: $e'),
@@ -110,21 +108,10 @@ class _LoginScreenState extends State<LoginScreen> {
       User? user = await _authController.signInWithGoogle(context);
 
       if (user != null) {
-        print("========");
-        print(user.uid);
         LocalStorage.setUserID(userID: user.uid);
-        String userType = '3';
-        if (isAdminSelected) {
-          userType = '1'; // Admin
-        } else if (isBarberSelected) {
-          print("========");
-          print(user.uid);
-          LocalStorage.setUserID(userID: user.uid);
-          userType = '2'; // Barber
-        }
+        String userType = isAdminSelected ? '1' : isBarberSelected ? '2' : '3';
 
         switch (userType) {
-
           case '1': // Admin
             Navigator.pushReplacement(
               context,
@@ -137,7 +124,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (context) => const BarberPanel(),
+                builder: (context) => BarberPanel(barberId: user.uid),
               ),
             );
             break;
@@ -158,7 +145,6 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      print('Error during Google sign-in: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error during Google sign-in: $e'),
@@ -190,224 +176,33 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.05),
               Row(
                 children: [
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          isUserSelected = true;
-                          isAdminSelected = false;
-                          isBarberSelected = false;
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: isUserSelected ? Colors.orange : Colors.transparent,
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        child: Text(
-                          'User',
-                          style: TextStyle(
-                            color: isUserSelected ? Colors.white : Colors.black,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildRoleSelectionButton('User', isUserSelected, () {
+                    setState(() {
+                      isUserSelected = true;
+                      isAdminSelected = false;
+                      isBarberSelected = false;
+                    });
+                  }),
                   SizedBox(width: 10.0),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          isUserSelected = false;
-                          isAdminSelected = true;
-                          isBarberSelected = false;
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: isAdminSelected ? Colors.orange : Colors.transparent,
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        child: Text(
-                          'Admin',
-                          style: TextStyle(
-                            color: isAdminSelected ? Colors.white : Colors.black,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildRoleSelectionButton('Admin', isAdminSelected, () {
+                    setState(() {
+                      isUserSelected = false;
+                      isAdminSelected = true;
+                      isBarberSelected = false;
+                    });
+                  }),
                   SizedBox(width: 10.0),
-                  Expanded(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          isUserSelected = false;
-                          isAdminSelected = false;
-                          isBarberSelected = true;
-                        });
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 40.0,
-                        decoration: BoxDecoration(
-                          color: isBarberSelected ? Colors.orange : Colors.transparent,
-                          borderRadius: BorderRadius.circular(15.0),
-                        ),
-                        child: Text(
-                          'Barber',
-                          style: TextStyle(
-                            color: isBarberSelected ? Colors.white : Colors.black,
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildRoleSelectionButton('Barber', isBarberSelected, () {
+                    setState(() {
+                      isUserSelected = false;
+                      isAdminSelected = false;
+                      isBarberSelected = true;
+                    });
+                  }),
                 ],
               ),
               SizedBox(height: screenHeight * 0.03),
-              isUserSelected
-                  ? Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 150),
-          child: Text(
-            'Login as User',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'Acumin Pro',
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-                  TextFormField(
-                    controller: userEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  TextFormField(
-                    controller: userPasswordController,
-                    obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : isAdminSelected
-                  ? Column(
-
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 150),
-                    child: Text(
-                      'Login as Admin',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'Acumin Pro',
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  TextFormField(
-                    controller: adminEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Admin Email',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  TextFormField(
-                    controller: adminPasswordController,
-                    obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Admin Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : Column(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(right: 150),
-                    child: Text(
-                      'Login as Barber',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                        fontFamily: 'Acumin Pro',
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  TextFormField(
-                    controller: barberEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      labelText: 'Barber Email',
-                      prefixIcon: Icon(Icons.email),
-                    ),
-                  ),
-                  SizedBox(height: screenHeight * 0.02),
-                  TextFormField(
-                    controller: barberPasswordController,
-                    obscureText: !isPasswordVisible,
-                    decoration: InputDecoration(
-                      labelText: 'Barber Password',
-                      prefixIcon: Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            isPasswordVisible = !isPasswordVisible;
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              _buildLoginForm(),
               SizedBox(height: screenHeight * 0.03),
               Button(
                 child: Text('LOGIN'),
@@ -430,7 +225,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: screenHeight * 0.02),
-              if (!isAdminSelected && !isBarberSelected ) // Only show Google sign-in button if Admin is not selected
+              if (!isAdminSelected && !isBarberSelected) // Only show Google sign-in button if Admin is not selected
                 TextButton(
                   onPressed: _handleGoogleSignIn,
                   child: Row(
@@ -455,6 +250,85 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRoleSelectionButton(String role, bool isSelected, VoidCallback onTap) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          alignment: Alignment.center,
+          height: 40.0,
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.orange : Colors.transparent,
+            borderRadius: BorderRadius.circular(15.0),
+          ),
+          child: Text(
+            role,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.black,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginForm() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.only(right: 150),
+          child: Text(
+            isUserSelected ? 'Login as User' : isAdminSelected ? 'Login as Admin' : 'Login as Barber',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              fontFamily: 'Acumin Pro',
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: isUserSelected
+              ? userEmailController
+              : isAdminSelected
+              ? adminEmailController
+              : barberEmailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            labelText: isUserSelected ? 'Email' : isAdminSelected ? 'Admin Email' : 'Barber Email',
+            prefixIcon: Icon(Icons.email),
+          ),
+        ),
+        SizedBox(height: 10),
+        TextFormField(
+          controller: isUserSelected
+              ? userPasswordController
+              : isAdminSelected
+              ? adminPasswordController
+              : barberPasswordController,
+          obscureText: !isPasswordVisible,
+          decoration: InputDecoration(
+            labelText: isUserSelected ? 'Password' : isAdminSelected ? 'Admin Password' : 'Barber Password',
+            prefixIcon: Icon(Icons.lock),
+            suffixIcon: IconButton(
+              icon: Icon(
+                isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+              ),
+              onPressed: () {
+                setState(() {
+                  isPasswordVisible = !isPasswordVisible;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

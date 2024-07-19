@@ -1,6 +1,3 @@
-// admin panel
-
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -25,9 +22,13 @@ class _AdminPanelState extends State<AdminPanel> {
   }
 
   Future<String> _getUserName(String uid) async {
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    if (userDoc.exists) {
-      return userDoc.data()!['name'] ?? 'Unknown User';
+    try {
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (userDoc.exists) {
+        return userDoc.data()?['name'] ?? 'Unknown User';
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
     }
     return 'Unknown User';
   }
@@ -41,7 +42,7 @@ class _AdminPanelState extends State<AdminPanel> {
         automaticallyImplyLeading: false,
         title: const Text('Admin Panel'),
       ),
-      endDrawer: AdminDrawer(screenWidth:screenWidth ),
+      endDrawer: AdminDrawer(screenWidth: screenWidth),
       body: StreamBuilder<List<Appointment>>(
         stream: _appointmentController.getAllAppointments(),
         builder: (context, snapshot) {
@@ -99,7 +100,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Date: ${DateFormat.yMd().format(appointment.date)}',
+                                  'Date: ${appointment.date != null ? DateFormat.yMd().format(appointment.date.toDate()) : 'N/A'}',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
@@ -120,7 +121,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                  Text(
+                                Text(
                                   'Time: ${appointment.time}',
                                   style: const TextStyle(
                                     fontSize: 14,
@@ -129,11 +130,13 @@ class _AdminPanelState extends State<AdminPanel> {
                                 const SizedBox(height: 8),
                                 Wrap(
                                   spacing: 8,
-                                  children: appointment.services.map((service) {
+                                  children: appointment.services.isNotEmpty
+                                      ? appointment.services.map((service) {
                                     return Chip(
-                                      label: Text(service.name),
+                                      label: Text(service.name ?? 'Unknown Service'),
                                     );
-                                  }).toList(),
+                                  }).toList()
+                                      : [const Chip(label: Text('No services'))],
                                 ),
                               ],
                             ),

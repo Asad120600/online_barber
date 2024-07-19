@@ -20,4 +20,6 @@ class LocalStorage {
   static void logout() {
     prefs.clear();
   }
+
+
 }

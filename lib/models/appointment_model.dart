@@ -2,55 +2,66 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/models/service_model.dart';
 
 class Appointment {
-  String id;
-  DateTime date;
-  List<Service> services; // List of Service objects
-  String address;
-  String phoneNumber;
-  String uid;
-  String time;
-  String clientName;
+  final String id;
+  final Timestamp date; // Use Timestamp for date
+  final String time;
+  final List<Service> services;
+  final String address;
+  final String phoneNumber;
+  final String uid;
+  final String barberName;
+  final String barberAddress;
+  final String clientName;
+  final String barberId;
 
   Appointment({
     required this.id,
     required this.date,
+    required this.time,
     required this.services,
     required this.address,
     required this.phoneNumber,
     required this.uid,
-    required this.time,
+    required this.barberName,
+    required this.barberAddress,
     required this.clientName,
+    required this.barberId,
   });
 
-  // Convert Appointment object to a map for Firestore
+  // Convert Appointment to a map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'date':
-      Timestamp.fromDate(date), // Convert DateTime to Firestore Timestamp
+      'date': date, // Store as Timestamp
+      'time': time,
       'services': services.map((service) => service.toMap()).toList(),
       'address': address,
       'phoneNumber': phoneNumber,
       'uid': uid,
-      'time': time,
+      'barberName': barberName,
+      'barberAddress': barberAddress,
+      'barberId': barberId,
       'clientName': clientName,
     };
   }
 
-  // Create Appointment object from Firestore snapshot
-  static Appointment fromSnapshot(DocumentSnapshot snapshot) {
+  // Create an Appointment from a Firestore snapshot
+  factory Appointment.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
 
     return Appointment(
       id: data['id'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
-      services: (data['services'] as List<dynamic>).map((serviceData) {
+      date: data['date'] is Timestamp ? data['date'] as Timestamp : Timestamp.now(),
+      time: data['time'] ?? '',
+      services: (data['services'] as List<dynamic>? ?? []).map((serviceData) {
         return Service.fromMap(serviceData as Map<String, dynamic>);
       }).toList(),
       address: data['address'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
       uid: data['uid'] ?? '',
-      time: data['time'] ?? '',
+      barberName: data['barberName'] ?? '',
+      barberAddress: data['barberAddress'] ?? '',
+      barberId: data['barberId'] ?? '',
       clientName: data['clientName'] ?? '',
     );
   }

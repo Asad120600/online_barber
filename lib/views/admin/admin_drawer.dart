@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_barber_app/views/admin/barber%20admin/manage_barber.dart';
 import 'package:online_barber_app/views/admin/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/admin/active_users.dart';
@@ -9,8 +10,7 @@ import 'package:online_barber_app/views/admin/faqs_settings.dart';
 import 'package:online_barber_app/views/admin/help_settings.dart';
 import 'package:online_barber_app/views/admin/privacy_settings.dart';
 import 'package:online_barber_app/views/admin/admin_profile.dart';
-import 'barber_screen.dart';
-import 'manage_barber.dart';
+import 'barber admin/barber_screen.dart';
 import 'manage_services.dart';
 
 class AdminDrawer extends StatefulWidget {
