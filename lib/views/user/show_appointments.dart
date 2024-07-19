@@ -24,7 +24,6 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
   @override
   Widget build(BuildContext context) {
     if (widget.uid.isEmpty) {
-      // Handle case where uid is empty or user is not authenticated
       return Scaffold(
         appBar: AppBar(
           title: const Text('Appointments'),
@@ -45,7 +44,6 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            // Print detailed error information
             print('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -69,7 +67,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 2,
                           blurRadius: 5,
-                          offset: const Offset(0, 3), // changes position of shadow
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -78,9 +76,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Safely convert Timestamp to DateTime
                           Text(
-                            'Date: ${appointment.date != null ? DateFormat.yMd().format(appointment.date.toDate()) : 'N/A'}', // Convert Timestamp to DateTime
+                            'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -88,21 +85,28 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Barber Name: ${appointment.barberName ?? 'N/A'}', // Show barber name
+                            'Time: ${appointment.time}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Address: ${appointment.address ?? 'N/A'}',
+                            'Barber Name: ${appointment.barberName}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Phone Number: ${appointment.phoneNumber ?? 'N/A'}',
+                            'Address: ${appointment.address}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Phone Number: ${appointment.phoneNumber}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),
@@ -110,7 +114,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
-                            children: appointment.services != null
+                            children: appointment.services.isNotEmpty
                                 ? appointment.services.map((service) {
                               return Chip(
                                 label: Text(service.name ?? 'Unknown'),

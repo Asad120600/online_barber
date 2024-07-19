@@ -284,9 +284,9 @@ class _BookAppointmentState extends State<BookAppointment> {
                       uid: widget.uid,
                       time: _timeController.text,
                       clientName: _userName,
-                      barberName: widget.selectedBarberName,
+                      barberName: widget.selectedBarberName, // Ensure this is set
                       barberAddress: widget.selectedBarberAddress,
-                      barberId: widget.selectedBarberId,
+                      barberId: widget.selectedBarberId, // Ensure this is set correctly
                     );
 
                     await AppointmentController().bookAppointment(appointment);

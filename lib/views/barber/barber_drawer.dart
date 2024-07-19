@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_barber_app/models/service_model.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/admin/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/barber/barber_profile.dart';
+import 'package:online_barber_app/views/barber/set_price.dart';
 
 
 class BarberDrawer extends StatefulWidget {
@@ -103,35 +106,43 @@ class _BarberDrawerState extends State<BarberDrawer> {
               ),
               children: <Widget>[
                 ListTile(
-                  leading: const Icon(Icons.add),
+                  leading: const Icon(Icons.price_change),
                   title: const Text(
-                    'Add services',
-                  ),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    // Navigator.push(
-                    //   context,
-                    //   MaterialPageRoute(
-                    //     builder: (context) =>  const ManageService(),
-                    //   ),
-                    // );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.manage_history),
-                  title: const Text(
-                    'Manage services',
+                    'Set prices',
                   ),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  const ServiceList(),
+                        builder: (context) => SetServicePrices(service: Service(
+                          id: '',
+                          name: '',
+                          price: 0.0,
+                          category: 'Hair Styles',
+                          imageUrl: null,
+                          barberPrices: null,
+                        ), barberId: '', ),
                       ),
                     );
                   },
-                ),
+                )
+
+                  // ListTile(
+                //   leading: const Icon(Icons.manage_history),
+                //   title: const Text(
+                //     'Manage services',
+                //   ),
+                //   onTap: () {
+                //     Navigator.pop(context); // Close the drawer
+                //     Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (context) =>  const ServiceList(),
+                //       ),
+                //     );
+                //   },
+                // ),
               ],
             ),
             ListTile(

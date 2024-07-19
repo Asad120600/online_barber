@@ -54,6 +54,11 @@ class _LoginScreenState extends State<LoginScreen> {
         if (user != null) {
           LocalStorage.setUserID(userID: user.uid);
 
+          if (isBarberSelected) {
+            print(user.uid);
+            LocalStorage.setBarberId(user.uid);  // Save barber ID here
+          }
+
           switch (userType) {
             case '1': // Admin
               Navigator.pushReplacement(
@@ -67,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                  builder: (context) =>  BarberPanel(barberId: user.uid),
+                  builder: (context) => BarberPanel(barberId: user.uid),
                 ),
               );
               break;
@@ -110,6 +115,10 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user != null) {
         LocalStorage.setUserID(userID: user.uid);
         String userType = isAdminSelected ? '1' : isBarberSelected ? '2' : '3';
+
+        if (isBarberSelected) {
+          LocalStorage.setBarberId(user.uid);
+        }
 
         switch (userType) {
           case '1': // Admin
@@ -285,28 +294,27 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Text(
             isUserSelected ? 'Login as User' : isAdminSelected ? 'Login as Admin' : 'Login as Barber',
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'Acumin Pro',
-              decoration: TextDecoration.underline,
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        SizedBox(height: 10),
-        TextFormField(
+        SizedBox(height: 10.0),
+        TextField(
           controller: isUserSelected
               ? userEmailController
               : isAdminSelected
               ? adminEmailController
               : barberEmailController,
-          keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
-            labelText: isUserSelected ? 'Email' : isAdminSelected ? 'Admin Email' : 'Barber Email',
-            prefixIcon: Icon(Icons.email),
+            hintText: 'Email',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
           ),
         ),
-        SizedBox(height: 10),
-        TextFormField(
+        SizedBox(height: 10.0),
+        TextField(
           controller: isUserSelected
               ? userPasswordController
               : isAdminSelected
@@ -314,8 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
               : barberPasswordController,
           obscureText: !isPasswordVisible,
           decoration: InputDecoration(
-            labelText: isUserSelected ? 'Password' : isAdminSelected ? 'Admin Password' : 'Barber Password',
-            prefixIcon: Icon(Icons.lock),
+            hintText: 'Password',
             suffixIcon: IconButton(
               icon: Icon(
                 isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -325,6 +332,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   isPasswordVisible = !isPasswordVisible;
                 });
               },
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
             ),
           ),
         ),

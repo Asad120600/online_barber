@@ -6,6 +6,7 @@ class Service {
   final double price;
   final String category;
   final String? imageUrl;
+  final List<Map<String, dynamic>>? barberPrices; // List of maps containing barberId and price
 
   Service({
     required this.id,
@@ -13,6 +14,7 @@ class Service {
     required this.price,
     required this.category,
     this.imageUrl,
+    this.barberPrices,
   });
 
   // Convert a Service object to a Map for Firestore operations
@@ -23,6 +25,7 @@ class Service {
       'price': price,
       'category': category,
       'imageUrl': imageUrl,
+      'barberPrices': barberPrices,
     };
   }
 
@@ -31,9 +34,10 @@ class Service {
     return Service(
       id: data['id'] ?? '',
       name: data['name'] ?? '',
-      price: (data['price'] ?? 0).toDouble(), // Ensure price is cast to double
+      price: (data['price'] ?? 0).toDouble(),
       category: data['category'] ?? '',
       imageUrl: data['imageUrl'],
+      barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
     );
   }
 
@@ -44,9 +48,10 @@ class Service {
     return Service(
       id: snapshot.id,
       name: data['name'] ?? '',
-      price: (data['price'] ?? 0).toDouble(), // Ensure price is cast to double
+      price: (data['price'] ?? 0).toDouble(),
       category: data['category'] ?? '',
       imageUrl: data['imageUrl'],
+      barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
     );
   }
 }

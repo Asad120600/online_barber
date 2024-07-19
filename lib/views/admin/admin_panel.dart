@@ -108,6 +108,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
+                                  'Barber: ${appointment.barberName}',
+                                  style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
                                   'Address: ${appointment.address}',
                                   style: const TextStyle(
                                     fontSize: 14,

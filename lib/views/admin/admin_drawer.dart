@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_barber_app/views/admin/barber%20admin/manage_barber.dart';
 import 'package:online_barber_app/views/admin/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/admin/active_users.dart';
@@ -118,6 +117,21 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>DeletedUsers()));
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.content_cut),
+                  title: const Text(
+                    'Barbers',
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  BarberListScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             ExpansionTile(
@@ -158,44 +172,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 ),
               ],
             ),
-            ExpansionTile(
-              leading: const Icon(Icons.group),
-              title: const Text(
-                'Barbers',
-              ),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.content_cut),
-                  title: const Text(
-                    'Show Barbers',
-                  ),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>  BarberListScreen(),
-                      ),
-                    );
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.manage_accounts_sharp),
-                  title: const Text(
-                    'Manage Barbers',
-                  ),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>  ManageBarbersScreen(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
+
             ExpansionTile(
               leading: const Icon(Icons.miscellaneous_services_outlined),
               title: const Text(

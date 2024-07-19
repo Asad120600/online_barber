@@ -91,7 +91,7 @@ class _BarberPanelState extends State<BarberPanel> {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Barber Name: ${appointment.barberName ?? 'N/A'}',
+                            'Client Name: ${appointment.clientName ?? 'N/A'}',
                             style: const TextStyle(
                               fontSize: 14,
                             ),
