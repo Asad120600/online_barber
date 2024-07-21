@@ -58,13 +58,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           );
           break;
-        default: // Regular user
+        case '3': // Regular user
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => const HomeScreen(),
             ),
           );
+          break;
+        default:
           break;
       }
     }

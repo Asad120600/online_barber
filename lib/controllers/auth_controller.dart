@@ -12,9 +12,20 @@ class AuthController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-  Future<User?> signUpWithEmail(String email, String password, String firstName, String lastName, String phone, String userType, BuildContext context) async {
+  Future<bool> signUpWithEmail(
+      String email,
+      String password,
+      String firstName,
+      String lastName,
+      String phone,
+      String userType,
+      BuildContext context
+      ) async {
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       User? user = userCredential.user;
 
       if (user != null) {
@@ -52,21 +63,37 @@ class AuthController {
             ).toMap();
             await _firestore.collection('barbers').doc(user.uid).set(userData);
             break;
-          default: // Regular user
+
+          case '3': // User
+            userData = BaseUserModel(
+              uid: user.uid,
+              email: email,
+              firstName: firstName,
+              lastName: lastName,
+              userType: userType,
+              phone: phone,
+
+            ).toMap();
             await _firestore.collection('users').doc(user.uid).set(userData);
             break;
+            default: // Regular user
+            break;
         }
+        return true; // Return true on successful signup
       }
-      return user;
+      return false; // Return false if user is null
     } catch (e) {
-      print(e.toString());
-      return null;
+      print("Sign Up Error: ${e.toString()}");
+      return false; // Return false on error
     }
   }
 
   Future<User?> signInWithEmail(String email, String password, String userType) async {
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       User? user = userCredential.user;
 
       if (user != null) {
@@ -74,7 +101,6 @@ class AuthController {
 
         switch (userType) {
           case '1': // Admin
-          // Check if trying to login as admin
             userDoc = await _firestore.collection('admins').doc(user.uid).get();
             if (userDoc.exists) {
               print("Admin logged in");
@@ -86,7 +112,6 @@ class AuthController {
             }
             break;
           case '2': // Barber
-          // Check if trying to login as barber
             userDoc = await _firestore.collection('barbers').doc(user.uid).get();
             if (userDoc.exists) {
               print("Barber logged in");
@@ -98,7 +123,6 @@ class AuthController {
             }
             break;
           default: // Regular user
-          // Check if trying to login as regular user
             userDoc = await _firestore.collection('users').doc(user.uid).get();
             if (userDoc.exists) {
               print("Regular user logged in");
@@ -110,20 +134,24 @@ class AuthController {
             }
             break;
         }
+        return user;
       }
-      return user;
+      return null; // Return null if user is null
     } catch (e) {
-      print(e.toString());
-      return null;
+      print("Sign In Error: ${e.toString()}");
+      return null; // Return null on error
     }
   }
-
-
 
   Future<User?> signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      final GoogleSignInAuthentication googleAuth = await googleUser!.authentication;
+      if (googleUser == null) {
+        print("Google sign-in aborted by user.");
+        return null; // User aborted Google sign-in
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -147,21 +175,21 @@ class AuthController {
 
           await _firestore.collection('users').doc(user.uid).set(userData);
         }
+        return user;
       }
-      return user;
+      return null; // Return null if user is null
     } catch (e) {
-      print(e.toString());
-      return null;
+      print("Google Sign-In Error: ${e.toString()}");
+      return null; // Return null on error
     }
   }
-
 
   Future<void> signOut() async {
     try {
       await _auth.signOut();
       await _googleSignIn.signOut();
     } catch (e) {
-      print(e.toString());
+      print("Sign Out Error: ${e.toString()}");
     }
   }
 }

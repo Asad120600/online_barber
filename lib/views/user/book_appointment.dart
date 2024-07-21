@@ -243,10 +243,10 @@ class _BookAppointmentState extends State<BookAppointment> {
             TextFormField(
               controller: _phoneNumberController,
               keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Enter your phone number',
                 border: OutlineInputBorder(),
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.phone,
                   color: Colors.orange,
                 ),
@@ -297,7 +297,7 @@ class _BookAppointmentState extends State<BookAppointment> {
                             onPressed: () {
                               Navigator.pushAndRemoveUntil(
                                 context,
-                                MaterialPageRoute(builder: (context) => HomeScreen()),
+                                MaterialPageRoute(builder: (context) => const HomeScreen()),
                                     (Route<dynamic> route) => false, // Remove all previous routes
                               );
                             },
@@ -324,7 +324,7 @@ class _BookAppointmentState extends State<BookAppointment> {
                     );
                   }
                 },
-                child: Text('Book Appointment'),
+                child: const Text('Book Appointment'),
               ),
             ),
           ],

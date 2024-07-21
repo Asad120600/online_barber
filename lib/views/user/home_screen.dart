@@ -4,7 +4,7 @@ import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/barber_list.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
-import '../../utils/drawer_widget.dart';
+import '../../utils/user_drawer_widget.dart';
 import 'book_appointment.dart';
 
 class HomeScreen extends StatefulWidget {

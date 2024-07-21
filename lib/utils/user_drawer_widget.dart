@@ -50,11 +50,6 @@ class _AppDrawerState extends State<AppDrawer> {
     try {
       await FirebaseAuth.instance.signOut();
       await _googleSignIn.signOut();
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-            (route) => false,
-      );
     } catch (e) {
       print('Error signing out: $e');
     }
@@ -99,11 +94,13 @@ class _AppDrawerState extends State<AppDrawer> {
             // Then delete the user from FirebaseAuth
             await user.delete();
 
+            // Sign out the user
+            await _signOut(context);
+
             // Navigate to login screen
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
-                  (route) => false,
             );
           } else {
             print('Failed to cast user data.');
@@ -172,7 +169,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  const ProfileScreen(),
+                    builder: (context) => const ProfileScreen(),
                   ),
                 );
               },
@@ -185,7 +182,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  AppointmentsShow( uid: LocalStorage.getUserID().toString(),),
+                    builder: (context) => AppointmentsShow(uid: LocalStorage.getUserID().toString()),
                   ),
                 );
               },
@@ -234,7 +231,7 @@ class _AppDrawerState extends State<AppDrawer> {
               leading: const Icon(Icons.delete),
               title: const Text('Delete Account'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pop(context); // Close the drawer
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -244,13 +241,14 @@ class _AppDrawerState extends State<AppDrawer> {
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(); // Close the dialog
                           },
                           child: const Text('Cancel'),
                         ),
                         TextButton(
                           onPressed: () async {
-                            _deleteAccount(context);
+                            Navigator.of(context).pop(); // Close the dialog before deletion
+                            await _deleteAccount(context); // Proceed with account deletion
                           },
                           child: const Text('Delete'),
                         ),
@@ -264,6 +262,7 @@ class _AppDrawerState extends State<AppDrawer> {
               leading: const Icon(Icons.logout),
               title: const Text('Sign Out'),
               onTap: () {
+                Navigator.pop(context); // Close the drawer
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
@@ -273,14 +272,18 @@ class _AppDrawerState extends State<AppDrawer> {
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(); // Close the dialog
                           },
                           child: const Text('Cancel'),
                         ),
                         TextButton(
                           onPressed: () async {
-                            Navigator.of(context).pop();
-                            await _signOut(context);
+                            Navigator.of(context).pop(); // Close the dialog before sign-out
+                            await _signOut(context); // Proceed with sign-out
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            ); // Navigate to login screen
                           },
                           child: const Text('Sign Out'),
                         ),

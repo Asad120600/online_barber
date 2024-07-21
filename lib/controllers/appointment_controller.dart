@@ -46,6 +46,4 @@ class AppointmentController {
       return snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList();
     });
   }
-
-
 }

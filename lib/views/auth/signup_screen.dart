@@ -14,29 +14,17 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isUserSelected = true;
   bool isAdminSelected = false;
-  bool isBarberSelected = false; // Add this line
+  bool isBarberSelected = false;
   bool isPasswordVisible = false;
 
-  final TextEditingController userFirstNameController = TextEditingController();
-  final TextEditingController userLastNameController = TextEditingController();
-  final TextEditingController userEmailController = TextEditingController();
-  final TextEditingController userPasswordController = TextEditingController();
-  final TextEditingController userConfirmPasswordController = TextEditingController();
-  final TextEditingController userPhoneNumberController = TextEditingController(); // Add this line
-  final TextEditingController adminFirstNameController = TextEditingController();
-  final TextEditingController adminLastNameController = TextEditingController();
-  final TextEditingController adminEmailController = TextEditingController();
-  final TextEditingController adminPasswordController = TextEditingController();
-  final TextEditingController adminConfirmPasswordController = TextEditingController();
-  final TextEditingController adminPhoneNumberController = TextEditingController(); // Add this line
-  final TextEditingController barberFirstNameController = TextEditingController(); // Add this line
-  final TextEditingController barberLastNameController = TextEditingController(); // Add this line
-  final TextEditingController barberEmailController = TextEditingController(); // Add this line
-  final TextEditingController barberPasswordController = TextEditingController(); // Add this line
-  final TextEditingController barberConfirmPasswordController = TextEditingController(); // Add this line
-  final TextEditingController barberPhoneNumberController = TextEditingController(); // Add this line
+  final TextEditingController firstNameController = TextEditingController();
+  final TextEditingController lastNameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController phoneNumberController = TextEditingController();
 
-  final AuthController _authController = AuthController(); // Initialize AuthController
+  final AuthController _authController = AuthController();
 
   void _showLoadingDialog(BuildContext context) {
     showDialog(
@@ -53,9 +41,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
-                  'assets/img/done.png', // Replace with your image path
-                  width: 100, // Adjust width as needed
-                  height: 100, // Adjust height as needed
+                  'assets/img/done.png',
+                  width: 100,
+                  height: 100,
                 ),
                 const SizedBox(height: 20),
                 const Text(
@@ -89,56 +77,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     Future.delayed(const Duration(seconds: 2), () {
       Navigator.of(context).pop();
-      if (isUserSelected) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      } else if (isAdminSelected) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      }
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
     });
   }
 
   Future<void> _handleSignUp() async {
-    String firstName = isUserSelected
-        ? userFirstNameController.text.trim()
-        : isAdminSelected
-        ? adminFirstNameController.text.trim()
-        : barberFirstNameController.text.trim();
-    String lastName = isUserSelected
-        ? userLastNameController.text.trim()
-        : isAdminSelected
-        ? adminLastNameController.text.trim()
-        : barberLastNameController.text.trim();
-    String email = isUserSelected
-        ? userEmailController.text.trim()
-        : isAdminSelected
-        ? adminEmailController.text.trim()
-        : barberEmailController.text.trim();
-    String password = isUserSelected
-        ? userPasswordController.text.trim()
-        : isAdminSelected
-        ? adminPasswordController.text.trim()
-        : barberPasswordController.text.trim();
-    String confirmPassword = isUserSelected
-        ? userConfirmPasswordController.text.trim()
-        : isAdminSelected
-        ? adminConfirmPasswordController.text.trim()
-        : barberConfirmPasswordController.text.trim();
-    String phoneNumber = isUserSelected
-        ? userPhoneNumberController.text.trim()
-        : isAdminSelected
-        ? adminPhoneNumberController.text.trim()
-        : barberPhoneNumberController.text.trim();
-    String userType = isUserSelected ? '3' : isAdminSelected ? '1' : '2'; // Barber user type
+    String firstName = firstNameController.text.trim();
+    String lastName = lastNameController.text.trim();
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
+    String phoneNumber = phoneNumberController.text.trim();
+    String userType = isUserSelected ? '3' : isAdminSelected ? '1' : '2';
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -149,7 +104,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    User? user = await _authController.signUpWithEmail(
+    bool signUpSuccess = await _authController.signUpWithEmail(
       email,
       password,
       firstName,
@@ -159,19 +114,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
       context,
     );
 
-    if (user != null) {
+    if (signUpSuccess) {
       _showLoadingDialog(context);
-      // Navigate to login screen after successful signup
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
-        );
-      });
     } else {
-      // Show error message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Sign up failed. Please try again.'),
@@ -188,18 +133,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: screenHeight * 0.05), // Adjust the height as needed
+              SizedBox(height: screenHeight * 0.05),
               Container(
                 margin: EdgeInsets.only(bottom: screenHeight * 0.000001),
                 alignment: Alignment.center,
                 child: Image.asset(
-                  'assets/img/login.png', // Replace with your image path
-                  width: screenWidth * 0.6, // Adjust width as needed
-                  height: screenWidth * 0.8, // Adjust height as needed
+                  'assets/img/login.png',
+                  width: screenWidth * 0.6,
+                  height: screenWidth * 0.8,
                 ),
               ),
               Row(
@@ -250,38 +195,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberFirstNameController : (isUserSelected ? userFirstNameController : adminFirstNameController),
+                controller: firstNameController,
                 decoration: InputDecoration(
-                  labelText: isBarberSelected ? 'First Name' : (isUserSelected ? 'First Name' : 'Admin First Name'),
+                  labelText: 'First Name',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberLastNameController : (isUserSelected ? userLastNameController : adminLastNameController),
+                controller: lastNameController,
                 decoration: InputDecoration(
-                  labelText: isBarberSelected ? 'Last Name' : (isUserSelected ? 'Last Name' : 'Admin Last Name'),
+                  labelText: 'Last Name',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberEmailController : (isUserSelected ? userEmailController : adminEmailController),
+                controller: emailController,
                 decoration: InputDecoration(
-                  labelText: isBarberSelected ? 'Email' : (isUserSelected ? 'Email' : 'Admin Email'),
+                  labelText: 'Email',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberPhoneNumberController : (isUserSelected ? userPhoneNumberController : adminPhoneNumberController),
+                controller: phoneNumberController,
                 decoration: InputDecoration(
-                  labelText: isBarberSelected ? 'Phone Number' : (isUserSelected ? 'Phone Number' : 'Admin Phone Number'),
+                  labelText: 'Phone Number',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberPasswordController : (isUserSelected ? userPasswordController : adminPasswordController),
+                controller: passwordController,
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: isBarberSelected ? 'Password' : (isUserSelected ? 'Password' : 'Admin Password'),
+                  labelText: 'Password',
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -296,7 +241,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: isBarberSelected ? barberConfirmPasswordController : (isUserSelected ? userConfirmPasswordController : adminConfirmPasswordController),
+                controller: confirmPasswordController,
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
                   labelText: 'Confirm Password',
@@ -316,7 +261,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
               Button(
                 onPressed: _handleSignUp,
                 child: Text('Sign Up'),
-
               ),
               const SizedBox(height: 10),
               Row(
@@ -331,7 +275,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           builder: (context) => const LoginScreen(),
                         ),
                       );
-                      // Navigate to login screen
                     },
                     child: const Text("Login"),
                   ),
