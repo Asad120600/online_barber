@@ -7,6 +7,7 @@ class BaseUserModel {
   String lastName;
   String userType;
   String phone;
+  String token;
 
   BaseUserModel({
     required this.uid,
@@ -15,6 +16,7 @@ class BaseUserModel {
     required this.lastName,
     required this.userType,
     required this.phone,
+    required this.token,
 
   });
 
@@ -27,6 +29,7 @@ class BaseUserModel {
       lastName: data['lastName'] ?? '',
       userType: data['userType'] ?? '3',
       phone: data['phone'] ?? '',
+      token: data['token'] ?? '',
     );
   }
 
@@ -38,6 +41,7 @@ class BaseUserModel {
       'lastName': lastName,
       'userType': userType,
       'phone' : phone,
+      'token' : token,
     };
   }
 }

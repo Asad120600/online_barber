@@ -12,6 +12,7 @@ class AdminModel extends BaseUserModel {
     required super.lastName,
     required super.userType,
     required super.phone,
+    required super.token,
     // Add any additional admin-specific fields here
   });
 
@@ -25,6 +26,7 @@ class AdminModel extends BaseUserModel {
       lastName: data['lastName'] ?? '',
       userType: data['userType'] ?? '1',
       phone: data['phone'] ?? '',
+      token: data['token'] ?? '',
       // Initialize additional fields here
     );
   }

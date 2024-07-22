@@ -51,6 +51,13 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           } else {
             List<Appointment> appointments = snapshot.data!;
 
+            // Sort appointments by date and time
+            appointments.sort((a, b) {
+              DateTime dateTimeA = a.date.toDate().add(_parseTime(a.time));
+              DateTime dateTimeB = b.date.toDate().add(_parseTime(b.time));
+              return dateTimeA.compareTo(dateTimeB);
+            });
+
             return ListView.builder(
               padding: const EdgeInsets.all(8.0),
               itemCount: appointments.length,
@@ -133,5 +140,17 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
         },
       ),
     );
+  }
+
+  // Helper method to parse time string to Duration
+  Duration _parseTime(String? time) {
+    if (time == null || time.isEmpty) return Duration.zero;
+    try {
+      final parts = time.split(':');
+      return Duration(hours: int.parse(parts[0]), minutes: int.parse(parts[1]));
+    } catch (e) {
+      print('Error parsing time: $e');
+      return Duration.zero;
+    }
   }
 }

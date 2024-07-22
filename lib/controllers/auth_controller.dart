@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
 
 import '../models/user_model.dart';
 import '../models/admin_model.dart';
@@ -11,6 +13,7 @@ class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<bool> signUpWithEmail(
       String email,
@@ -29,6 +32,11 @@ class AuthController {
       User? user = userCredential.user;
 
       if (user != null) {
+        String? token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          LocalStorage.setFirebaseToken(token);
+        }
+
         var userData = BaseUserModel(
           uid: user.uid,
           email: email,
@@ -36,6 +44,7 @@ class AuthController {
           lastName: lastName,
           userType: userType,
           phone: phone,
+          token: token ?? '',
         ).toMap();
 
         // Set user data based on user type
@@ -48,6 +57,7 @@ class AuthController {
               lastName: lastName,
               userType: userType,
               phone: phone,
+              token: token ?? '',
             ).toMap();
             await _firestore.collection('admins').doc(user.uid).set(userData);
             break;
@@ -60,10 +70,10 @@ class AuthController {
               phoneNumber: phone,
               address: '',
               imageUrl: '',
+              token: token ?? '',
             ).toMap();
             await _firestore.collection('barbers').doc(user.uid).set(userData);
             break;
-
           case '3': // User
             userData = BaseUserModel(
               uid: user.uid,
@@ -72,11 +82,11 @@ class AuthController {
               lastName: lastName,
               userType: userType,
               phone: phone,
-
+              token: token ?? '',
             ).toMap();
             await _firestore.collection('users').doc(user.uid).set(userData);
             break;
-            default: // Regular user
+          default: // Regular user
             break;
         }
         return true; // Return true on successful signup
@@ -97,6 +107,12 @@ class AuthController {
       User? user = userCredential.user;
 
       if (user != null) {
+        String? token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          await updateTokenInFirestore(user.uid, token);
+          LocalStorage.setFirebaseToken(token);
+        }
+
         DocumentSnapshot userDoc;
 
         switch (userType) {
@@ -162,6 +178,12 @@ class AuthController {
       User? user = userCredential.user;
 
       if (user != null) {
+        String? token = await _firebaseMessaging.getToken();
+        if (token != null) {
+          await updateTokenInFirestore(user.uid, token);
+          LocalStorage.setFirebaseToken(token);
+        }
+
         final userDoc = await _firestore.collection('users').doc(user.uid).get();
         if (!userDoc.exists) {
           var userData = {
@@ -171,6 +193,7 @@ class AuthController {
             'lastName': user.displayName?.split(" ")[1] ?? '',
             'userType': '3', // Default userType for Google sign-in
             'phone': user.phoneNumber ?? '',
+            'token': token ?? '',
           };
 
           await _firestore.collection('users').doc(user.uid).set(userData);
@@ -190,6 +213,31 @@ class AuthController {
       await _googleSignIn.signOut();
     } catch (e) {
       print("Sign Out Error: ${e.toString()}");
+    }
+  }
+
+  Future<void> updateTokenInFirestore(String userId, String token) async {
+    try {
+      // Check user type and update the corresponding collection
+      var userDoc = await _firestore.collection('admins').doc(userId).get();
+      if (userDoc.exists) {
+        await _firestore.collection('admins').doc(userId).update({'token': token});
+        return;
+      }
+
+      userDoc = await _firestore.collection('barbers').doc(userId).get();
+      if (userDoc.exists) {
+        await _firestore.collection('barbers').doc(userId).update({'token': token});
+        return;
+      }
+
+      userDoc = await _firestore.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        await _firestore.collection('users').doc(userId).update({'token': token});
+        return;
+      }
+    } catch (e) {
+      print("Failed to update token in Firestore: $e");
     }
   }
 }

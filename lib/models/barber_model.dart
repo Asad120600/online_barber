@@ -7,6 +7,7 @@ class Barber {
   final String phoneNumber;
   final String address;
   final String imageUrl;
+  String token;
   String email;
   String userType;
 
@@ -18,6 +19,7 @@ class Barber {
     required this.phoneNumber,
     required this.address,
     required this.imageUrl,
+    required  this.token,
   });
 
   factory Barber.fromSnapshot(DocumentSnapshot doc) {
@@ -29,6 +31,7 @@ class Barber {
       address: doc['address'] ?? '',
       imageUrl: doc['imageUrl'] ?? '',
       userType: doc['userType'] ?? '3',
+      token: doc['token'] ?? '',
 
 
     );
@@ -43,6 +46,7 @@ class Barber {
       imageUrl: data['imageUrl'] ?? '',
       email: data['email'] ?? '',
       userType: data['userType'] ?? '3',
+      token: data['token'] ?? '',
 
 
     );
@@ -57,6 +61,7 @@ class Barber {
       'imageUrl': imageUrl,
       'email':email,
       'userType':userType,
+      'token':token,
 
     };
   }

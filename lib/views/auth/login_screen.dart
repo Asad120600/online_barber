@@ -39,7 +39,8 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _checkLoginStatus() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      String? userType = await LocalStorage.getUserType(); // Assuming you have a method to get user type
+      String? userType = await LocalStorage.getUserType();
+
 
       switch (userType) {
         case '1': // Admin

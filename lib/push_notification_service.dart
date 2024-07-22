@@ -43,14 +43,14 @@ class PushNotificationService{
     return credentials.accessToken.data;
   }
 
-  static sendNotification(String deviceToken, BuildContext context, String message) async {
+  static sendNotification(String token, BuildContext context, String message) async {
 
     final String serverkey = await getAccessToken();
     String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-641ba/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
-        'token': deviceToken,
+        'token': token,
         'notification': {
           'title': 'New Notification',
           'body': message,

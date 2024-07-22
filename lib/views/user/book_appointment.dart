@@ -1,36 +1,41 @@
-import 'package:flutter/material.dart';
+/// notify
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_barber_app/views/user/home_screen.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
+import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
   final String uid;
-  final String selectedBarberName;
-  final String selectedBarberAddress;
-  final String selectedBarberId;
+  final String barberId;
+  final String barberName;
+  final String barberAddress;
 
   const BookAppointment({
-    super.key,
+    Key? key,
     required this.selectedServices,
     required this.uid,
-    required this.selectedBarberName,
-    required this.selectedBarberAddress,
-    required this.selectedBarberId,
-  });
+    required this.barberId,
+    required this.barberName,
+    required this.barberAddress,
+  }) : super(key: key);
 
   @override
-  _BookAppointmentState createState() => _BookAppointmentState();
+  State<BookAppointment> createState() => _BookAppointmentState();
 }
 
 class _BookAppointmentState extends State<BookAppointment> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime selectedDay = DateTime.now();
+  DateTime focusedDay = DateTime.now();
+  bool isBooking = false;
+  final AppointmentController _appointmentController = AppointmentController();
+
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
@@ -74,6 +79,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
+
   Future<void> _getUserName() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
@@ -89,20 +95,140 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
+  Future<void> _bookAppointment() async {
+    if (selectedDay == null) {
+      _showErrorDialog('Please select a date');
+      return;
+    }
+    if (_timeController.text.isEmpty) {
+      _showErrorDialog('Please select a time slot');
+      return;
+    }
+    if (_addressController.text.isEmpty) {
+      _showErrorDialog('Address cannot be empty');
+      return;
+    }
+    if (_phoneNumberController.text.isEmpty) {
+      _showErrorDialog('Phone number cannot be empty');
+      return;
+    }
+
+    setState(() {
+      isBooking = true;
+    });
+
+    try {
+      String id = FirebaseFirestore.instance.collection('appointments').doc().id;
+      Timestamp timestamp = Timestamp.fromDate(selectedDay);
+
+      DocumentSnapshot clientDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(widget.barberId).get();
+
+      final appointment = Appointment(
+        id: DateTime.now().toIso8601String(),
+        date: timestamp,
+        time: _timeController.text,
+        services: widget.selectedServices,
+        address: _addressController.text,
+        phoneNumber: _phoneNumberController.text,
+        uid: widget.uid,
+        barberName: widget.barberName,
+        barberAddress: widget.barberAddress,
+        clientName: _userName,
+        barberId: widget.barberId,
+      );
+
+      await _appointmentController.bookAppointment(appointment);
+
+      // Send push notification
+      final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);
+      await PushNotificationService.sendNotification(
+        barberDeviceToken,
+        context,
+        'You have a new appointment booked!',
+      );
+      print(barberDeviceToken);
+
+      _showSuccessDialog();
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        isBooking = false;
+      });
+    }
+  }
+
+  Future<String> getBarberDeviceToken(String barberId) async {
+    try {
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(barberId).get();
+      if (barberDoc.exists) {
+        final data = barberDoc.data() as Map<String, dynamic>;
+        final deviceToken = data['token'];
+        if (deviceToken != null) {
+          return deviceToken;
+        } else {
+          throw Exception('Device token is missing in the document');
+        }
+      } else {
+        throw Exception('Barber document does not exist');
+      }
+    } catch (e) {
+      print('Error fetching barber device token: $e');
+      rethrow; // Propagate the error to be handled in the calling function
+    }
+  }
+
+
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Success'),
+        content: const Text('Appointment booked successfully'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                    (Route<dynamic> route) => false, // Remove all previous routes
+              );
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Book Appointment',
-          style: TextStyle(
-            fontFamily: 'Acumin Pro',
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: const Text('Book Appointment'),
       ),
-      body: SingleChildScrollView(
+      body: isBooking
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,7 +236,6 @@ class _BookAppointmentState extends State<BookAppointment> {
             const Text(
               'Selected Services',
               style: TextStyle(
-                fontFamily: 'Acumin Pro',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -132,40 +257,29 @@ class _BookAppointmentState extends State<BookAppointment> {
             const Text(
               'Select Date',
               style: TextStyle(
-                fontFamily: 'Acumin Pro',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 8),
             TableCalendar(
-              firstDay: DateTime.now(),
-              lastDay: DateTime(2025, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+              focusedDay: focusedDay,
+              firstDay: DateTime.utc(2020, 10, 16),
+              lastDay: DateTime.utc(2030, 3, 14),
+              selectedDayPredicate: (day) {
+                return isSameDay(selectedDay, day);
+              },
               onDaySelected: (selectedDay, focusedDay) {
                 setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
+                  this.selectedDay = selectedDay;
+                  this.focusedDay = focusedDay;
                 });
               },
-              calendarFormat: CalendarFormat.month,
-              calendarStyle: const CalendarStyle(
-                selectedDecoration: BoxDecoration(
-                  color: Colors.orange,
-                  shape: BoxShape.circle,
-                ),
-                todayDecoration: BoxDecoration(
-                  color: Colors.blue,
-                  shape: BoxShape.circle,
-                ),
-              ),
             ),
             const SizedBox(height: 16),
             const Text(
               'Select Time Slot',
               style: TextStyle(
-                fontFamily: 'Acumin Pro',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -217,7 +331,6 @@ class _BookAppointmentState extends State<BookAppointment> {
             const Text(
               'Address',
               style: TextStyle(
-                fontFamily: 'Acumin Pro',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -234,7 +347,6 @@ class _BookAppointmentState extends State<BookAppointment> {
             const Text(
               'Phone Number',
               style: TextStyle(
-                fontFamily: 'Acumin Pro',
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),
@@ -255,75 +367,7 @@ class _BookAppointmentState extends State<BookAppointment> {
             const SizedBox(height: 16),
             Center(
               child: Button(
-                onPressed: () async {
-                  try {
-                    if (_selectedDay == null) {
-                      throw Exception('Please select a date');
-                    }
-                    if (_timeController.text.isEmpty) {
-                      throw Exception('Please select a time slot');
-                    }
-                    if (_addressController.text.isEmpty) {
-                      throw Exception('Address cannot be empty');
-                    }
-                    if (_phoneNumberController.text.isEmpty) {
-                      throw Exception('Phone number cannot be empty');
-                    }
-
-                    // Create and save the appointment
-                    final appointment = Appointment(
-                      id: DateTime.now().toIso8601String(), // Use ISO8601 string for ID
-                      date: Timestamp.fromDate(_selectedDay!), // Convert to Timestamp
-                      services: widget.selectedServices,
-                      address: _addressController.text,
-                      phoneNumber: _phoneNumberController.text,
-                      uid: widget.uid,
-                      time: _timeController.text,
-                      clientName: _userName,
-                      barberName: widget.selectedBarberName, // Ensure this is set
-                      barberAddress: widget.selectedBarberAddress,
-                      barberId: widget.selectedBarberId, // Ensure this is set correctly
-                    );
-
-                    await AppointmentController().bookAppointment(appointment);
-
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Success'),
-                        content: const Text('Appointment booked successfully'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pushAndRemoveUntil(
-                                context,
-                                MaterialPageRoute(builder: (context) => const HomeScreen()),
-                                    (Route<dynamic> route) => false, // Remove all previous routes
-                              );
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  } catch (e) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Error'),
-                        content: Text(e.toString()),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('OK'),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                },
+                onPressed: _bookAppointment,
                 child: const Text('Book Appointment'),
               ),
             ),

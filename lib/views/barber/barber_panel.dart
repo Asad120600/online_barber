@@ -48,13 +48,19 @@ class _BarberPanelState extends State<BarberPanel> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            // Print detailed error information
             print('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No Bookings found.'));
           } else {
             List<Appointment> appointments = snapshot.data!;
+
+            // Sort appointments by date and time
+            appointments.sort((a, b) {
+              DateTime dateTimeA = _createDateTime(a.date.toDate(), a.time);
+              DateTime dateTimeB = _createDateTime(b.date.toDate(), b.time);
+              return dateTimeA.compareTo(dateTimeB);
+            });
 
             return ListView.builder(
               padding: const EdgeInsets.all(8.0),
@@ -72,7 +78,7 @@ class _BarberPanelState extends State<BarberPanel> {
                           color: Colors.grey.withOpacity(0.5),
                           spreadRadius: 2,
                           blurRadius: 5,
-                          offset: const Offset(0, 3), // changes position of shadow
+                          offset: const Offset(0, 3),
                         ),
                       ],
                     ),
@@ -81,12 +87,19 @@ class _BarberPanelState extends State<BarberPanel> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Safely convert Timestamp to DateTime
                           Text(
-                            'Date: ${appointment.date != null ? DateFormat.yMd().format(appointment.date.toDate()) : 'N/A'}',
+                            'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Time: ${appointment.time}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -133,4 +146,19 @@ class _BarberPanelState extends State<BarberPanel> {
       ),
     );
   }
+
+  // Helper method to create DateTime object from date and time
+  DateTime _createDateTime(DateTime date, String? time) {
+    if (time == null || time.isEmpty) return date;
+    try {
+      // Create a DateFormat object for 12-hour time with AM/PM
+      final timeFormat = DateFormat.jm(); // 'j:m a' format
+      final timeParsed = timeFormat.parse(time);
+      return DateTime(date.year, date.month, date.day, timeParsed.hour, timeParsed.minute);
+    } catch (e) {
+      print('Error parsing time: $e');
+      return date;
+    }
+  }
 }
+

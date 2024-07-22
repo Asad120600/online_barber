@@ -1,3 +1,5 @@
+// notify barber list
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/models/barber_model.dart';
@@ -8,7 +10,7 @@ import 'package:online_barber_app/views/user/book_appointment.dart';
 
 class BarberList extends StatefulWidget {
   final List<Service> selectedServices;
-  const BarberList({super.key, required this.selectedServices});
+  const BarberList({Key? key, required this.selectedServices}) : super(key: key);
 
   @override
   State<BarberList> createState() => _BarberListState();
@@ -135,7 +137,8 @@ class _BarberListState extends State<BarberList> {
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Button(
-              onPressed: _selectedBarberId != null ? () {
+              onPressed: _selectedBarberId != null
+                  ? () {
                 if (_selectedBarber != null) {
                   Navigator.push(
                     context,
@@ -143,15 +146,16 @@ class _BarberListState extends State<BarberList> {
                       builder: (context) => BookAppointment(
                         selectedServices: _selectedServices,
                         uid: LocalStorage.getUserID().toString(),
-                        selectedBarberName: _selectedBarber!.name,
-                        selectedBarberAddress: _selectedBarber!.address,
-                        selectedBarberId: _selectedBarber!.id,
+                        barberId: _selectedBarber!.id,
+                        barberName: _selectedBarber!.name,
+                        barberAddress: _selectedBarber!.address,
                       ),
                     ),
                   );
                 }
-              } : null,
-              child: const Text('Confirm '),
+              }
+                  : null,
+              child: const Text('Confirm'),
             ),
           ),
         ],

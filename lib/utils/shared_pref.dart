@@ -42,6 +42,15 @@ class LocalStorage {
     return prefs.getString('userType');
   }
 
+
+  static void setFirebaseToken(String token) {
+    prefs.setString('token', token);
+  }
+
+  static String? getFirebaseToken() {
+    return prefs.getString('token');
+  }
+
   static void logout() {
     prefs.clear();
   }
