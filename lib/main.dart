@@ -6,9 +6,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
 
-
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -30,11 +27,11 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-  requestPremission();
+  requestPermission();
   getToken();
   }
 
-  void requestPremission() async {
+  void requestPermission() async {
     FirebaseMessaging message = FirebaseMessaging.instance;
 
     NotificationSettings settings = await message.requestPermission(
@@ -47,10 +44,10 @@ class _MyAppState extends State<MyApp> {
       sound: true,
     );
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      log("Premission granted");
+      log("Permission granted");
     } else if (settings.authorizationStatus ==
         AuthorizationStatus.provisional) {
-      log("Premission Not Granted");
+      log("Permission Not Granted");
     } else {
       log("User Premission Declined");
     }

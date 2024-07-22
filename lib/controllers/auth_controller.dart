@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -93,7 +95,7 @@ class AuthController {
       }
       return false; // Return false if user is null
     } catch (e) {
-      print("Sign Up Error: ${e.toString()}");
+      log("Sign Up Error: ${e.toString()}");
       return false; // Return false on error
     }
   }
@@ -119,10 +121,10 @@ class AuthController {
           case '1': // Admin
             userDoc = await _firestore.collection('admins').doc(user.uid).get();
             if (userDoc.exists) {
-              print("Admin logged in");
+              log("Admin logged in");
               // Navigate to admin panel or perform admin-specific actions
             } else {
-              print("Admin document does not exist for uid: ${user.uid}");
+              log("Admin document does not exist for uid: ${user.uid}");
               await _auth.signOut(); // Sign out user if trying to login as admin with user credentials
               return null;
             }
@@ -130,10 +132,10 @@ class AuthController {
           case '2': // Barber
             userDoc = await _firestore.collection('barbers').doc(user.uid).get();
             if (userDoc.exists) {
-              print("Barber logged in");
+              log("Barber logged in");
               // Navigate to barber dashboard or perform barber-specific actions
             } else {
-              print("Barber document does not exist for uid: ${user.uid}");
+              log("Barber document does not exist for uid: ${user.uid}");
               await _auth.signOut(); // Sign out user if trying to login as barber with user credentials
               return null;
             }
@@ -141,10 +143,10 @@ class AuthController {
           default: // Regular user
             userDoc = await _firestore.collection('users').doc(user.uid).get();
             if (userDoc.exists) {
-              print("Regular user logged in");
+              log("Regular user logged in");
               // Navigate to user home screen or perform user-specific actions
             } else {
-              print("User document does not exist for uid: ${user.uid}");
+              log("User document does not exist for uid: ${user.uid}");
               await _auth.signOut(); // Sign out user if trying to login as regular user with admin/barber credentials
               return null;
             }
@@ -154,7 +156,7 @@ class AuthController {
       }
       return null; // Return null if user is null
     } catch (e) {
-      print("Sign In Error: ${e.toString()}");
+      log("Sign In Error: ${e.toString()}");
       return null; // Return null on error
     }
   }
@@ -163,7 +165,7 @@ class AuthController {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        print("Google sign-in aborted by user.");
+        log("Google sign-in aborted by user.");
         return null; // User aborted Google sign-in
       }
 
@@ -202,7 +204,7 @@ class AuthController {
       }
       return null; // Return null if user is null
     } catch (e) {
-      print("Google Sign-In Error: ${e.toString()}");
+      log("Google Sign-In Error: ${e.toString()}");
       return null; // Return null on error
     }
   }
@@ -212,7 +214,7 @@ class AuthController {
       await _auth.signOut();
       await _googleSignIn.signOut();
     } catch (e) {
-      print("Sign Out Error: ${e.toString()}");
+      log("Sign Out Error: ${e.toString()}");
     }
   }
 
@@ -237,7 +239,7 @@ class AuthController {
         return;
       }
     } catch (e) {
-      print("Failed to update token in Firestore: $e");
+      log("Failed to update token in Firestore: $e");
     }
   }
 }

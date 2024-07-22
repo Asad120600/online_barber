@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';  // Import Firebase Auth
@@ -32,11 +34,11 @@ class _SetServicePricesState extends State<SetServicePrices> {
       setState(() {
         _services = services;
 
-        print('Current User ID: $_currentUserId');
+        log('Current User ID: $_currentUserId');
 
         for (var service in services) {
-          print('Service ID: ${service.id}');
-          print('Service Barber Prices: ${service.barberPrices}');
+          log('Service ID: ${service.id}');
+          log('Service Barber Prices: ${service.barberPrices}');
 
           // Find the price specific to the current user
           final userPrice = service.barberPrices?.firstWhere(
@@ -44,7 +46,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
               orElse: () => {'price': service.price}
           )['price'];
 
-          print('Selected Price: $userPrice');
+          log('Selected Price: $userPrice');
 
           _priceControllers[service.id] = TextEditingController(
             text: (userPrice ?? service.price).toString(),
@@ -52,7 +54,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
         }
       });
     } catch (e) {
-      print("Error fetching services: $e");
+      log("Error fetching services: $e");
     }
   }
 
@@ -87,7 +89,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Prices updated successfully')));
     } catch (e) {
-      print("Error saving prices: $e");
+      log("Error saving prices: $e");
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error updating prices')));
     }
   }

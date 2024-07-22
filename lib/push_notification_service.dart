@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -43,7 +44,7 @@ class PushNotificationService{
     return credentials.accessToken.data;
   }
 
-  static sendNotification(String token, BuildContext context, String message) async {
+  static sendNotification(String token, BuildContext context, String message, String notificationBody) async {
 
     final String serverkey = await getAccessToken();
     String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-641ba/messages:send';
@@ -52,8 +53,8 @@ class PushNotificationService{
       'message': {
         'token': token,
         'notification': {
-          'title': 'New Notification',
-          'body': message,
+          'title': message,
+          'body': notificationBody,
         },
         'data': {
           'name': 'name'
@@ -70,9 +71,9 @@ class PushNotificationService{
     );
 
     if (response.statusCode == 200) {
-      print("Notification sent successfully");
+      log("Notification sent successfully");
     } else {
-      print("Notification not sent: ${response.body}");
+      log("Notification not sent: ${response.body}");
     }
   }
 

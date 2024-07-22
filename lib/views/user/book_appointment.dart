@@ -1,4 +1,6 @@
 /// notify
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -75,7 +77,7 @@ class _BookAppointmentState extends State<BookAppointment> {
         _phoneNumberController.text = data['phone'] ?? '';
       });
     } catch (e) {
-      print('Error fetching phone number: $e');
+      log('Error fetching phone number: $e');
     }
   }
 
@@ -91,7 +93,7 @@ class _BookAppointmentState extends State<BookAppointment> {
         _userName = '${data['firstName'] ?? ''} ${data['lastName'] ?? ''}';
       });
     } catch (e) {
-      print('Error fetching user name: $e');
+      log('Error fetching user name: $e');
     }
   }
 
@@ -139,6 +141,17 @@ class _BookAppointmentState extends State<BookAppointment> {
       );
 
       await _appointmentController.bookAppointment(appointment);
+      // Prepare notification details
+      String services = widget.selectedServices.map((s) => s.name).join(', ');
+      String notificationBody = '''
+    New Appointment Booked!
+    Client: $_userName
+    Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+    Time: ${_timeController.text}
+    Address: ${_addressController.text}
+    Phone: ${_phoneNumberController.text}
+    Services: $services
+    ''';
 
       // Send push notification
       final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);
@@ -146,8 +159,10 @@ class _BookAppointmentState extends State<BookAppointment> {
         barberDeviceToken,
         context,
         'You have a new appointment booked!',
+        notificationBody,
+
       );
-      print(barberDeviceToken);
+      log(barberDeviceToken);
 
       _showSuccessDialog();
     } catch (e) {
@@ -174,7 +189,7 @@ class _BookAppointmentState extends State<BookAppointment> {
         throw Exception('Barber document does not exist');
       }
     } catch (e) {
-      print('Error fetching barber device token: $e');
+      log('Error fetching barber device token: $e');
       rethrow; // Propagate the error to be handled in the calling function
     }
   }

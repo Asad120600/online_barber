@@ -33,45 +33,43 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    _checkLoginStatus();
+    // _checkLoginStatus();
   }
 
-  Future<void> _checkLoginStatus() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      String? userType = await LocalStorage.getUserType();
-
-
-      switch (userType) {
-        case '1': // Admin
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const AdminPanel(),
-            ),
-          );
-          break;
-        case '2': // Barber
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BarberPanel(barberId: user.uid),
-            ),
-          );
-          break;
-        case '3': // Regular user
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const HomeScreen(),
-            ),
-          );
-          break;
-        default:
-          break;
-      }
-    }
-  }
+  // Future<void> _checkLoginStatus() async {
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //   if (user != null) {
+  //     String? userType = await LocalStorage.getUserType();
+  //     switch (userType) {
+  //       case '1': // Admin
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => const AdminPanel(),
+  //           ),
+  //         );
+  //         break;
+  //       case '2': // Barber
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => BarberPanel(barberId: user.uid),
+  //           ),
+  //         );
+  //         break;
+  //       case '3': // Regular user
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => const HomeScreen(),
+  //           ),
+  //         );
+  //         break;
+  //       default:
+  //         break;
+  //     }
+  //   }
+  // }
 
   Future<void> _handleLogin() async {
     String email = isUserSelected

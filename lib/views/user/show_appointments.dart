@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -28,7 +30,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
         appBar: AppBar(
           title: const Text('Appointments'),
         ),
-        body: Center(
+        body: const Center(
           child: Text('User ID is empty or user not authenticated.'),
         ),
       );
@@ -44,7 +46,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            print('Error: ${snapshot.error}');
+            log('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No Appointments found.'));
@@ -149,7 +151,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
       final parts = time.split(':');
       return Duration(hours: int.parse(parts[0]), minutes: int.parse(parts[1]));
     } catch (e) {
-      print('Error parsing time: $e');
+      log('Error parsing time: $e');
       return Duration.zero;
     }
   }

@@ -1,11 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/controllers/auth_controller.dart';
 import 'package:online_barber_app/utils/button.dart'; // Adjust this import as per your project structure
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   _SignUpScreenState createState() => _SignUpScreenState();
@@ -196,28 +195,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
               TextField(
                 controller: firstNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'First Name',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: lastNameController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Last Name',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Email',
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: phoneNumberController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Phone Number',
                 ),
               ),
@@ -260,7 +259,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
               Button(
                 onPressed: _handleSignUp,
-                child: Text('Sign Up'),
+                child: const Text('Sign Up'),
               ),
               const SizedBox(height: 10),
               Row(

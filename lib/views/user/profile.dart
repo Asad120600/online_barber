@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -26,24 +28,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _fetchProfileData() async {
-    print('Fetching profile data for user: ${_currentUser?.uid}');
+    log('Fetching profile data for user: ${_currentUser?.uid}');
     try {
       DocumentSnapshot snapshot = await _firestore.collection('users').doc(_currentUser?.uid).get();
       if (snapshot.exists) {
-        print('Snapshot exists');
+        log('Snapshot exists');
         setState(() {
           _firstName = snapshot['firstName'] ?? 'User';
           _phoneController.text = snapshot['phone'] ?? (_currentUser?.phoneNumber ?? '');
         });
-        print('Fetched data: firstName: $_firstName, phone: ${_phoneController.text}');
+        log('Fetched data: firstName: $_firstName, phone: ${_phoneController.text}');
       } else {
-        print('Snapshot does not exist, using currentUser phone number');
+        log('Snapshot does not exist, using currentUser phone number');
         setState(() {
           _phoneController.text = _currentUser?.phoneNumber ?? '';
         });
       }
     } catch (e) {
-      print('Error fetching profile data: $e');
+      log('Error fetching profile data: $e');
       setState(() {
         _phoneController.text = _currentUser?.phoneNumber ?? '';
       });
@@ -59,7 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text('Profile updated successfully')),
       );
     } catch (e) {
-      print('Error updating profile: $e');
+      log('Error updating profile: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to update profile')),
       );

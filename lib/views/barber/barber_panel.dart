@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -88,7 +90,7 @@ class _BarberPanelState extends State<BarberPanel> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
+                            'Date: ${DateFormat('dd/MM/yy').format(appointment.date.toDate())}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -156,9 +158,8 @@ class _BarberPanelState extends State<BarberPanel> {
       final timeParsed = timeFormat.parse(time);
       return DateTime(date.year, date.month, date.day, timeParsed.hour, timeParsed.minute);
     } catch (e) {
-      print('Error parsing time: $e');
+      log('Error parsing time: $e');
       return date;
     }
   }
 }
-

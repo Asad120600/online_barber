@@ -1,6 +1,12 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/admin/admin_panel.dart';
+import 'package:online_barber_app/views/barber/barber_panel.dart';
+import 'package:online_barber_app/views/user/home_screen.dart';
 import 'auth/login_screen.dart';
 import '../utils/button.dart';
 
@@ -27,23 +33,69 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
   int currentIndex = 0;
   bool isCarouselCompleted = false;
   final CarouselController _carouselController = CarouselController();
+  Timer? _slideshowTimer;
 
   @override
   void initState() {
     super.initState();
+    _checkLoginStatus();
     _startSlideshow();
   }
 
+  @override
+  void dispose() {
+    _slideshowTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String? userType = await LocalStorage.getUserType();
+      switch (userType) {
+        case '1': // Admin
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AdminPanel(),
+            ),
+          );
+          break;
+        case '2': // Barber
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BarberPanel(barberId: user.uid),
+            ),
+          );
+          break;
+        case '3': // Regular user
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const HomeScreen(),
+            ),
+          );
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
   void _startSlideshow() {
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        currentIndex = (currentIndex + 1) % images.length;
-        if (currentIndex == 0) {
-          isCarouselCompleted = true;
-        }
-      });
-      _carouselController.nextPage();
-      _startSlideshow();
+    _slideshowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      if (mounted) {
+        setState(() {
+          currentIndex = (currentIndex + 1) % images.length;
+          if (currentIndex == 0) {
+            isCarouselCompleted = true;
+          }
+        });
+        _carouselController.nextPage();
+      } else {
+        timer.cancel();
+      }
     });
   }
 
@@ -105,7 +157,6 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  // if(isCarouselCompleted)
                   Padding(
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Button(
