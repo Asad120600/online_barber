@@ -186,7 +186,8 @@ Time: ${_timeController.text}
 Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
 Phone: ${_phoneNumberController.text}
 Services: $services
-Total Price: \$${totalPrice.toStringAsFixed(2)}
+Home Service: $_isHomeService
+Total Price: ${totalPrice.toStringAsFixed(2)}
 ''';
 
       final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);

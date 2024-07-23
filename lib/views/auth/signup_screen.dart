@@ -12,7 +12,6 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   bool isUserSelected = true;
-  bool isAdminSelected = false;
   bool isBarberSelected = false;
   bool isPasswordVisible = false;
 
@@ -92,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String password = passwordController.text.trim();
     String confirmPassword = confirmPasswordController.text.trim();
     String phoneNumber = phoneNumberController.text.trim();
-    String userType = isUserSelected ? '3' : isAdminSelected ? '1' : '2';
+    String userType = isUserSelected ? '3' : '2'; // 3 for user, 2 for barber
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +152,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     onPressed: () {
                       setState(() {
                         isUserSelected = true;
-                        isAdminSelected = false;
                         isBarberSelected = false;
                       });
                     },
@@ -167,21 +165,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     onPressed: () {
                       setState(() {
                         isUserSelected = false;
-                        isAdminSelected = true;
-                        isBarberSelected = false;
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isAdminSelected ? Colors.orange : Colors.grey,
-                    ),
-                    child: const Text("Admin"),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        isUserSelected = false;
-                        isAdminSelected = false;
                         isBarberSelected = true;
                       });
                     },
