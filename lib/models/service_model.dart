@@ -6,7 +6,9 @@ class Service {
   final double price;
   final String category;
   final String? imageUrl;
-  final List<Map<String, dynamic>>? barberPrices; // List of maps containing barberId and price
+  final List<Map<String, dynamic>>? barberPrices;
+  final bool isHomeService;
+  final double homeServicePrice;// List of maps containing barberId and price
 
   Service({
     required this.id,
@@ -15,6 +17,8 @@ class Service {
     required this.category,
     this.imageUrl,
     this.barberPrices,
+    required this.isHomeService,
+    required this.homeServicePrice,
   });
 
   // Convert a Service object to a Map for Firestore operations
@@ -26,6 +30,8 @@ class Service {
       'category': category,
       'imageUrl': imageUrl,
       'barberPrices': barberPrices,
+      'isHomeService': isHomeService,
+      'homeServicePrice': homeServicePrice,
     };
   }
 
@@ -37,6 +43,8 @@ class Service {
       price: (data['price'] ?? 0).toDouble(),
       category: data['category'] ?? '',
       imageUrl: data['imageUrl'],
+      isHomeService: data['isHomeService'] ?? false,
+      homeServicePrice: (data['homeServicePrice'] ?? 0.0).toDouble(),
       barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
     );
   }
@@ -52,6 +60,8 @@ class Service {
       category: data['category'] ?? '',
       imageUrl: data['imageUrl'],
       barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
+      isHomeService: data['isHomeService'] ?? false,
+      homeServicePrice: (data['homeServicePrice'] ?? 0.0).toDouble(),
     );
   }
 }

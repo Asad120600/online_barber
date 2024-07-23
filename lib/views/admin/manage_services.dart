@@ -19,9 +19,11 @@ class _ManageServiceState extends State<ManageService> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _homeServicePriceController = TextEditingController();
   String _category = 'Hair Styles';
   File? _image;
   String? _imageUrl;
+  bool _isHomeService = false;
 
   @override
   void initState() {
@@ -29,8 +31,10 @@ class _ManageServiceState extends State<ManageService> {
     if (widget.service != null) {
       _nameController.text = widget.service!.name;
       _priceController.text = widget.service!.price.toString();
+      _homeServicePriceController.text = widget.service!.homeServicePrice.toString();
       _category = widget.service!.category;
       _imageUrl = widget.service!.imageUrl;
+      _isHomeService = widget.service!.isHomeService;
     }
   }
 
@@ -62,11 +66,13 @@ class _ManageServiceState extends State<ManageService> {
       }
 
       final service = Service(
+        id: widget.service?.id ?? '',  // Provide an ID for both new and existing services
         name: _nameController.text,
         price: double.parse(_priceController.text),
         category: _category,
-        id: widget.service?.id ?? '',
         imageUrl: imageUrl,
+        isHomeService: _isHomeService,
+        homeServicePrice: double.parse(_homeServicePriceController.text),
       );
 
       if (widget.service != null) {
@@ -124,6 +130,17 @@ class _ManageServiceState extends State<ManageService> {
                       return null;
                     },
                   ),
+                  TextFormField(
+                    controller: _homeServicePriceController,
+                    decoration: const InputDecoration(labelText: 'Home Service Price'),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a home service price';
+                      }
+                      return null;
+                    },
+                  ),
                   DropdownButtonFormField<String>(
                     value: _category,
                     items: ['Hair Styles', 'Beard Styles'].map((String category) {
@@ -138,6 +155,16 @@ class _ManageServiceState extends State<ManageService> {
                       });
                     },
                     decoration: const InputDecoration(labelText: 'Category'),
+                  ),
+                  const SizedBox(height: 20),
+                  CheckboxListTile(
+                    title: const Text('Is Home Service?'),
+                    value: _isHomeService,
+                    onChanged: (bool? value) {
+                      setState(() {
+                        _isHomeService = value ?? false;
+                      });
+                    },
                   ),
                   const SizedBox(height: 20),
                   if (_image != null)

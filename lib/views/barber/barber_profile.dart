@@ -15,21 +15,23 @@ class BarberProfile extends StatefulWidget {
 }
 
 class _BarberProfileState extends State<BarberProfile> {
-  late User? _currentUser;
+  User? _currentUser;
   late TextEditingController _phoneController;
-  late TextEditingController _addressController; // Controller for address field
+  late TextEditingController _addressController;
+  late TextEditingController _shopNameController;
+  late TextEditingController _nameController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  File? _imageFile; // Variable to hold selected image file
-  String? _firstName;
-  String? _imageUrl; // URL to store and retrieve image from Firebase
-  String? _address; // Variable to hold the address
+  File? _imageFile;
+  String? _imageUrl;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
     _phoneController = TextEditingController();
-    _addressController = TextEditingController(); // Initialize address controller
+    _addressController = TextEditingController();
+    _shopNameController = TextEditingController();
+    _nameController = TextEditingController();
     _fetchBarberData();
   }
 
@@ -40,8 +42,9 @@ class _BarberProfileState extends State<BarberProfile> {
       if (snapshot.exists) {
         setState(() {
           _phoneController.text = snapshot['phoneNumber'] ?? '';
-          _addressController.text = snapshot['address'] ?? ''; // Set address from Firestore
-          _firstName = snapshot['name'];
+          _addressController.text = snapshot['address'] ?? '';
+          _shopNameController.text = snapshot['shopName'] ?? '';
+          _nameController.text = snapshot['name'] ?? '';
           _imageUrl = snapshot['imageUrl'];
         });
       }
@@ -69,8 +72,9 @@ class _BarberProfileState extends State<BarberProfile> {
 
       await _firestore.collection('barbers').doc(_currentUser?.uid).set({
         'phoneNumber': _phoneController.text,
-        'address': _addressController.text, // Update address in Firestore
-        'name': _firstName,
+        'address': _addressController.text,
+        'shopName': _shopNameController.text,
+        'name': _nameController.text,
         'imageUrl': _imageUrl,
       }, SetOptions(merge: true));
 
@@ -87,7 +91,6 @@ class _BarberProfileState extends State<BarberProfile> {
 
   Future<String> _uploadImage(File imageFile) async {
     try {
-      // Generate a unique image name or use the UID of the user/barber
       String imageName =
           _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
       Reference ref =
@@ -104,7 +107,9 @@ class _BarberProfileState extends State<BarberProfile> {
   @override
   void dispose() {
     _phoneController.dispose();
-    _addressController.dispose(); // Dispose address controller
+    _addressController.dispose();
+    _shopNameController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -155,19 +160,11 @@ class _BarberProfileState extends State<BarberProfile> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  _firstName ?? 'Barber',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _currentUser?.email ?? 'barber@gmail.com',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    icon: Icon(Icons.person, color: Colors.orange),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -184,6 +181,14 @@ class _BarberProfileState extends State<BarberProfile> {
                   decoration: const InputDecoration(
                     labelText: 'Address',
                     icon: Icon(Icons.location_on, color: Colors.orange),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _shopNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Shop Name',
+                    icon: Icon(Icons.store, color: Colors.orange),
                   ),
                 ),
                 const SizedBox(height: 16),

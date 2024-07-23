@@ -15,15 +15,17 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late User? _currentUser;
   late TextEditingController _phoneController;
-  String? _firstName;
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
-    _firstName = _currentUser?.displayName;
     _phoneController = TextEditingController();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
     _fetchProfileData();
   }
 
@@ -34,10 +36,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (snapshot.exists) {
         log('Snapshot exists');
         setState(() {
-          _firstName = snapshot['firstName'] ?? 'User';
+          _firstNameController.text = snapshot['firstName'] ?? 'User';
+          _lastNameController.text = snapshot['lastName'] ?? '';
           _phoneController.text = snapshot['phone'] ?? (_currentUser?.phoneNumber ?? '');
         });
-        log('Fetched data: firstName: $_firstName, phone: ${_phoneController.text}');
+        log('Fetched data: firstName: ${_firstNameController.text}, lastName: ${_lastNameController.text}, phone: ${_phoneController.text}');
       } else {
         log('Snapshot does not exist, using currentUser phone number');
         setState(() {
@@ -55,6 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _updateProfile() async {
     try {
       await _firestore.collection('users').doc(_currentUser?.uid).set({
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
         'phone': _phoneController.text,
       }, SetOptions(merge: true));
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,6 +76,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -101,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                _firstName ?? 'User',
+                _firstNameController.text.isNotEmpty ? _firstNameController.text : 'User',
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -116,11 +123,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text(
-                _phoneController.text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
+              TextField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(
+                  labelText: 'First Name',
+                  icon: Icon(Icons.person, color: Colors.orange),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Last Name',
+                  icon: Icon(Icons.person, color: Colors.orange),
                 ),
               ),
               const SizedBox(height: 16),

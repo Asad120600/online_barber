@@ -1,5 +1,3 @@
-// notify barber list
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/models/barber_model.dart';
@@ -10,7 +8,8 @@ import 'package:online_barber_app/views/user/book_appointment.dart';
 
 class BarberList extends StatefulWidget {
   final List<Service> selectedServices;
-  const BarberList({Key? key, required this.selectedServices}) : super(key: key);
+
+  const BarberList({super.key, required this.selectedServices});
 
   @override
   State<BarberList> createState() => _BarberListState();
@@ -21,6 +20,12 @@ class _BarberListState extends State<BarberList> {
   String? _selectedBarberId;
   Barber? _selectedBarber;
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedServices = widget.selectedServices;
+  }
+
   Stream<List<Barber>> getBarbers() {
     return FirebaseFirestore.instance.collection('barbers').snapshots().map((snapshot) {
       return snapshot.docs.map((doc) => Barber.fromSnapshot(doc)).toList();
@@ -30,28 +35,31 @@ class _BarberListState extends State<BarberList> {
   Future<Map<String, Map<String, double>>> _getBarberPrices(List<Service> services) async {
     final prices = <String, Map<String, double>>{};
 
-    for (var service in services) {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('services')
-          .doc(service.id)
-          .get();
-      final serviceData = Service.fromSnapshot(snapshot);
+    try {
+      for (var service in services) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('services')
+            .doc(service.id)
+            .get();
+        final serviceData = Service.fromSnapshot(snapshot);
 
-      final barberPrices = serviceData.barberPrices?.fold<Map<String, double>>({}, (acc, priceMap) {
-        acc[priceMap['barberId']] = (priceMap['price'] as num).toDouble();
-        return acc;
-      }) ?? {};
+        final barberPrices = serviceData.barberPrices?.fold<Map<String, double>>({}, (acc, priceMap) {
+          final barberId = priceMap['barberId'] as String;
+          final price = (priceMap['price'] as num).toDouble();
+          if (!acc.containsKey(barberId)) {
+            acc[barberId] = price;
+          }
+          return acc;
+        }) ?? {};
 
-      prices[service.id] = barberPrices;
+        prices[service.id] = barberPrices;
+      }
+    } catch (e) {
+      print('Error fetching barber prices: $e');
+      rethrow; // Re-throw the exception to be caught by FutureBuilder
     }
 
     return prices;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedServices = widget.selectedServices;
   }
 
   @override
@@ -69,6 +77,7 @@ class _BarberListState extends State<BarberList> {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
+                  print('Error fetching barbers: ${snapshot.error}');
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No barbers found'));
@@ -79,6 +88,7 @@ class _BarberListState extends State<BarberList> {
                       if (priceSnapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       } else if (priceSnapshot.hasError) {
+                        print('Error fetching barber prices: ${priceSnapshot.error}');
                         return Center(child: Text('Error: ${priceSnapshot.error}'));
                       } else if (!priceSnapshot.hasData) {
                         return const Center(child: Text('No pricing data found'));
@@ -90,9 +100,10 @@ class _BarberListState extends State<BarberList> {
                           itemBuilder: (context, index) {
                             Barber barber = snapshot.data![index];
 
+                            // Get the barber's prices for the selected services
                             final barberPrices = _selectedServices.map((service) {
                               final price = prices[service.id]?[barber.id] ?? service.price;
-                              return '${service.name}: ${price.toStringAsFixed(2)}';
+                              return '${service.name}: ${price.toStringAsFixed(2)}'; // \$
                             }).join(', ');
 
                             final isSelected = barber.id == _selectedBarberId;
@@ -115,7 +126,9 @@ class _BarberListState extends State<BarberList> {
                                       ? CircleAvatar(backgroundImage: NetworkImage(barber.imageUrl))
                                       : const CircleAvatar(child: Icon(Icons.person)),
                                   title: Text(barber.name),
-                                  subtitle: Text('Prices: $barberPrices'),
+                                  subtitle: Text(
+                                    'Prices: $barberPrices\nAddress: ${barber.address ?? 'N/A'}\nShop: ${barber.shopName ?? 'N/A'}',
+                                  ),
                                   onTap: () {
                                     setState(() {
                                       _selectedBarberId = barber.id;
@@ -148,7 +161,7 @@ class _BarberListState extends State<BarberList> {
                         uid: LocalStorage.getUserID().toString(),
                         barberId: _selectedBarber!.id,
                         barberName: _selectedBarber!.name,
-                        barberAddress: _selectedBarber!.address,
+                        barberAddress: _selectedBarber!.address ?? 'N/A',
                       ),
                     ),
                   );

@@ -1,5 +1,3 @@
-// ignore_for_file: unused_field
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 
@@ -27,8 +25,14 @@ class AppointmentController {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return Appointment.fromSnapshot(doc);
-      }).toList();
+        try {
+          return Appointment.fromSnapshot(doc);
+        } catch (e) {
+          // Handle conversion error
+          print('Error converting document to Appointment: $e');
+          return null;
+        }
+      }).whereType<Appointment>().toList();
     });
   }
 
@@ -38,14 +42,46 @@ class AppointmentController {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return Appointment.fromSnapshot(doc);
-      }).toList();
+        try {
+          return Appointment.fromSnapshot(doc);
+        } catch (e) {
+          // Handle conversion error
+          print('Error converting document to Appointment: $e');
+          return null;
+        }
+      }).whereType<Appointment>().toList();
     });
   }
 
   Stream<List<Appointment>> getAllAppointments() {
     return appointmentsCollection.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) => Appointment.fromSnapshot(doc)).toList();
+      return snapshot.docs.map((doc) {
+        try {
+          return Appointment.fromSnapshot(doc);
+        } catch (e) {
+          // Handle conversion error
+          print('Error converting document to Appointment: $e');
+          return null;
+        }
+      }).whereType<Appointment>().toList();
     });
+  }
+
+  Future<void> updateAppointmentStatus(String appointmentId,
+      String status) async {
+    try {
+      await appointmentsCollection.doc(appointmentId).update(
+          {'status': status});
+    } catch (e) {
+      throw Exception('Failed to update appointment status: $e');
+    }
+  }
+
+  Future<void> deleteAppointment(String appointmentId) async {
+    try {
+      await _firestore.collection('appointments').doc(appointmentId).delete();
+    } catch (e) {
+      throw Exception('Failed to delete appointment: $e');
+    }
   }
 }

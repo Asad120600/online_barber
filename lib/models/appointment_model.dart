@@ -3,16 +3,20 @@ import 'package:online_barber_app/models/service_model.dart';
 
 class Appointment {
   final String id;
-  final Timestamp date; // Use Timestamp for date
+  final Timestamp date;
   final String time;
   final List<Service> services;
   final String address;
   final String phoneNumber;
   final String uid;
+  final double totalPrice;
   final String barberName;
   final String barberAddress;
   final String clientName;
   final String barberId;
+  final bool isHomeService;
+  final double homeServicePrice;
+  final String? status; // Add this field
 
   Appointment({
     required this.id,
@@ -26,13 +30,17 @@ class Appointment {
     required this.barberAddress,
     required this.clientName,
     required this.barberId,
+    required this.isHomeService,
+    required this.homeServicePrice,
+    required this.totalPrice,
+    this.status, // Add this field
   });
 
   // Convert Appointment to a map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'date': date, // Store as Timestamp
+      'date': date,
       'time': time,
       'services': services.map((service) => service.toMap()).toList(),
       'address': address,
@@ -42,6 +50,10 @@ class Appointment {
       'barberAddress': barberAddress,
       'barberId': barberId,
       'clientName': clientName,
+      'isHomeService': isHomeService,
+      'homeServicePrice': homeServicePrice,
+      'totalPrice': totalPrice,
+      'status': status, // Add this field
     };
   }
 
@@ -63,6 +75,10 @@ class Appointment {
       barberAddress: data['barberAddress'] ?? '',
       barberId: data['barberId'] ?? '',
       clientName: data['clientName'] ?? '',
+      totalPrice: (data['totalPrice'] as num?)?.toDouble() ?? 0.0,
+      isHomeService: data['isHomeService'] ?? false,
+      homeServicePrice: (data['homeServicePrice'] as num?)?.toDouble() ?? 0.0,
+      status: data['status'], // Add this field
     );
   }
 }

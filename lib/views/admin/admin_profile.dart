@@ -14,14 +14,17 @@ class AdminProfile extends StatefulWidget {
 class _AdminProfileState extends State<AdminProfile> {
   late User? _currentUser;
   late TextEditingController _phoneController;
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String? _firstName;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
     _phoneController = TextEditingController();
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
     _fetchAdminData();
   }
 
@@ -32,7 +35,8 @@ class _AdminProfileState extends State<AdminProfile> {
       if (snapshot.exists) {
         setState(() {
           _phoneController.text = snapshot['phone'] ?? '';
-          _firstName = snapshot['firstName']; // Assuming 'firstname' is the field name in Firestore
+          _firstNameController.text = snapshot['firstName'] ?? '';
+          _lastNameController.text = snapshot['lastName'] ?? '';
         });
       }
     } catch (e) {
@@ -44,7 +48,8 @@ class _AdminProfileState extends State<AdminProfile> {
     try {
       await _firestore.collection('admins').doc(_currentUser?.uid).set({
         'phone': _phoneController.text,
-        'firstname': _firstName, // Update the 'firstname' field in Firestore
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
       }, SetOptions(merge: true));
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Profile updated successfully')),
@@ -60,6 +65,8 @@ class _AdminProfileState extends State<AdminProfile> {
   @override
   void dispose() {
     _phoneController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     super.dispose();
   }
 
@@ -86,7 +93,7 @@ class _AdminProfileState extends State<AdminProfile> {
             ),
             const SizedBox(height: 16),
             Text(
-              _firstName ?? 'Admin ', // Display first name or fallback to 'Admin'
+              _firstNameController.text.isNotEmpty ? _firstNameController.text : 'Admin',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -94,10 +101,26 @@ class _AdminProfileState extends State<AdminProfile> {
             ),
             const SizedBox(height: 4),
             Text(
-              _currentUser?.email ?? 'admin@gmail.com', // Replace with admin's email
+              _currentUser?.email ?? 'admin@gmail.com',
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _firstNameController,
+              decoration: const InputDecoration(
+                labelText: 'First Name',
+                icon: Icon(Icons.person, color: Colors.orange),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _lastNameController,
+              decoration: const InputDecoration(
+                labelText: 'Last Name',
+                icon: Icon(Icons.person, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 16),

@@ -55,6 +55,16 @@ class _AdminPanelState extends State<AdminPanel> {
           } else {
             List<Appointment> appointments = snapshot.data!;
 
+            // Sort appointments by date and time
+            appointments.sort((a, b) {
+              // First, compare by date
+              int dateComparison = a.date.compareTo(b.date);
+              if (dateComparison != 0) return dateComparison;
+
+              // If dates are equal, compare by time
+              return a.time.compareTo(b.time);
+            });
+
             return ListView.builder(
               padding: const EdgeInsets.all(8.0),
               itemCount: appointments.length,
@@ -110,8 +120,8 @@ class _AdminPanelState extends State<AdminPanel> {
                                 Text(
                                   'Barber: ${appointment.barberName}',
                                   style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                   ),
                                 ),
                                 const SizedBox(height: 8),

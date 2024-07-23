@@ -73,6 +73,7 @@ class AuthController {
               address: '',
               imageUrl: '',
               token: token ?? '',
+              shopName: '',
             ).toMap();
             await _firestore.collection('barbers').doc(user.uid).set(userData);
             break;

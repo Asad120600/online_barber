@@ -1,6 +1,4 @@
-/// notify
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,7 +39,9 @@ class _BookAppointmentState extends State<BookAppointment> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
+  final TextEditingController _homeServicePriceController = TextEditingController();
   String _userName = '';
+  bool _isHomeService = false;
 
   @override
   void initState() {
@@ -49,6 +49,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     _phoneNumberController.addListener(_onPhoneNumberChanged);
     _getPhoneNumber();
     _getUserName();
+    _initializeHomeServicePrice();
   }
 
   @override
@@ -57,13 +58,12 @@ class _BookAppointmentState extends State<BookAppointment> {
     _phoneNumberController.removeListener(_onPhoneNumberChanged);
     _phoneNumberController.dispose();
     _timeController.dispose();
+    _homeServicePriceController.dispose();
     super.dispose();
   }
 
   void _onPhoneNumberChanged() {
-    setState(() {
-      // Refresh UI if needed
-    });
+    setState(() {});
   }
 
   Future<void> _getPhoneNumber() async {
@@ -81,7 +81,6 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
-
   Future<void> _getUserName() async {
     try {
       DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
@@ -97,6 +96,28 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
+  Future<void> _initializeHomeServicePrice() async {
+    double homeServicePrice = 0.0;
+
+    try {
+      // Iterate through each selected service to find the home service price
+      for (var service in widget.selectedServices) {
+        final servicePrices = service.barberPrices ?? [];
+        for (var priceInfo in servicePrices) {
+          if (priceInfo['barberId'] == widget.barberId && priceInfo['isHomeService'] == true) {
+            homeServicePrice = double.tryParse(priceInfo['price'].toString()) ?? 0.0;
+            break;
+          }
+        }
+      }
+      setState(() {
+        _homeServicePriceController.text = homeServicePrice.toString();
+      });
+    } catch (e) {
+      log('Error fetching home service price: $e');
+    }
+  }
+
   Future<void> _bookAppointment() async {
     if (selectedDay == null) {
       _showErrorDialog('Please select a date');
@@ -106,13 +127,21 @@ class _BookAppointmentState extends State<BookAppointment> {
       _showErrorDialog('Please select a time slot');
       return;
     }
-    if (_addressController.text.isEmpty) {
-      _showErrorDialog('Address cannot be empty');
+    if (_isHomeService && _addressController.text.isEmpty) {
+      _showErrorDialog('Address cannot be empty for home service');
       return;
     }
     if (_phoneNumberController.text.isEmpty) {
       _showErrorDialog('Phone number cannot be empty');
       return;
+    }
+    if (_isHomeService) {
+      try {
+        double.parse(_homeServicePriceController.text);
+      } catch (e) {
+        _showErrorDialog('Invalid home service price');
+        return;
+      }
     }
 
     setState(() {
@@ -126,41 +155,46 @@ class _BookAppointmentState extends State<BookAppointment> {
       DocumentSnapshot clientDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
       DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(widget.barberId).get();
 
+      // Calculate total price
+      double totalPrice = _calculateTotalPrice();
+
       final appointment = Appointment(
         id: DateTime.now().toIso8601String(),
         date: timestamp,
         time: _timeController.text,
         services: widget.selectedServices,
-        address: _addressController.text,
+        address: _isHomeService ? _addressController.text : widget.barberAddress,
         phoneNumber: _phoneNumberController.text,
         uid: widget.uid,
         barberName: widget.barberName,
         barberAddress: widget.barberAddress,
         clientName: _userName,
         barberId: widget.barberId,
+        isHomeService: _isHomeService,
+        homeServicePrice: _isHomeService ? double.parse(_homeServicePriceController.text) : 0.0,
+        totalPrice: totalPrice,
       );
 
       await _appointmentController.bookAppointment(appointment);
-      // Prepare notification details
+
       String services = widget.selectedServices.map((s) => s.name).join(', ');
       String notificationBody = '''
-    New Appointment Booked!
-    Client: $_userName
-    Date: ${selectedDay.toLocal().toString().split(' ')[0]}
-    Time: ${_timeController.text}
-    Address: ${_addressController.text}
-    Phone: ${_phoneNumberController.text}
-    Services: $services
-    ''';
+New Appointment Booked!
+Client: $_userName
+Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+Time: ${_timeController.text}
+Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
+Phone: ${_phoneNumberController.text}
+Services: $services
+Total Price: \$${totalPrice.toStringAsFixed(2)}
+''';
 
-      // Send push notification
       final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);
       await PushNotificationService.sendNotification(
         barberDeviceToken,
         context,
         'You have a new appointment booked!',
         notificationBody,
-
       );
       log(barberDeviceToken);
 
@@ -190,10 +224,9 @@ class _BookAppointmentState extends State<BookAppointment> {
       }
     } catch (e) {
       log('Error fetching barber device token: $e');
-      rethrow; // Propagate the error to be handled in the calling function
+      rethrow;
     }
   }
-
 
   void _showSuccessDialog() {
     showDialog(
@@ -207,7 +240,7 @@ class _BookAppointmentState extends State<BookAppointment> {
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    (Route<dynamic> route) => false, // Remove all previous routes
+                    (Route<dynamic> route) => false,
               );
             },
             child: const Text('OK'),
@@ -235,158 +268,183 @@ class _BookAppointmentState extends State<BookAppointment> {
     );
   }
 
+  double _getBarberPrice(Service service) {
+    for (var priceInfo in service.barberPrices ?? []) {
+      if (priceInfo['barberId'] == widget.barberId) {
+        return double.tryParse(priceInfo['price'].toString()) ?? service.price;
+      }
+    }
+    return service.price;
+  }
+
+  double _calculateTotalPrice() {
+    double basePrice = widget.selectedServices.fold(0.0, (total, service) {
+      return total + _getBarberPrice(service);
+    });
+
+    if (_isHomeService) {
+      double homeServicePrice = double.tryParse(_homeServicePriceController.text) ?? 0.0;
+      return basePrice + homeServicePrice;
+    } else {
+      return basePrice;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    double totalPrice = _calculateTotalPrice();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Appointment'),
+        centerTitle: true,
       ),
-      body: isBooking
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Selected Services',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Selected Services',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 8),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: widget.selectedServices.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(
-                    widget.selectedServices[index].name,
-                    style: const TextStyle(fontSize: 14),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Select Date',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              ListView.builder(
+                shrinkWrap: true,
+                itemCount: widget.selectedServices.length,
+                itemBuilder: (context, index) {
+                  final service = widget.selectedServices[index];
+                  double barberPrice = _getBarberPrice(service);
+                  return ListTile(
+                    title: Text(service.name),
+                    trailing: Text(
+                      barberPrice.toStringAsFixed(2),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 8),
-            TableCalendar(
-              focusedDay: focusedDay,
-              firstDay: DateTime.utc(2020, 10, 16),
-              lastDay: DateTime.utc(2030, 3, 14),
-              selectedDayPredicate: (day) {
-                return isSameDay(selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  this.selectedDay = selectedDay;
-                  this.focusedDay = focusedDay;
-                });
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Select Time Slot',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _timeController,
-              readOnly: true,
-              decoration: InputDecoration(
-                contentPadding: EdgeInsets.symmetric(
-                  vertical: MediaQuery.of(context).size.width * 0.030,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(
-                    color: Colors.black45,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(
-                    color: Colors.black,
-                  ),
-                ),
-                hintText: "Select a time",
-                hintStyle: const TextStyle(
-                  color: Color(0xFF828A89),
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                ),
-                prefixIcon: const Icon(
-                  Icons.watch_later,
-                  color: Colors.orange,
-                ),
-              ),
-              onTap: () async {
-                TimeOfDay? picked = await showTimePicker(
-                  context: context,
-                  initialTime: TimeOfDay.now(),
-                );
-                if (picked != null) {
+              const SizedBox(height: 20),
+              TableCalendar(
+                focusedDay: focusedDay,
+                firstDay: DateTime.now(),
+                lastDay: DateTime(2100),
+                selectedDayPredicate: (day) {
+                  return isSameDay(selectedDay, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
                   setState(() {
-                    _timeController.text = picked.format(context);
+                    this.selectedDay = selectedDay;
+                    this.focusedDay = focusedDay;
                   });
-                }
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Address',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _addressController,
-              decoration: const InputDecoration(
-                hintText: 'Enter your address',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Phone Number',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _phoneNumberController,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(
-                hintText: 'Enter your phone number',
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(
-                  Icons.phone,
-                  color: Colors.orange,
+                },
+                calendarStyle: const CalendarStyle(
+                  todayDecoration: BoxDecoration(
+                    color: Colors.blue,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Colors.green,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Button(
-                onPressed: _bookAppointment,
-                child: const Text('Book Appointment'),
+              const SizedBox(height: 20),
+              TextField(
+                controller: _timeController,
+                decoration: InputDecoration(
+                  labelText: 'Time Slot',
+                  hintText: 'Select time slot',
+                  suffixIcon: const Icon(Icons.access_time),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                readOnly: true,
+                onTap: () {
+                  showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  ).then((selectedTime) {
+                    if (selectedTime != null) {
+                      setState(() {
+                        _timeController.text = selectedTime.format(context);
+                      });
+                    }
+                  });
+                },
               ),
-            ),
-          ],
+              const SizedBox(height: 20),
+              TextField(
+                controller: _phoneNumberController,
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  hintText: 'Enter your phone number',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Text('Home Service'),
+                  Switch(
+                    value: _isHomeService,
+                    onChanged: (value) {
+                      setState(() {
+                        _isHomeService = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              if (_isHomeService)
+                Column(
+                  children: [
+                    TextField(
+                      controller: _homeServicePriceController,
+                      decoration: InputDecoration(
+                        labelText: 'Home Service Price',
+                        hintText: 'Enter price for home service',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _addressController,
+                      decoration: InputDecoration(
+                        labelText: 'Home Service Address',
+                        hintText: 'Enter your address',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              Text(
+                'Total Price: ${totalPrice.toStringAsFixed(2)}',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              isBooking
+                  ? const Center(child: CircularProgressIndicator())
+                  : Center(
+                    child: Button(
+                                    child: Text('Book Appointment'),
+                                    onPressed: _bookAppointment,
+                                  ),
+                  ),
+            ],
+          ),
         ),
       ),
     );

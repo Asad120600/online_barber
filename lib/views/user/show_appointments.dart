@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -65,6 +64,11 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
               itemCount: appointments.length,
               itemBuilder: (context, index) {
                 Appointment appointment = appointments[index];
+                DateTime appointmentDateTime = appointment.date.toDate().add(_parseTime(appointment.time));
+
+                // Check if the appointment is expired
+                bool isExpired = appointmentDateTime.isBefore(DateTime.now());
+
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: Container(
@@ -121,6 +125,21 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                             ),
                           ),
                           const SizedBox(height: 8),
+                          Text(
+                            'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             children: appointment.services.isNotEmpty
@@ -131,6 +150,14 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                             }).toList()
                                 : [const Chip(label: Text('No services'))],
                           ),
+                          if (isExpired)
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => _deleteAppointment(appointment.id),
+                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -153,6 +180,21 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     } catch (e) {
       log('Error parsing time: $e');
       return Duration.zero;
+    }
+  }
+
+  // Method to delete an appointment
+  void _deleteAppointment(String appointmentId) async {
+    try {
+      await _appointmentController.deleteAppointment(appointmentId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Appointment deleted successfully')),
+      );
+    } catch (e) {
+      log('Error deleting appointment: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to delete appointment')),
+      );
     }
   }
 }
