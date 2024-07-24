@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-import 'package:online_barber_app/views/admin/service_list.dart';
+import 'package:online_barber_app/views/admin/services/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/barber/barber_profile.dart';
 import 'package:online_barber_app/views/barber/set_price.dart';

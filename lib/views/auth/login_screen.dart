@@ -33,45 +33,30 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    // _checkLoginStatus();
   }
 
-  // Future<void> _checkLoginStatus() async {
-  //   User? user = FirebaseAuth.instance.currentUser;
-  //   if (user != null) {
-  //     String? userType = await LocalStorage.getUserType();
-  //     switch (userType) {
-  //       case '1': // Admin
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const AdminPanel(),
-  //           ),
-  //         );
-  //         break;
-  //       case '2': // Barber
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => BarberPanel(barberId: user.uid),
-  //           ),
-  //         );
-  //         break;
-  //       case '3': // Regular user
-  //         Navigator.pushReplacement(
-  //           context,
-  //           MaterialPageRoute(
-  //             builder: (context) => const HomeScreen(),
-  //           ),
-  //         );
-  //         break;
-  //       default:
-  //         break;
-  //     }
-  //   }
-  // }
+  Future<void> _showLoadingDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dialog from being dismissed by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20.0),
+              Text('Logging in...'),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> _handleLogin() async {
+    _showLoadingDialog(); // Show the loading dialog
+
     String email = isUserSelected
         ? userEmailController.text.trim()
         : isAdminSelected
@@ -96,11 +81,12 @@ class _LoginScreenState extends State<LoginScreen> {
           LocalStorage.setUserID(userID: user.uid);
 
           if (isBarberSelected) {
-            print(user.uid);
             LocalStorage.setBarberId(user.uid); // Save barber ID here
           }
 
           LocalStorage.setUserType(userType); // Save user type here
+
+          Navigator.of(context).pop(); // Dismiss the loading dialog
 
           switch (userType) {
             case '1': // Admin
@@ -129,6 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
               break;
           }
         } else {
+          Navigator.of(context).pop(); // Dismiss the loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Failed to sign in. Please try again.'),
@@ -136,6 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
           );
         }
       } catch (e) {
+        Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Error during login: $e'),
@@ -143,6 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } else {
+      Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please enter email and password.'),
@@ -152,6 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    _showLoadingDialog(); // Show the loading dialog
+
     try {
       User? user = await _authController.signInWithGoogle(context);
 
@@ -164,6 +155,8 @@ class _LoginScreenState extends State<LoginScreen> {
         }
 
         LocalStorage.setUserType(userType); // Save user type here
+
+        Navigator.of(context).pop(); // Dismiss the loading dialog
 
         switch (userType) {
           case '1': // Admin
@@ -192,6 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
             break;
         }
       } else {
+        Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Failed to sign in with Google. Please try again.'),
@@ -199,6 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
+      Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error during Google sign-in: $e'),
@@ -263,23 +258,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: _handleLogin,
               ),
               SizedBox(height: screenHeight * 0.02),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const SignUpScreen()),
-                  );
-                },
-                child: Text(
-                  'Don\'t have an account? Sign Up',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontSize: 14.0,
+              if (!isAdminSelected) // Only show the Sign Up text if Admin is not selected
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                    );
+                  },
+                  child: Text(
+                    'Don\'t have an account? Sign Up',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 14.0,
+                    ),
                   ),
                 ),
-              ),
               SizedBox(height: screenHeight * 0.02),
-              if (!isAdminSelected && !isBarberSelected) // Only show Google sign-in button if Admin is not selected
+              if (!isAdminSelected && !isBarberSelected) // Only show Google sign-in button if Admin or Barber is not selected
                 TextButton(
                   onPressed: _handleGoogleSignIn,
                   child: Row(

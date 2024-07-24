@@ -1,16 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_barber_app/views/admin/service_list.dart';
+import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
+import 'package:online_barber_app/views/admin/app_settings/help_settings.dart';
+import 'package:online_barber_app/views/admin/services/manage_services.dart';
+import 'package:online_barber_app/views/admin/services/service_list.dart';
+import 'package:online_barber_app/views/admin/slideshow/slideshow_mnage.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
-import 'package:online_barber_app/views/admin/active_users.dart';
-import 'package:online_barber_app/views/admin/deleted_users.dart';
-import 'package:online_barber_app/views/admin/faqs_settings.dart';
-import 'package:online_barber_app/views/admin/help_settings.dart';
-import 'package:online_barber_app/views/admin/privacy_settings.dart';
+import 'package:online_barber_app/views/admin/users/active_users.dart';
+import 'package:online_barber_app/views/admin/users/deleted_users.dart';
+import 'package:online_barber_app/views/admin/app_settings/privacy_settings.dart';
 import 'package:online_barber_app/views/admin/admin_profile.dart';
 import 'barber admin/barber_screen.dart';
-import 'manage_services.dart';
 
 class AdminDrawer extends StatefulWidget {
   const AdminDrawer({super.key,required this.screenWidth,});
@@ -147,6 +148,16 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>const PrivacySettings()));
+                    // Navigate to PrivacySettings screen
+                  },
+                ),
+                ListTile(
+                  title: const Text(
+                    'Slide Show Settings',
+                  ),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const AdminSlideshowScreen()));
                     // Navigate to PrivacySettings screen
                   },
                 ),

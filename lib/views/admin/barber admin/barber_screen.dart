@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:online_barber_app/views/admin/barber%20admin/barber_panel_admin.dart';
 import '../../../controllers/barber_controller.dart';
 import '../../../models/barber_model.dart';
 import '../../../utils/barber_card.dart';
+import '../../barber/barber_panel.dart';  // Import the BarberPanel screen
 
 class BarberListScreen extends StatelessWidget {
   final BarberController _barberService = BarberController();
@@ -33,7 +35,17 @@ class BarberListScreen extends StatelessWidget {
             ),
             itemCount: barbers.length,
             itemBuilder: (context, index) {
-              return BarberCard(barber: barbers[index]);
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BarberPanelAdmin(barberId: barbers[index].id), // Navigate to BarberPanel
+                    ),
+                  );
+                },
+                child: BarberCard(barber: barbers[index]),
+              );
             },
           );
         },

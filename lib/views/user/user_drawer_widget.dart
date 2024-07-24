@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-import '../views/auth/login_screen.dart';
-import '../views/user/faqs.dart';
-import '../views/user/help.dart';
-import '../views/user/privacy_policy.dart';
-import '../views/user/profile.dart';
-import '../views/user/show_appointments.dart';
+import '../auth/login_screen.dart';
+import 'faqs.dart';
+import 'help.dart';
+import 'privacy_policy.dart';
+import 'profile.dart';
+import 'show_appointments.dart';
 
 class AppDrawer extends StatefulWidget {
   final double screenWidth;
@@ -185,6 +185,20 @@ class _AppDrawerState extends State<AppDrawer> {
                     builder: (context) => AppointmentsShow(uid: LocalStorage.getUserID().toString()),
                   ),
                 );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.calendar_today),
+              title: const Text(' Notifications'),
+              onTap: () {
+                Navigator.pop(context);
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => AppointmentsShow(uid: LocalStorage.getUserID().toString()),
+                //   ),
+                // );
               },
             ),
             const Divider(),

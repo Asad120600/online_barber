@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -18,20 +19,8 @@ class SlideshowScreen extends StatefulWidget {
 }
 
 class _SlideshowScreenState extends State<SlideshowScreen> {
-  final List<String> images = [
-    'assets/img/one.jpg',
-    'assets/img/two.jpg',
-    'assets/img/three.jpg',
-  ];
-
-  final List<String> texts = [
-    'Find Barbers and Salons Easily in Your Hands',
-    'Book Your Favorite Barber And Salon Quickly',
-    'Come be Handsome with us Right Now',
-  ];
-
+  List<Map<String, dynamic>> _slides = [];
   int currentIndex = 0;
-  bool isCarouselCompleted = false;
   final CarouselController _carouselController = CarouselController();
   Timer? _slideshowTimer;
 
@@ -39,6 +28,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
   void initState() {
     super.initState();
     _checkLoginStatus();
+    _fetchSlides();
     _startSlideshow();
   }
 
@@ -83,26 +73,46 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
     }
   }
 
+  Future<void> _fetchSlides() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance.collection('slideshow_images').get();
+      final slides = snapshot.docs.map((doc) {
+        return {
+          'imageUrl': doc['imageUrl'],
+          'text': doc['text'],
+        };
+      }).toList();
+
+      setState(() {
+        _slides = slides;
+      });
+    } catch (e) {
+      print('Error fetching slides: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load slides')));
+    }
+  }
+
   void _startSlideshow() {
-    _slideshowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
-      if (mounted) {
-        setState(() {
-          currentIndex = (currentIndex + 1) % images.length;
-          if (currentIndex == 0) {
-            isCarouselCompleted = true;
-          }
-        });
-        _carouselController.nextPage();
-      } else {
-        timer.cancel();
-      }
-    });
+    if (_slides.isNotEmpty) {
+      _slideshowTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+        if (mounted) {
+          setState(() {
+            currentIndex = (currentIndex + 1) % _slides.length;
+          });
+          _carouselController.nextPage();
+        } else {
+          timer.cancel();
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: _slides.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Column(
         children: [
           Expanded(
             flex: 6,
@@ -110,7 +120,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               carouselController: _carouselController,
               options: CarouselOptions(
                 height: MediaQuery.of(context).size.height * 0.6,
-                autoPlay: false, // Disable autoPlay
+                autoPlay: false,
                 enlargeCenterPage: true,
                 aspectRatio: 2.0,
                 onPageChanged: (index, reason) {
@@ -119,7 +129,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                   });
                 },
               ),
-              items: images.map((imagePath) {
+              items: _slides.map((slide) {
                 return Builder(
                   builder: (BuildContext context) {
                     return Container(
@@ -127,7 +137,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.orange, width: 2),
                         image: DecorationImage(
-                          image: AssetImage(imagePath),
+                          image: NetworkImage(slide['imageUrl'] as String),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -148,7 +158,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Text(
-                      texts[currentIndex],
+                      _slides.isNotEmpty ? _slides[currentIndex]['text'] as String : '',
                       style: const TextStyle(
                         fontSize: 24,
                         color: Colors.black,
@@ -161,7 +171,6 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Button(
                       onPressed: () {
-                        // Navigate to the app's main screen
                         Navigator.push(
                           context,
                           MaterialPageRoute(

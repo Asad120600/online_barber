@@ -9,6 +9,7 @@ import 'package:online_barber_app/push_notification_service.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
@@ -42,6 +43,7 @@ class _BookAppointmentState extends State<BookAppointment> {
   final TextEditingController _homeServicePriceController = TextEditingController();
   String _userName = '';
   bool _isHomeService = false;
+  LatLng? _selectedLocation;
 
   @override
   void initState() {
@@ -100,7 +102,6 @@ class _BookAppointmentState extends State<BookAppointment> {
     double homeServicePrice = 0.0;
 
     try {
-      // Iterate through each selected service to find the home service price
       for (var service in widget.selectedServices) {
         final servicePrices = service.barberPrices ?? [];
         for (var priceInfo in servicePrices) {
@@ -155,7 +156,6 @@ class _BookAppointmentState extends State<BookAppointment> {
       DocumentSnapshot clientDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
       DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(widget.barberId).get();
 
-      // Calculate total price
       double totalPrice = _calculateTotalPrice();
 
       final appointment = Appointment(
@@ -289,6 +289,22 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
     } else {
       return basePrice;
     }
+  }
+
+  void _openGoogleMaps() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GoogleMapsScreen(
+          onLocationSelected: (location) {
+            setState(() {
+              _selectedLocation = location;
+              _addressController.text = 'Lat: ${location.latitude}, Lng: ${location.longitude}'; // Just an example
+            });
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -426,6 +442,10 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.map),
+                          onPressed: _openGoogleMaps,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -439,14 +459,39 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
               isBooking
                   ? const Center(child: CircularProgressIndicator())
                   : Center(
-                    child: Button(
-                                    child: Text('Book Appointment'),
-                                    onPressed: _bookAppointment,
-                                  ),
-                  ),
+                child: Button(
+                  child: Text('Book Appointment'),
+                  onPressed: _bookAppointment,
+                ),
+              ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class GoogleMapsScreen extends StatelessWidget {
+  final Function(LatLng) onLocationSelected;
+
+  const GoogleMapsScreen({Key? key, required this.onLocationSelected}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Select Location'),
+      ),
+      body: GoogleMap(
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(0, 0),
+          zoom: 10,
+        ),
+        onTap: (location) {
+          onLocationSelected(location);
+          Navigator.pop(context);
+        },
       ),
     );
   }
