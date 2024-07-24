@@ -84,4 +84,13 @@ class AppointmentController {
       throw Exception('Failed to delete appointment: $e');
     }
   }
+
+Future<Appointment> getAppointmentById(String appointmentId) async {
+  try {
+    DocumentSnapshot doc = await appointmentsCollection.doc(appointmentId).get();
+    return Appointment.fromSnapshot(doc);
+  } catch (e) {
+    throw Exception('Failed to get appointment: $e');
+  }
+}
 }

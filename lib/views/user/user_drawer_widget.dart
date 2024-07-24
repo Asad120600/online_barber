@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/notifications.dart';
 import '../auth/login_screen.dart';
 import 'faqs.dart';
 import 'help.dart';
@@ -179,26 +180,40 @@ class _AppDrawerState extends State<AppDrawer> {
               title: const Text('My Appointments'),
               onTap: () {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AppointmentsShow(uid: LocalStorage.getUserID().toString()),
-                  ),
-                );
+                final userId = LocalStorage.getUserID();
+                if (userId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AppointmentsShow(uid: userId),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User ID not found.')),
+                  );
+                }
               },
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.calendar_today),
-              title: const Text(' Notifications'),
+              leading: const Icon(Icons.notifications),
+              title: const Text('Notifications'),
               onTap: () {
                 Navigator.pop(context);
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => AppointmentsShow(uid: LocalStorage.getUserID().toString()),
-                //   ),
-                // );
+                final userId = LocalStorage.getUserID();
+                if (userId != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationsScreen(uid: userId),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('User ID not found.')),
+                  );
+                }
               },
             ),
             const Divider(),

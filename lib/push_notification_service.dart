@@ -1,12 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 import 'package:googleapis/servicecontrol/v1.dart' as servicecontrol;
 
 class PushNotificationService{
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   static Future<String>getAccessToken() async
   {
     final serviceAccountJson = {
@@ -77,6 +81,55 @@ class PushNotificationService{
     }
   }
 
+  static Future<void> sendNotificationToUser(String token, BuildContext context, String message, String notificationBody) async {
+    final String serverkey = await getAccessToken();
+    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-641ba/messages:send';
 
+    final Map<String, dynamic> notificationMessage = {
+      'message': {
+        'token': token,
+        'notification': {
+          'title': message,
+          'body': notificationBody,
+        },
+        'data': {
+          'name': 'name'
+        }
+      }
+    };
+    final http.Response response = await http.post(
+      Uri.parse(endpointFirebaseCloudMessaging),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $serverkey'
+      },
+      body: jsonEncode(notificationMessage),
+    );
+
+    if (response.statusCode == 200) {
+      log("Notification sent successfully");
+    } else {
+      log("Notification not sent: ${response.body}");
+    }
   }
+
+
+  static void _showDialog(BuildContext context, String title, String content) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 
