@@ -1,8 +1,11 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
+import '../../utils/button.dart';
+import 'barber_rating_screen.dart';
 
 class AppointmentsShow extends StatefulWidget {
   final String uid;
@@ -52,7 +55,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           } else {
             List<Appointment> appointments = snapshot.data!;
 
-            // Sort appointments by date and time
+// Sort appointments by date and time
             appointments.sort((a, b) {
               DateTime dateTimeA = a.date.toDate().add(_parseTime(a.time));
               DateTime dateTimeB = b.date.toDate().add(_parseTime(b.time));
@@ -64,103 +67,203 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
               itemCount: appointments.length,
               itemBuilder: (context, index) {
                 Appointment appointment = appointments[index];
-                DateTime appointmentDateTime = appointment.date.toDate().add(_parseTime(appointment.time));
 
-                // Check if the appointment is expired
-                bool isExpired = appointmentDateTime.isBefore(DateTime.now());
+// Determine the background color based on the appointment status
+                Color backgroundColor = Colors.white;
 
                 return Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: backgroundColor,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 2,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Time: ${appointment.time}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Barber Name: ${appointment.barberName}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Address: ${appointment.address}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Phone Number: ${appointment.phoneNumber}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            children: appointment.services.isNotEmpty
-                                ? appointment.services.map((service) {
-                              return Chip(
-                                label: Text(service.name ?? 'Unknown'),
-                              );
-                            }).toList()
-                                : [const Chip(label: Text('No services'))],
-                          ),
-                          if (isExpired)
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: TextButton(
-                                onPressed: () => _deleteAppointment(appointment.id),
-                                child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.calendar_today, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                        ],
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.access_time, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Time: ${appointment.time}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.cut, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Barber Name: ${appointment.barberName}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.location_on, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Address: ${appointment.address}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.phone, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Phone Number: ${appointment.phoneNumber}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.attach_money, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                      appointment.isHomeService
+                                          ? Icons.home
+                                          : Icons.store,
+                                      size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.query_stats, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Status: ${appointment.status}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                children: appointment.services.isNotEmpty
+                                    ? appointment.services.map((service) {
+                                        return Chip(
+                                          label:
+                                              Text(service.name ?? 'Unknown'),
+                                        );
+                                      }).toList()
+                                    : [const Chip(label: Text('No services'))],
+                              ),
+                              const SizedBox(height: 16),
+// Show "Rate Barber" button only if the status is 'Done'
+                              if (appointment.status == 'Done')
+                                Button(
+                                  width: 125,
+                                  onPressed: appointment.hasBeenRated
+                                      ? null // Disable the button if already rated
+                                      : () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => BarberRatingScreen(
+                                          barberId: appointment.barberId,
+                                          barberName: appointment.barberName,
+                                          appointmentId:appointment.id
+                                        ),
+                                      ),
+                                    ).then((_) {
+                                      // Refresh the state after rating
+                                      setState(() {});
+                                    });
+                                  },
+                                  child: Text(
+                                    appointment.hasBeenRated ? 'Already Rated' : 'Rate Barber',
+                                    textAlign: TextAlign.center, // Center align the text
+                                    style: TextStyle(
+                                      fontSize: 14, // Increase font size
+                                      fontWeight: FontWeight.w700, // Make text bold
+                                      color: appointment.hasBeenRated ? Colors.white : Colors.white, // Different colors
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                      if (appointment.status == 'Done')
+                        Align(
+                          alignment: Alignment.topRight,
+                          child: Container(
+                            margin: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(4.0),
+                            child: const Icon(
+                              Icons.check,
+                              color: Colors.orange,
+                              size: 34,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 );
               },
@@ -171,7 +274,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     );
   }
 
-  // Helper method to parse time string to Duration
+// Helper method to parse time string to Duration
   Duration _parseTime(String? time) {
     if (time == null || time.isEmpty) return Duration.zero;
     try {
@@ -180,21 +283,6 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     } catch (e) {
       log('Error parsing time: $e');
       return Duration.zero;
-    }
-  }
-
-  // Method to delete an appointment
-  void _deleteAppointment(String appointmentId) async {
-    try {
-      await _appointmentController.deleteAppointment(appointmentId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Appointment deleted successfully')),
-      );
-    } catch (e) {
-      log('Error deleting appointment: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to delete appointment')),
-      );
     }
   }
 }

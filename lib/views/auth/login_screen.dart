@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/controllers/auth_controller.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/admin/admin_panel.dart';
 import 'package:online_barber_app/views/auth/signup_screen.dart';
@@ -40,11 +41,11 @@ class _LoginScreenState extends State<LoginScreen> {
       context: context,
       barrierDismissible: false, // Prevent dialog from being dismissed by tapping outside
       builder: (BuildContext context) {
-        return AlertDialog(
-          content: Row(
+        return const AlertDialog(
+          content:  Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
+              LoadingDots(),
               SizedBox(width: 20.0),
               Text('Logging in...'),
             ],
@@ -140,6 +141,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+
+
   Future<void> _handleGoogleSignIn() async {
     _showLoadingDialog(); // Show the loading dialog
 
@@ -232,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       isBarberSelected = false;
                     });
                   }),
-                  SizedBox(width: 10.0),
+                  const SizedBox(width: 10.0),
                   _buildRoleSelectionButton('Admin', isAdminSelected, () {
                     setState(() {
                       isUserSelected = false;
@@ -240,7 +243,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       isBarberSelected = false;
                     });
                   }),
-                  SizedBox(width: 10.0),
+                  const SizedBox(width: 10.0),
                   _buildRoleSelectionButton('Barber', isBarberSelected, () {
                     setState(() {
                       isUserSelected = false;
@@ -254,8 +257,8 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildLoginForm(),
               SizedBox(height: screenHeight * 0.03),
               Button(
-                child: Text('LOGIN'),
                 onPressed: _handleLogin,
+                child: const Text('LOGIN'),
               ),
               SizedBox(height: screenHeight * 0.02),
               if (!isAdminSelected) // Only show the Sign Up text if Admin is not selected
@@ -266,7 +269,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const SignUpScreen()),
                     );
                   },
-                  child: Text(
+                  child: const Text(
                     'Don\'t have an account? Sign Up',
                     style: TextStyle(
                       color: Colors.blue,
@@ -285,8 +288,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         'assets/img/google_logo.png',
                         height: 25.0,
                       ),
-                      SizedBox(width: 10.0),
-                      Text(
+                      const SizedBox(width: 10.0),
+                      const Text(
                         'Sign in with Google',
                         style: TextStyle(
                           color: Colors.black87,
@@ -331,16 +334,16 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.only(right: 150),
+          padding: const EdgeInsets.only(right: 150),
           child: Text(
             isUserSelected ? 'Login as User' : isAdminSelected ? 'Login as Admin' : 'Login as Barber',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        SizedBox(height: 10.0),
+        const SizedBox(height: 10.0),
         TextField(
           controller: isUserSelected
               ? userEmailController
@@ -354,7 +357,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-        SizedBox(height: 10.0),
+        const SizedBox(height: 10.0),
         TextField(
           controller: isUserSelected
               ? userPasswordController

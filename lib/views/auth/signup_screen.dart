@@ -199,6 +199,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
               TextField(
                 controller: phoneNumberController,
+                keyboardType: TextInputType.phone, // Ensures only numerical input
                 decoration: const InputDecoration(
                   labelText: 'Phone Number',
                 ),

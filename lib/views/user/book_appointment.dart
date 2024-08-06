@@ -1,3 +1,4 @@
+// book Appointment
 import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -6,10 +7,13 @@ import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
-import 'package:online_barber_app/utils/button.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+
+import '../../utils/cutom_google_map.dart';
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
@@ -44,6 +48,9 @@ class _BookAppointmentState extends State<BookAppointment> {
   String _userName = '';
   bool _isHomeService = false;
   LatLng? _selectedLocation;
+  GoogleMapController? _mapController;
+
+
 
   @override
   void initState() {
@@ -286,212 +293,245 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
     if (_isHomeService) {
       double homeServicePrice = double.tryParse(_homeServicePriceController.text) ?? 0.0;
       return basePrice + homeServicePrice;
-    } else {
-      return basePrice;
+    }
+    return basePrice;
+  }
+
+  void _selectTime() async {
+    TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        _timeController.text = pickedTime.format(context);
+      });
     }
   }
 
-  void _openGoogleMaps() {
-    Navigator.push(
+
+  void _openGoogleMap() async {
+    final String? result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GoogleMapsScreen(
-          onLocationSelected: (location) {
-            setState(() {
-              _selectedLocation = location;
-              _addressController.text = 'Lat: ${location.latitude}, Lng: ${location.longitude}'; // Just an example
-            });
-          },
-        ),
+        builder: (context) => CustomGoogleMap(),
       ),
     );
+    if (result != null) {
+      setState(() {
+        _addressController.text = result; // Update the address field with the selected address
+      });
+    }
   }
-
   @override
   Widget build(BuildContext context) {
-    double totalPrice = _calculateTotalPrice();
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Book Appointment'),
-        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Selected Services',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                itemCount: widget.selectedServices.length,
-                itemBuilder: (context, index) {
-                  final service = widget.selectedServices[index];
-                  double barberPrice = _getBarberPrice(service);
-                  return ListTile(
-                    title: Text(service.name),
-                    trailing: Text(
-                      barberPrice.toStringAsFixed(2),
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Select Date',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                TableCalendar(
+                  firstDay: DateTime.utc(2010, 10, 16),
+                  lastDay: DateTime.utc(2030, 3, 14),
+                  focusedDay: selectedDay,
+                  calendarFormat: CalendarFormat.month,
+                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+                  onDaySelected: (selectedDay, focusedDay) {
+                    setState(() {
+                      this.selectedDay = selectedDay;
+                      this.focusedDay = focusedDay;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Select Time Slot',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _timeController,
+                  readOnly: true,
+                  onTap: _selectTime,
+                  decoration:  InputDecoration(
+                    suffixIcon: const Icon(Icons.access_time),
+                    hintText: 'Select time',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
                     ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
-              TableCalendar(
-                focusedDay: focusedDay,
-                firstDay: DateTime.now(),
-                lastDay: DateTime(2100),
-                selectedDayPredicate: (day) {
-                  return isSameDay(selectedDay, day);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    this.selectedDay = selectedDay;
-                    this.focusedDay = focusedDay;
-                  });
-                },
-                calendarStyle: const CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: Colors.blue,
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.green,
-                    shape: BoxShape.circle,
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _timeController,
-                decoration: InputDecoration(
-                  labelText: 'Time Slot',
-                  hintText: 'Select time slot',
-                  suffixIcon: const Icon(Icons.access_time),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 16),
+                const Text(
+                  'Phone Number',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _phoneNumberController,
+                  keyboardType: TextInputType.phone,
+                  decoration:  InputDecoration(
+                    hintText: 'Enter phone number',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                    ),
                   ),
                 ),
-                readOnly: true,
-                onTap: () {
-                  showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                  ).then((selectedTime) {
-                    if (selectedTime != null) {
-                      setState(() {
-                        _timeController.text = selectedTime.format(context);
-                      });
-                    }
-                  });
-                },
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _phoneNumberController,
-                decoration: InputDecoration(
-                  labelText: 'Phone Number',
-                  hintText: 'Enter your phone number',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  const Text('Home Service'),
-                  Switch(
-                    value: _isHomeService,
-                    onChanged: (value) {
-                      setState(() {
-                        _isHomeService = value;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              if (_isHomeService)
-                Column(
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    TextField(
-                      controller: _homeServicePriceController,
-                      decoration: InputDecoration(
-                        labelText: 'Home Service Price',
-                        hintText: 'Enter price for home service',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      keyboardType: TextInputType.number,
+                    const Text(
+                      'Home Service',
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
-                    const SizedBox(height: 20),
-                    TextField(
-                      controller: _addressController,
-                      decoration: InputDecoration(
-                        labelText: 'Home Service Address',
-                        hintText: 'Enter your address',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.map),
-                          onPressed: _openGoogleMaps,
-                        ),
-                      ),
+                    Switch(
+                      value: _isHomeService,
+                      onChanged: (bool value) {
+                        setState(() {
+                          _isHomeService = value;
+                        });
+                      },
                     ),
-                    const SizedBox(height: 20),
                   ],
                 ),
-              Text(
-                'Total Price: ${totalPrice.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-              isBooking
-                  ? const Center(child: CircularProgressIndicator())
-                  : Center(
-                child: Button(
-                  child: Text('Book Appointment'),
-                  onPressed: _bookAppointment,
+                if (_isHomeService)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Home Service Price',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        readOnly: true,
+                        controller: _homeServicePriceController,
+                        keyboardType: TextInputType.number,
+                        decoration:  InputDecoration(
+                          hintText: 'Home Service Price',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Address',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        controller: _addressController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter address',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                            borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                          ),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.location_on),
+                            onPressed: _openGoogleMap,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Selected Services',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(height: 8),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: widget.selectedServices.length,
+                  itemBuilder: (context, index) {
+                    final service = widget.selectedServices[index];
+                    final barberPrice = _getBarberPrice(service);
+                    return ListTile(
+                      title: Text(service.name),
+                      subtitle: Text('Price: ${barberPrice.toStringAsFixed(2)}'),
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                if (_isHomeService)
+                  Text(
+                    'Home Service Price: ${double.tryParse(_homeServicePriceController.text)?.toStringAsFixed(2) ?? '0.00'}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                const SizedBox(height: 16),
+                Text(
+                  'Total Price: ${_calculateTotalPrice().toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: isBooking
+                      ? const LoadingDots()
+                      : ElevatedButton(
+                    onPressed: _bookAppointment,
+                    child: const Text('Book Appointment'),
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: Colors.orange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class GoogleMapsScreen extends StatelessWidget {
-  final Function(LatLng) onLocationSelected;
-
-  const GoogleMapsScreen({Key? key, required this.onLocationSelected}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select Location'),
-      ),
-      body: GoogleMap(
-        initialCameraPosition: const CameraPosition(
-          target: LatLng(0, 0),
-          zoom: 10,
-        ),
-        onTap: (location) {
-          onLocationSelected(location);
-          Navigator.pop(context);
-        },
       ),
     );
   }

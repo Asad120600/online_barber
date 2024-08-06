@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/button.dart';
 
-
 class FAQsSettings extends StatefulWidget {
   const FAQsSettings({super.key});
 
@@ -94,18 +93,37 @@ class _FAQsSettingsState extends State<FAQsSettings> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              TextField(
-                controller: _questionController,
-                decoration: const InputDecoration(labelText: 'Question'),
-              ),
-              TextField(
-                controller: _answerController,
-                decoration: const InputDecoration(labelText: 'Answer'),
-              ),
-              const SizedBox(height: 10,),
-              Button(
-                onPressed: _addFAQ,
-                child: const Text('Add FAQ'),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _questionController,
+                      decoration: const InputDecoration(labelText: 'Question'),
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      controller: _answerController,
+                      decoration: const InputDecoration(labelText: 'Answer'),
+                    ),
+                    const SizedBox(height: 16.0),
+                    Button(
+                      onPressed: _addFAQ,
+                      child: const Text('Add FAQ'),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16.0),
               Expanded(
@@ -130,25 +148,40 @@ class _FAQsSettingsState extends State<FAQsSettings> {
                       itemCount: faqDocs.length,
                       itemBuilder: (context, index) {
                         final faq = faqDocs[index];
-                        return ListTile(
-                          title: Text(faq['question']),
-                          subtitle: Text(faq['answer']),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () {
-                                  _editFAQ(faq.id, faq['question'], faq['answer']);
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  _deleteFAQ(faq.id);
-                                },
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4.0,
+                                offset: Offset(0, 2),
                               ),
                             ],
+                          ),
+                          child: ListTile(
+                            title: Text(faq['question']),
+                            subtitle: Text(faq['answer']),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    _editFAQ(faq.id, faq['question'], faq['answer']);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _deleteFAQ(faq.id);
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

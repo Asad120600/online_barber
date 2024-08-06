@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../utils/button.dart';
+import '../../../utils/button.dart'; // Replace with your custom button implementation
 
 class PrivacySettings extends StatefulWidget {
   const PrivacySettings({super.key});
@@ -28,15 +28,55 @@ class _PrivacySettingsState extends State<PrivacySettings> {
     _contentController.clear();
   }
 
-  Future<void> _deletePolicy(String id) async {
-    await _firestore.collection('privacyPolicies').doc(id).delete();
+  Future<void> _editPolicy(String id, String title, String content) async {
+    _titleController.text = title;
+    _contentController.text = content;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Edit Privacy Policy'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
+              ),
+              TextField(
+                controller: _contentController,
+                decoration: const InputDecoration(labelText: 'Content'),
+                maxLines: 5,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _firestore.collection('privacyPolicies').doc(id).update({
+                  'title': _titleController.text,
+                  'content': _contentController.text,
+                });
+                _titleController.clear();
+                _contentController.clear();
+                Navigator.pop(context);
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
-  Future<void> _editPolicy(String id, String newTitle, String newContent) async {
-    await _firestore.collection('privacyPolicies').doc(id).update({
-      'title': newTitle,
-      'content': newContent,
-    });
+  Future<void> _deletePolicy(String id) async {
+    await _firestore.collection('privacyPolicies').doc(id).delete();
   }
 
   Future<bool> _onWillPop() async {
@@ -57,21 +97,40 @@ class _PrivacySettingsState extends State<PrivacySettings> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8.0),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 4.0,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _titleController,
+                      decoration: const InputDecoration(labelText: 'Title'),
+                    ),
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      controller: _contentController,
+                      decoration: const InputDecoration(labelText: 'Content'),
+                      maxLines: 5,
+                    ),
+                    const SizedBox(height: 16.0),
+                    Button(
+                      onPressed: _addPolicy,
+                      child: const Text('Add Policy'),
+                    ),
+                  ],
+                ),
               ),
-              TextField(
-                controller: _contentController,
-                decoration: const InputDecoration(labelText: 'Content'),
-                maxLines: 5,
-              ),
-              const SizedBox(height: 10),
-              Button(
-                onPressed: _addPolicy,
-                child: const Text('Add Policy'),
-              ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16.0),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
                   stream: _firestore.collection('privacyPolicies').snapshots(),
@@ -94,13 +153,47 @@ class _PrivacySettingsState extends State<PrivacySettings> {
                       itemCount: policyDocs.length,
                       itemBuilder: (context, index) {
                         final policy = policyDocs[index];
-
-                        return PolicyEditSection(
-                          id: policy.id,
-                          title: policy['title'],
-                          content: policy['content'],
-                          onDelete: _deletePolicy,
-                          onEdit: _editPolicy,
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.0),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 4.0,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ListTile(
+                            title: Text(
+                              policy['title'],
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              policy['content'],
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    _editPolicy(policy.id, policy['title'], policy['content']);
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _deletePolicy(policy.id);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         );
                       },
                     );
@@ -110,112 +203,6 @@ class _PrivacySettingsState extends State<PrivacySettings> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class PolicyEditSection extends StatefulWidget {
-  final String id;
-  final String title;
-  final String content;
-  final Function(String) onDelete;
-  final Function(String, String, String) onEdit;
-
-  const PolicyEditSection({
-    super.key,
-    required this.id,
-    required this.title,
-    required this.content,
-    required this.onDelete,
-    required this.onEdit,
-  });
-
-  @override
-  _PolicyEditSectionState createState() => _PolicyEditSectionState();
-}
-
-class _PolicyEditSectionState extends State<PolicyEditSection> {
-  late TextEditingController _titleController;
-  late TextEditingController _contentController;
-  bool _isEditing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.title);
-    _contentController = TextEditingController(text: widget.content);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _contentController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (_isEditing)
-            Column(
-              children: [
-                TextField(
-                  controller: _titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
-                ),
-                TextField(
-                  controller: _contentController,
-                  decoration: const InputDecoration(labelText: 'Content'),
-                  maxLines: 5,
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    widget.onEdit(widget.id, _titleController.text, _contentController.text);
-                    setState(() {
-                      _isEditing = false;
-                    });
-                  },
-                  child: const Text('Save Changes'),
-                ),
-              ],
-            )
-          else
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  widget.content,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.edit),
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = true;
-                        });
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete),
-                      onPressed: () => widget.onDelete(widget.id),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-        ],
       ),
     );
   }

@@ -1,8 +1,12 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/book_appointment.dart';
 
@@ -55,8 +59,8 @@ class _BarberListState extends State<BarberList> {
         prices[service.id] = barberPrices;
       }
     } catch (e) {
-      print('Error fetching barber prices: $e');
-      rethrow; // Re-throw the exception to be caught by FutureBuilder
+      log('Error fetching barber prices: $e');
+      rethrow;
     }
 
     return prices;
@@ -75,9 +79,9 @@ class _BarberListState extends State<BarberList> {
               stream: getBarbers(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: LoadingDots());
                 } else if (snapshot.hasError) {
-                  print('Error fetching barbers: ${snapshot.error}');
+                  log('Error fetching barbers: ${snapshot.error}');
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Center(child: Text('No barbers found'));
@@ -86,9 +90,9 @@ class _BarberListState extends State<BarberList> {
                     future: _getBarberPrices(_selectedServices),
                     builder: (context, priceSnapshot) {
                       if (priceSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
+                        return const Center(child: LoadingDots());
                       } else if (priceSnapshot.hasError) {
-                        print('Error fetching barber prices: ${priceSnapshot.error}');
+                        log('Error fetching barber prices: ${priceSnapshot.error}');
                         return Center(child: Text('Error: ${priceSnapshot.error}'));
                       } else if (!priceSnapshot.hasData) {
                         return const Center(child: Text('No pricing data found'));
@@ -96,42 +100,99 @@ class _BarberListState extends State<BarberList> {
                         final prices = priceSnapshot.data!;
 
                         return ListView.builder(
+                          padding: const EdgeInsets.all(8.0),
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
-                            Barber barber = snapshot.data![index];
+                            final barber = snapshot.data![index];
+                            final barberId = barber.id;
 
-                            // Get the barber's prices for the selected services
                             final barberPrices = _selectedServices.map((service) {
-                              final price = prices[service.id]?[barber.id] ?? service.price;
-                              return '${service.name}: ${price.toStringAsFixed(2)}'; // \$
+                              final price = prices[service.id]?[barberId] ?? service.price;
+                              return '${service.name}: ${price.toStringAsFixed(2)}';
                             }).join(', ');
 
-                            final isSelected = barber.id == _selectedBarberId;
+                            final isSelected = barberId == _selectedBarberId;
 
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 300),
-                                curve: Curves.easeInOut,
-                                decoration: BoxDecoration(
-                                  color: isSelected ? Colors.blue[100] : Colors.white,
-                                  border: Border.all(
-                                    color: isSelected ? Colors.blue : Colors.grey,
-                                    width: isSelected ? 2 : 1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8.0),
+                              child: Card(
+                                elevation: 4,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12.0),
                                 ),
+                                color: isSelected ? Colors.orange[50] : Colors.white,
                                 child: ListTile(
-                                  leading: barber.imageUrl.isNotEmpty
-                                      ? CircleAvatar(backgroundImage: NetworkImage(barber.imageUrl))
-                                      : const CircleAvatar(child: Icon(Icons.person)),
-                                  title: Text(barber.name),
-                                  subtitle: Text(
-                                    'Prices: $barberPrices\nAddress: ${barber.address ?? 'N/A'}\nShop: ${barber.shopName ?? 'N/A'}',
+                                  contentPadding: const EdgeInsets.all(16.0),
+                                  leading: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.orange,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: ClipOval(
+                                      child: barber.imageUrl.isNotEmpty
+                                          ? Image.network(
+                                        barber.imageUrl,
+                                        width: 60,
+                                        height: 60,
+                                        fit: BoxFit.cover,
+                                      )
+                                          : const Icon(
+                                        Icons.person,
+                                        size: 40,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                  title: Text(
+                                    barber.name,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                  subtitle: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Shop: ${barber.shopName}\nAddress: ${barber.address}',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      Text(
+                                        'Prices: $barberPrices',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          RatingBarIndicator(
+                                            rating: barber.rating,
+                                            itemBuilder: (context, index) => const Icon(
+                                              Icons.star,
+                                              color: Colors.amber,
+                                            ),
+                                            itemCount: 5,
+                                            itemSize: 20.0,
+                                            direction: Axis.horizontal,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(barber.rating.toStringAsFixed(1)),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                                   onTap: () {
                                     setState(() {
-                                      _selectedBarberId = barber.id;
+                                      _selectedBarberId = barberId;
                                       _selectedBarber = barber;
                                     });
                                   },
@@ -161,7 +222,7 @@ class _BarberListState extends State<BarberList> {
                         uid: LocalStorage.getUserID().toString(),
                         barberId: _selectedBarber!.id,
                         barberName: _selectedBarber!.name,
-                        barberAddress: _selectedBarber!.address ?? 'N/A',
+                        barberAddress: _selectedBarber!.address,
                       ),
                     ),
                   );

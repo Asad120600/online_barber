@@ -13,8 +13,8 @@ class _FAQState extends State<FAQ> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('FAQs'),
         automaticallyImplyLeading: true,
+        title: const Text('FAQs'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -40,7 +40,7 @@ class _FAQState extends State<FAQ> {
               itemBuilder: (context, index) {
                 final faq = faqDocs[index];
                 return FAQSection(
-                  number: index + 1,
+                  index: index + 1,
                   question: faq['question'],
                   answer: faq['answer'],
                 );
@@ -54,29 +54,41 @@ class _FAQState extends State<FAQ> {
 }
 
 class FAQSection extends StatelessWidget {
-  final int number;
+  final int index;
   final String question;
   final String answer;
 
-  const FAQSection({super.key, required this.number, required this.question, required this.answer});
+  const FAQSection({super.key, required this.index, required this.question, required this.answer});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$number. $question',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            answer,
-            style: const TextStyle(fontSize: 16),
-          ),
-        ],
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '$index. $question',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.orange, // Customize the title color
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              answer,
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.justify,
+            ),
+          ],
+        ),
       ),
     );
   }

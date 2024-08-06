@@ -6,10 +6,12 @@ import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'dart:io';
 
+import 'package:online_barber_app/utils/loading_dialog.dart';
+
 class ManageService extends StatefulWidget {
   final Service? service;
 
-  const ManageService({Key? key, this.service}) : super(key: key);
+  const ManageService({super.key, this.service});
 
   @override
   _ManageServiceState createState() => _ManageServiceState();
@@ -59,6 +61,15 @@ class _ManageServiceState extends State<ManageService> {
 
   void _saveService() async {
     if (_formKey.currentState!.validate()) {
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const LoadingDialog(message: 'Service is Adding ',);
+        },
+      );
+
       String? imageUrl = _imageUrl;
 
       if (_image != null) {
@@ -90,7 +101,10 @@ class _ManageServiceState extends State<ManageService> {
             .update({'id': docRef.id});
       }
 
-      Navigator.pop(context);
+      // Hide loading dialog
+      Navigator.of(context).pop(); // Close the loading dialog
+
+      Navigator.pop(context); // Close the ManageService screen
     }
   }
 

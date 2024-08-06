@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
-import 'package:online_barber_app/views/barber/barber_drawer.dart';
 
 class BarberPanelAdmin extends StatefulWidget {
   final String barberId;
@@ -37,7 +36,9 @@ class _BarberPanelAdminState extends State<BarberPanelAdmin> with SingleTickerPr
     if (widget.barberId.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false,
+          leading: IconButton(onPressed: (){
+            Navigator.pop(context);
+          }, icon: const Icon(Icons.arrow_back)),
           title: const Text('Bookings Barber'),
         ),
         body: const Center(
@@ -48,8 +49,10 @@ class _BarberPanelAdminState extends State<BarberPanelAdmin> with SingleTickerPr
 
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: const Text('Bookings'),
+        leading: IconButton(onPressed: (){
+          Navigator.pop(context);
+        }, icon: const Icon(Icons.arrow_back)),
+        title: const Text('Bookings Barber'),
         bottom: _tabController != null
             ? TabBar(
           controller: _tabController,
@@ -95,7 +98,6 @@ class _BarberPanelAdminState extends State<BarberPanelAdmin> with SingleTickerPr
             DateTime dateTimeB = _createDateTime(b.date.toDate(), b.time);
             return dateTimeA.compareTo(dateTimeB);
           });
-
           return ListView.builder(
             padding: const EdgeInsets.all(8.0),
             itemCount: filteredAppointments.length,
@@ -103,126 +105,376 @@ class _BarberPanelAdminState extends State<BarberPanelAdmin> with SingleTickerPr
               Appointment appointment = filteredAppointments[index];
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.5),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Date: ${DateFormat('dd/MM/yy').format(appointment.date.toDate())}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Time: ${appointment.time}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Client Name: ${appointment.clientName ?? 'N/A'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
-                        if (appointment.isHomeService) ...[
-                          const SizedBox(height: 8),
-                          Text(
-                            'Address: ${appointment.address ?? 'N/A'}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.5),
+                            spreadRadius: 2,
+                            blurRadius: 5,
+                            offset: const Offset(0, 3),
                           ),
                         ],
-                        const SizedBox(height: 8),
-                        Text(
-                          'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Date: ${DateFormat('dd/MM/yy').format(appointment.date.toDate())}',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.access_time, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Time: ${appointment.time}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.person, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Client Name: ${appointment.clientName}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (appointment.isHomeService) ...[
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.home, size: 16),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Address: ${appointment.address}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.local_shipping, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.phone, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Phone Number: ${appointment.phoneNumber}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.attach_money, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(Icons.info, size: 16),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'Status: ${appointment.status}',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: appointment.status == 'Done'
+                                        ? Colors.green
+                                        : Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              children: appointment.services.isNotEmpty
+                                  ? appointment.services.map((service) {
+                                return Chip(
+                                  label: Text(service.name),
+                                );
+                              }).toList()
+                                  : [const Chip(label: Text('No services'))],
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Phone Number: ${appointment.phoneNumber ?? 'N/A'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          children: appointment.services.isNotEmpty
-                              ? appointment.services.map((service) {
-                            return Chip(
-                              label: Text(service.name ?? 'Unknown'),
-                            );
-                          }).toList()
-                              : [const Chip(label: Text('No services'))],
-                        ),
-                      ],
+                      ),
                     ),
-                  ),
+                    if (appointment.status == 'Done')
+                      const Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Icon(
+                          Icons.check,
+                          color: Colors.orange,
+                          size: 28,
+                        ),
+                      ),
+                  ],
                 ),
               );
             },
           );
+
+
+          // return ListView.builder(
+          //   padding: const EdgeInsets.all(8.0),
+          //   itemCount: filteredAppointments.length,
+          //   itemBuilder: (context, index) {
+          //     Appointment appointment = filteredAppointments[index];
+          //     return Padding(
+          //       padding: const EdgeInsets.symmetric(vertical: 8.0),
+          //       child: Container(
+          //         decoration: BoxDecoration(
+          //           color: Colors.white,
+          //           borderRadius: BorderRadius.circular(10),
+          //           boxShadow: [
+          //             BoxShadow(
+          //               color: Colors.grey.withOpacity(0.5),
+          //               spreadRadius: 2,
+          //               blurRadius: 5,
+          //               offset: const Offset(0, 3),
+          //             ),
+          //           ],
+          //         ),
+          //         child: Padding(
+          //           padding: const EdgeInsets.all(16.0),
+          //           child: Column(
+          //             crossAxisAlignment: CrossAxisAlignment.start,
+          //             children: [
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.calendar_today, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Date: ${DateFormat('dd/MM/yy').format(appointment.date.toDate())}',
+          //                     style: const TextStyle(
+          //                       fontWeight: FontWeight.bold,
+          //                       fontSize: 16,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.access_time, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Time: ${appointment.time}',
+          //                     style: const TextStyle(
+          //                       fontSize: 14,
+          //                       fontWeight: FontWeight.bold,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.person, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Client Name: ${appointment.clientName ?? 'N/A'}',
+          //                     style: const TextStyle(
+          //                       fontSize: 14,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               if (appointment.isHomeService) ...[
+          //                 const SizedBox(height: 8),
+          //                 Row(
+          //                   children: [
+          //                     Icon(Icons.home, size: 16),
+          //                     const SizedBox(width: 8),
+          //                     Text(
+          //                       'Address: ${appointment.address ?? 'N/A'}',
+          //                       style: const TextStyle(
+          //                         fontSize: 14,
+          //                       ),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ],
+          //               const SizedBox(height: 8),
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.local_shipping, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+          //                     style: const TextStyle(
+          //                       fontSize: 14,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.phone, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Phone Number: ${appointment.phoneNumber ?? 'N/A'}',
+          //                     style: const TextStyle(
+          //                       fontSize: 14,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Row(
+          //                 children: [
+          //                   Icon(Icons.attach_money, size: 16),
+          //                   const SizedBox(width: 8),
+          //                   Text(
+          //                     'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+          //                     style: const TextStyle(
+          //                       fontSize: 14,
+          //                       fontWeight: FontWeight.bold,
+          //                     ),
+          //                   ),
+          //                 ],
+          //               ),
+          //               const SizedBox(height: 8),
+          //               Wrap(
+          //                 spacing: 8,
+          //                 children: appointment.services.isNotEmpty
+          //                     ? appointment.services.map((service) {
+          //                   return Chip(
+          //                     label: Text(service.name ?? 'Unknown'),
+          //                   );
+          //                 }).toList()
+          //                     : [const Chip(label: Text('No services'))],
+          //               ),
+          //               ],
+          //           ),
+          //         ),
+          //       ),
+          //     );
+          //   },
+          // );
         }
       },
     );
   }
 
-  List<Appointment> _filterAppointmentsForToday(List<Appointment> appointments) {
+  // List<Appointment> _filterAppointmentsForToday(List<Appointment> appointments) {
+  //   DateTime now = DateTime.now();
+  //   return appointments.where((appointment) {
+  //     DateTime appointmentDate = appointment.date.toDate();
+  //     return appointmentDate.year == now.year &&
+  //         appointmentDate.month == now.month &&
+  //         appointmentDate.day == now.day &&
+  //         appointment.status != 'Done';
+  //   }).toList();
+  // }
+  //
+  // List<Appointment> _filterAppointmentsForUpcoming(List<Appointment> appointments) {
+  //   DateTime now = DateTime.now();
+  //   return appointments.where((appointment) {
+  //     DateTime appointmentDate = appointment.date.toDate();
+  //     return appointmentDate.isAfter(now) && appointment.status != 'Done';
+  //   }).toList();
+  // }
+  //
+  // List<Appointment> _filterAppointmentsForHistory(List<Appointment> appointments) {
+  //   DateTime now = DateTime.now();
+  //   return appointments.where((appointment) {
+  //     DateTime appointmentDate = appointment.date.toDate();
+  //     return (appointmentDate.isBefore(now) &&
+  //         (appointment.status == 'Done' || appointment.status == 'Cancelled') &&
+  //         appointmentDate.day != now.day);
+  //   }).toList();
+  // }
+
+  List<Appointment> _filterAppointmentsForToday(
+      List<Appointment> appointments) {
     DateTime now = DateTime.now();
     return appointments.where((appointment) {
-      DateTime appointmentDate = appointment.date.toDate();
+      DateTime appointmentDate = _createDateTime(
+          appointment.date.toDate(), appointment.time);
       return appointmentDate.year == now.year &&
           appointmentDate.month == now.month &&
           appointmentDate.day == now.day &&
-          appointment.status != 'Done';
+          appointment.status != 'Done'; // Ensure 'Done' appointments are excluded
     }).toList();
   }
 
-  List<Appointment> _filterAppointmentsForUpcoming(List<Appointment> appointments) {
+
+  List<Appointment> _filterAppointmentsForUpcoming(
+      List<Appointment> appointments) {
     DateTime now = DateTime.now();
     return appointments.where((appointment) {
-      DateTime appointmentDate = appointment.date.toDate();
+      DateTime appointmentDate = _createDateTime(
+          appointment.date.toDate(), appointment.time);
       return appointmentDate.isAfter(now) && appointment.status != 'Done';
     }).toList();
   }
 
-  List<Appointment> _filterAppointmentsForHistory(List<Appointment> appointments) {
+  List<Appointment> _filterAppointmentsForHistory(
+      List<Appointment> appointments) {
     DateTime now = DateTime.now();
     return appointments.where((appointment) {
       DateTime appointmentDate = appointment.date.toDate();
+      // Include only appointments marked as "Done" or those in the past not marked as "Confirmed"
       return (appointmentDate.isBefore(now) &&
-          (appointment.status == 'Done' || appointment.status == 'Cancelled') &&
-          appointmentDate.day != now.day);
+          appointment.status != 'Confirmed' &&
+          appointmentDate.day != now.day) ||
+          appointment.status == 'Done';
     }).toList();
   }
 
@@ -232,7 +484,7 @@ class _BarberPanelAdminState extends State<BarberPanelAdmin> with SingleTickerPr
       String cleanedTime = time.replaceAll(RegExp(r'(AM|PM)'), '').trim();
       List<String> timeParts = cleanedTime.split(':');
       if (timeParts.length != 2) {
-        throw FormatException('Invalid time format');
+        throw const FormatException('Invalid time format');
       }
 
       int hour = int.parse(timeParts[0].trim());

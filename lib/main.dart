@@ -1,10 +1,10 @@
 import 'dart:developer';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
   requestPermission();
+  requestLocationPermission();
   getToken();
   }
 
@@ -54,10 +55,28 @@ class _MyAppState extends State<MyApp> {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
 
       if (message.notification != null) {
-        print(
+        log(
             'Message also contained a notification: ${message.notification?.title}');
       }
     });
+  }
+  Future<void> requestLocationPermission() async {
+    var status = await Permission.location.status;
+    if (status.isDenied) {
+      if (await Permission.location.request().isGranted) {
+        // The user granted permission
+        log("Location permission granted.");
+      } else {
+        // The user denied the permission
+        log("Location permission denied.");
+      }
+    } else if (status.isPermanentlyDenied) {
+      // Handle the case where the user has permanently denied the permission.
+      openAppSettings();
+    } else if (status.isGranted) {
+      // Permission already granted
+      log("Location permission already granted.");
+    }
   }
   String myToken="";
   void getToken() async {

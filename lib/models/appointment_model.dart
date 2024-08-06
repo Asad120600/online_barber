@@ -16,7 +16,8 @@ class Appointment {
   final String barberId;
   final bool isHomeService;
   final double homeServicePrice;
-  final String? status; // Add this field
+  final String? status;
+  final bool hasBeenRated; // New field added
 
   Appointment({
     required this.id,
@@ -33,7 +34,8 @@ class Appointment {
     required this.isHomeService,
     required this.homeServicePrice,
     required this.totalPrice,
-    this.status, // Add this field
+    this.status,
+    this.hasBeenRated = false, // New field initialized
   });
 
   // Convert Appointment to a map for Firestore
@@ -53,7 +55,8 @@ class Appointment {
       'isHomeService': isHomeService,
       'homeServicePrice': homeServicePrice,
       'totalPrice': totalPrice,
-      'status': status, // Add this field
+      'status': status,
+      'hasBeenRated': hasBeenRated, // New field added
     };
   }
 
@@ -78,7 +81,8 @@ class Appointment {
       totalPrice: (data['totalPrice'] as num?)?.toDouble() ?? 0.0,
       isHomeService: data['isHomeService'] ?? false,
       homeServicePrice: (data['homeServicePrice'] as num?)?.toDouble() ?? 0.0,
-      status: data['status'], // Add this field
+      status: data['status'],
+      hasBeenRated: data['hasBeenRated'] ?? false, // Default to false if not present
     );
   }
 }

@@ -1,14 +1,15 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/barber_list.dart';
+import 'package:online_barber_app/views/user/notifications.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
 import 'user_drawer_widget.dart';
-import 'book_appointment.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -20,11 +21,27 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Service> _beardStyles = [];
   List<bool> _checkedHairStyles = [];
   List<bool> _checkedBeardStyles = [];
+  int _notificationCount = 0;
 
   @override
   void initState() {
     super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      _updateNotificationCount();
+    });
     _fetchServices();
+  }
+
+  void _updateNotificationCount() {
+    setState(() {
+      _notificationCount++;
+    });
+  }
+
+  void _resetNotificationCount() {
+    setState(() {
+      _notificationCount = 0;
+    });
   }
 
   Future<void> _fetchServices() async {
@@ -37,6 +54,34 @@ class _HomeScreenState extends State<HomeScreen> {
       _checkedHairStyles = List<bool>.generate(_hairStyles.length, (index) => false);
       _checkedBeardStyles = List<bool>.generate(_beardStyles.length, (index) => false);
     });
+  }
+
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: Container(
+            padding: EdgeInsets.all(15.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                imageUrl != null
+                    ? Image.network(imageUrl)
+                    : Image.asset('assets/img/default_image.png'), // Use a default image if none is available
+                SizedBox(height: 8),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -55,6 +100,47 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(Icons.notifications),
+                onPressed: () {
+                  _resetNotificationCount(); // Reset the counter
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => NotificationsScreen(uid: LocalStorage.getUserID().toString()),
+                    ),
+                  );
+                },
+              ),
+              if (_notificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_notificationCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
           IconButton(
             onPressed: () {
               _scaffoldKey.currentState?.openEndDrawer();
@@ -66,19 +152,21 @@ class _HomeScreenState extends State<HomeScreen> {
       endDrawer: AppDrawer(screenWidth: screenWidth), // Use the drawer widget
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
+          Container(
+            padding: const EdgeInsets.all(16.0),
+            child: const Text(
               'Our Services',
               style: TextStyle(
                 fontFamily: 'Acumin Pro',
                 fontWeight: FontWeight.bold,
                 fontSize: 22.0,
+                color: Colors.black,
               ),
             ),
           ),
           Expanded(
             child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
               children: [
                 _buildCategorySection('Hair Styles', _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
                 _buildCategorySection('Beard Styles', _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
@@ -103,12 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   }
                   // Navigate to book appointment screen with selected services
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => BookAppointment(selectedServices: selectedServices, uid: LocalStorage.getUserID().toString()),
-                  //   ),
-                  // );
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -126,9 +208,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategorySection(String title, List<Service> services, List<bool> checked, String defaultImage) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
           child: Text(
             title,
             style: const TextStyle(
@@ -138,41 +221,46 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: services.length,
-          itemBuilder: (context, index) {
-            return Column(
-              children: [
-                ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: services[index].imageUrl != null
-                        ? NetworkImage(services[index].imageUrl!)
-                        : AssetImage(defaultImage) as ImageProvider,
-                    radius: 25,
-                  ),
-                  title: Text(services[index].name),
-                  subtitle: Text('Price: ${services[index].price.toStringAsFixed(2)}'),
-                  trailing: Checkbox(
-                    value: checked[index],
-                    onChanged: (bool? value) {
-                      setState(() {
-                        checked[index] = value ?? false;
-                      });
-                    },
-                  ),
-                  onTap: () {
-                    setState(() {
-                      checked[index] = !checked[index];
-                    });
-                  },
+        ...services.asMap().entries.map((entry) {
+          int index = entry.key;
+          Service service = entry.value;
+          return Card(
+            margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListTile(
+              contentPadding: const EdgeInsets.all(16.0),
+              leading: GestureDetector(
+                onTap: () {
+                  _showFullImage(context, service.imageUrl ?? defaultImage);
+                },
+                child: CircleAvatar(
+                  backgroundImage: service.imageUrl != null
+                      ? NetworkImage(service.imageUrl!)
+                      : AssetImage(defaultImage) as ImageProvider,
+                  radius: 25,
                 ),
-                if (index < services.length - 1) const Divider(color: Colors.grey),
-              ],
-            );
-          },
-        ),
+              ),
+              title: Text(service.name),
+              subtitle: Text('Price: ${service.price.toStringAsFixed(2)}'),
+              trailing: Checkbox(
+                value: checked[index],
+                onChanged: (bool? value) {
+                  setState(() {
+                    checked[index] = value ?? false;
+                  });
+                },
+              ),
+              onTap: () {
+                setState(() {
+                  checked[index] = !checked[index];
+                });
+              },
+            ),
+          );
+        }).toList(),
       ],
     );
   }

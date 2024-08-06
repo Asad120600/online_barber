@@ -1,11 +1,15 @@
 import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dialog.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/barber/barber_panel.dart';
 
 class BarberProfile extends StatefulWidget {
   const BarberProfile({Key? key}) : super(key: key);
@@ -23,6 +27,7 @@ class _BarberProfileState extends State<BarberProfile> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File? _imageFile;
   String? _imageUrl;
+  double? _rating;
 
   @override
   void initState() {
@@ -46,6 +51,7 @@ class _BarberProfileState extends State<BarberProfile> {
           _shopNameController.text = snapshot['shopName'] ?? '';
           _nameController.text = snapshot['name'] ?? '';
           _imageUrl = snapshot['imageUrl'];
+          _rating = snapshot['rating']?.toDouble() ?? 0.0; // Fetch rating and convert to double
         });
       }
     } catch (e) {
@@ -65,6 +71,14 @@ class _BarberProfileState extends State<BarberProfile> {
   }
 
   Future<void> _updateBarberProfile() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return const Center(child: LoadingDialog(message: 'Profile is Updating'));
+      },
+    );
+
     try {
       if (_imageFile != null) {
         _imageUrl = await _uploadImage(_imageFile!);
@@ -78,11 +92,27 @@ class _BarberProfileState extends State<BarberProfile> {
         'imageUrl': _imageUrl,
       }, SetOptions(merge: true));
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+      Navigator.of(context).pop();
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomAlertDialog(
+            title: 'Success',
+            content: 'Profile updated successfully',
+            confirmButtonText: 'OK',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => BarberPanel(barberId: _currentUser!.uid)),
+              );
+            },
+          );
+        },
       );
     } catch (e) {
       print('Error updating barber profile: $e');
+      Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to update profile')),
       );
@@ -93,8 +123,9 @@ class _BarberProfileState extends State<BarberProfile> {
     try {
       String imageName =
           _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref =
-      FirebaseStorage.instance.ref().child('barber_images/$imageName.jpg');
+      Reference ref = FirebaseStorage.instance
+          .ref()
+          .child('barber_images/$imageName.jpg');
       await ref.putFile(imageFile);
       String downloadUrl = await ref.getDownloadURL();
       return downloadUrl;
@@ -153,7 +184,7 @@ class _BarberProfileState extends State<BarberProfile> {
                       ),
                     )
                         : const Icon(
-                      Icons.account_circle,
+                      Icons.cut, // Barber-related icon
                       size: 100,
                       color: Colors.white,
                     ),
@@ -162,41 +193,123 @@ class _BarberProfileState extends State<BarberProfile> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _nameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Name',
-                    icon: Icon(Icons.person, color: Colors.orange),
+                    icon: const Icon(Icons.person, color: Colors.orange),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _phoneController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Phone Number',
-                    icon: Icon(Icons.phone, color: Colors.orange),
+                    icon: const Icon(Icons.phone, color: Colors.orange),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _addressController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Address',
-                    icon: Icon(Icons.location_on, color: Colors.orange),
+                    icon: const Icon(Icons.location_on, color: Colors.orange),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
                 TextField(
                   controller: _shopNameController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Shop Name',
-                    icon: Icon(Icons.store, color: Colors.orange),
+                    icon: const Icon(Icons.store, color: Colors.orange),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
+                // Display the rating
+                _rating != null
+                    ? Column(
+                  children: [
+                    const Text(
+                      'Rating:',
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        RatingBar.builder(
+                          initialRating: _rating!,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          allowHalfRating: true,
+                          itemCount: 5,
+                          itemPadding:
+                          const EdgeInsets.symmetric(horizontal: 4.0),
+                          itemBuilder: (context, _) => const Icon(
+                            Icons.star,
+                            color: Colors.orange,
+                          ),
+                          onRatingUpdate: (rating) {
+                            // Do nothing on rating update
+                          },
+                          ignoreGestures: true, // Prevents user from updating rating
+                        ),
+                        Text(
+                          _rating!.toStringAsFixed(1),
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ],
+                    ),
+                  ],
+                )
+                    : const SizedBox.shrink(),
+                const SizedBox(height: 16),
                 Button(
                   onPressed: _updateBarberProfile,
-                  child: const Text('Save Changes'),
+                  child: const Text('Update Profile'),
                 ),
-                const SizedBox(height: 16),
               ],
             ),
           ),

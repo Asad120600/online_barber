@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/alert_dialog.dart';
+import 'package:online_barber_app/utils/loading_dialog.dart';
+import 'package:online_barber_app/views/admin/admin_panel.dart';
 
 import '../../utils/button.dart';
 
@@ -45,17 +48,46 @@ class _AdminProfileState extends State<AdminProfile> {
   }
 
   void _updateAdminProfile() async {
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: LoadingDialog(message: "Profile is Updating!"),
+        );
+      },
+    );
+
     try {
       await _firestore.collection('admins').doc(_currentUser?.uid).set({
         'phone': _phoneController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
       }, SetOptions(merge: true));
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+
+      // Dismiss the loading dialog
+      Navigator.pop(context);
+
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return CustomAlertDialog(
+            title: 'Success',
+            content: 'Profile updated successfully',
+            confirmButtonText: 'OK',
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => AdminPanel()),
+              );
+            },
+          );
+        },
       );
     } catch (e) {
       print('Error updating admin profile: $e');
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to update profile')),
       );
@@ -94,7 +126,7 @@ class _AdminProfileState extends State<AdminProfile> {
             const SizedBox(height: 16),
             Text(
               _firstNameController.text.isNotEmpty ? _firstNameController.text : 'Admin',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
@@ -110,25 +142,59 @@ class _AdminProfileState extends State<AdminProfile> {
             const SizedBox(height: 16),
             TextField(
               controller: _firstNameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'First Name',
                 icon: Icon(Icons.person, color: Colors.orange),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _lastNameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Last Name',
                 icon: Icon(Icons.person, color: Colors.orange),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                ),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _phoneController,
-              decoration: const InputDecoration(
+              keyboardType: TextInputType.phone, // Ensures only numerical input
+              decoration: InputDecoration(
                 labelText: 'Phone Number',
                 icon: Icon(Icons.phone, color: Colors.orange),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12.0),
+                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                ),
               ),
             ),
             const SizedBox(height: 16),

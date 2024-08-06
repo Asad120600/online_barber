@@ -1,9 +1,13 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';  // Import Firebase Auth
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dialog.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/barber/barber_panel.dart';
 import '../../models/service_model.dart';
 
 class SetServicePrices extends StatefulWidget {
@@ -21,11 +25,12 @@ class _SetServicePricesState extends State<SetServicePrices> {
   final TextEditingController _homeServicePriceController = TextEditingController();
   late List<Service> _services = [];
   late String _currentUserId;
+  bool _isLoading = false; // Add a loading state variable
 
   @override
   void initState() {
     super.initState();
-    _currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';  // Get current user ID
+    _currentUserId = FirebaseAuth.instance.currentUser?.uid ?? ''; // Get current user ID
     _fetchServices();
   }
 
@@ -71,7 +76,39 @@ class _SetServicePricesState extends State<SetServicePrices> {
     }
   }
 
+  Future<void> _showCustomAlertDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomAlertDialog(
+          title: 'Success',
+          content: 'Prices have been updated successfully!',
+          confirmButtonText: 'OK',
+          onPressed: () {
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => BarberPanel(barberId: _currentUserId)));
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _showLoadingDialog() async {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext context) {
+        return const LoadingDialog(message: "Prices Are Updating");
+      },
+    );
+  }
+
   Future<void> _savePrices() async {
+    _showLoadingDialog(); // Show loading dialog
+
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
     try {
       final newHomeServicePrice = double.parse(_homeServicePriceController.text);
       final barberId = LocalStorage.getBarberId() ?? ''; // Ensure barberId is not null
@@ -118,10 +155,18 @@ class _SetServicePricesState extends State<SetServicePrices> {
         }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Prices updated successfully')));
     } catch (e) {
       log("Error saving prices: $e");
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Error updating prices')));
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      // Show the custom alert dialog after loading is complete
+      await _showCustomAlertDialog();
     }
   }
 
@@ -131,8 +176,10 @@ class _SetServicePricesState extends State<SetServicePrices> {
       appBar: AppBar(
         title: const Text('Set Service Prices'),
       ),
-      body: _services.isEmpty
-          ? const Center(child: CircularProgressIndicator())
+      body: _isLoading
+          ? const Center(child: LoadingDots()) // Loading dots while prices are updating
+          : _services.isEmpty
+          ? const Center(child: LoadingDots())
           : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(

@@ -99,52 +99,29 @@ class _BarberDrawerState extends State<BarberDrawer> {
                 );
               },
             ),
-            ExpansionTile(
-              leading: const Icon(Icons.miscellaneous_services_outlined),
+            ListTile(
+              leading: const Icon(Icons.price_change),
               title: const Text(
-                'Services',
+                'Set prices',
               ),
-              children: <Widget>[
-                ListTile(
-                  leading: const Icon(Icons.price_change),
-                  title: const Text(
-                    'Set prices',
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SetServicePrices(service: Service(
+                      id: '',
+                      name: '',
+                      price: 0.0,
+                      category: 'Hair Styles',
+                      imageUrl: null,
+                      barberPrices: null, isHomeService: false, homeServicePrice: 0.0,
+                    ), barberId: '', ),
                   ),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SetServicePrices(service: Service(
-                          id: '',
-                          name: '',
-                          price: 0.0,
-                          category: 'Hair Styles',
-                          imageUrl: null,
-                          barberPrices: null, isHomeService: false, homeServicePrice: 0.0,
-                        ), barberId: '', ),
-                      ),
-                    );
-                  },
-                )
-
-                  // ListTile(
-                //   leading: const Icon(Icons.manage_history),
-                //   title: const Text(
-                //     'Manage services',
-                //   ),
-                //   onTap: () {
-                //     Navigator.pop(context); // Close the drawer
-                //     Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (context) =>  const ServiceList(),
-                //       ),
-                //     );
-                //   },
-                // ),
-              ],
+                );
+              },
             ),
+
             ListTile(
               leading: const Icon(Icons.logout),
               title: const Text(

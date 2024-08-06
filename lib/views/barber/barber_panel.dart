@@ -1,3 +1,4 @@
+// barber panel
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,10 @@ import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/notification_model.dart';
 import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/barber/barber_drawer.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BarberPanel extends StatefulWidget {
   final String barberId;
@@ -33,6 +37,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
     super.dispose();
   }
 
+
   Future<String> getUserDeviceToken(String uid) async {
     try {
       DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection(
@@ -56,11 +61,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
-
+    double screenWidth = MediaQuery.of(context).size.width;
     if (widget.barberId.isEmpty) {
       return Scaffold(
         appBar: AppBar(
@@ -72,7 +73,6 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
         ),
       );
     }
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -105,11 +105,16 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
   Widget _buildAppointmentsTab(
       List<Appointment> Function(List<Appointment>) filterFunction,
       String tabType) {
-    return StreamBuilder<List<Appointment>>(
+    return RefreshIndicator(
+        onRefresh: () async {
+      // Force a rebuild by calling setState
+      setState(() {});
+    },
+    child : StreamBuilder<List<Appointment>>(
       stream: _appointmentController.getAppointmentsByBarberID(widget.barberId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center( child: LoadingDots( ),);
         } else if (snapshot.hasError) {
           log('Error: ${snapshot.error}');
           return Center(child: Text('Error: ${snapshot.error}'));
@@ -131,6 +136,8 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
             itemCount: filteredAppointments.length,
             itemBuilder: (context, index) {
               Appointment appointment = filteredAppointments[index];
+              bool isToday = tabType == 'Today';
+
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Container(
@@ -151,62 +158,117 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Date: ${DateFormat('dd/MM/yy').format(
-                              appointment.date.toDate())}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.calendar_today, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Date: ${DateFormat('dd/MM/yy').format(appointment.date.toDate())}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Time: ${appointment.time}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.access_time, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Time: ${appointment.time}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Client Name: ${appointment.clientName ?? 'N/A'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.person, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Client Name: ${appointment.clientName}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                         if (appointment.isHomeService) ...[
                           const SizedBox(height: 8),
-                          Text(
-                            'Address: ${appointment.address ?? 'N/A'}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
-                          ),
+                          Row(
+                            children: [
+                              const Icon(Icons.home, size: 16),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Address: ${appointment.address}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2, // Allow the text to wrap to a second line if needed
+                                  overflow: TextOverflow.ellipsis, // Show ellipsis if the text overflows two lines
+                                  softWrap: true, // Enable wrapping at soft line breaks
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  final url = 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(appointment.address)}';
+                                  if (await canLaunch(url)) {
+                                    await launch(url);
+                                  } else {
+                                    throw 'Could not launch $url';
+                                  }
+                                },
+                                icon: Icon(Icons.pin_drop_outlined),
+                              ),
+                            ],
+                          )
+
                         ],
                         const SizedBox(height: 8),
-                        Text(
-                          'Home Service: ${appointment.isHomeService
-                              ? 'Yes'
-                              : 'No'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.local_shipping, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Phone Number: ${appointment.phoneNumber ?? 'N/A'}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.phone, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Phone Number: ${appointment.phoneNumber}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
-                        Text(
-                          'Total Price: ${appointment.totalPrice
-                              .toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.attach_money, size: 16),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Wrap(
@@ -214,44 +276,31 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
                           children: appointment.services.isNotEmpty
                               ? appointment.services.map((service) {
                             return Chip(
-                              label: Text(service.name ?? 'Unknown'),
+                              label: Text(service.name),
                             );
                           }).toList()
                               : [const Chip(label: Text('No services'))],
                         ),
                         const SizedBox(height: 8),
-                        if (tabType == 'Upcoming') ...[
+                        if (isToday) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              ElevatedButton(
-                                onPressed: () {
-                                  // TODO: Add reschedule functionality
-                                },
-                                child: const Text('Reschedule'),
-                              ),
+                              if (appointment.status != 'Confirmed')
+                                Button(
+                                  width: 120,
+                                  onPressed: () => _confirmAppointment(appointment),
+                                  child: const Text('Confirm'),
+                                ),
+                              if (appointment.status == 'Confirmed' && appointment.status != 'Done')
+                                Button(
+                                  width: 120,
+                                  onPressed: () => _updateStatusAndMoveToHistory(appointment.id, 'Done'),
+                                  child: const Text('Done'),
+                                ),
                             ],
                           ),
-                        ] else
-                          if (tabType == 'Today') ...[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                if (appointment.status != 'Confirmed')
-                                  ElevatedButton(
-                                    onPressed: () =>
-                                        _confirmAppointment(appointment),
-                                    child: const Text('Confirm'),
-                                  ),
-                                const SizedBox(width: 8),
-                                if (appointment.status != 'Done')
-                                  ElevatedButton(
-                                    onPressed: () => _updateStatusAndMoveToHistory(appointment.id, 'Done'),
-                                    child: const Text('Done'),
-                                  ),
-                              ],
-                            ),
-                          ],
+                        ],
                       ],
                     ),
                   ),
@@ -261,18 +310,15 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
           );
         }
       },
+    )
     );
   }
+
   void _updateStatusAndMoveToHistory(String appointmentId, String status) async {
     try {
-      // Update the appointment status
       await _appointmentController.updateAppointmentStatus(appointmentId, status);
-
-      // Since the appointment status is updated, it should reflect in the stream.
-      // You may not need to call setState() here, as StreamBuilder should handle it.
     } catch (e) {
       log('Error updating status: $e');
-      // Show error message to the user
     }
   }
 
@@ -282,7 +328,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
           appointment.id, 'Confirmed');
 
       // Fetch the user ID from the appointment
-      String userId = appointment.uid ?? ''; // Handle potential null UID
+      String userId = appointment.uid; // Handle potential null UID
 
       // Create a notification
       NotificationModel notification = NotificationModel(

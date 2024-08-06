@@ -117,10 +117,11 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
           Expanded(
             flex: 6,
             child: CarouselSlider(
+
               carouselController: _carouselController,
               options: CarouselOptions(
                 height: MediaQuery.of(context).size.height * 0.6,
-                autoPlay: false,
+                autoPlay: true,
                 enlargeCenterPage: true,
                 aspectRatio: 2.0,
                 onPageChanged: (index, reason) {
