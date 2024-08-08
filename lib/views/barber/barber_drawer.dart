@@ -6,6 +6,7 @@ import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/admin/services/service_list.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/barber/barber_profile.dart';
+import 'package:online_barber_app/views/barber/barber_stats.dart';
 import 'package:online_barber_app/views/barber/set_price.dart';
 
 
@@ -117,6 +118,21 @@ class _BarberDrawerState extends State<BarberDrawer> {
                       imageUrl: null,
                       barberPrices: null, isHomeService: false, homeServicePrice: 0.0,
                     ), barberId: '', ),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.query_stats_sharp),
+              title: const Text(
+                'stats',
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Stats(barberId: LocalStorage.getBarberId().toString(),),
                   ),
                 );
               },

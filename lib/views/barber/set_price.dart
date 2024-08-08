@@ -201,7 +201,6 @@ class _SetServicePricesState extends State<SetServicePrices> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 24),
                   ],
                 );
               }).toList(),
