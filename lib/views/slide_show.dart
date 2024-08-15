@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carousel_slider/carousel_slider.dart' as carousel; // Use alias for carousel_slider
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/admin/admin_panel.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
@@ -21,7 +21,7 @@ class SlideshowScreen extends StatefulWidget {
 class _SlideshowScreenState extends State<SlideshowScreen> {
   List<Map<String, dynamic>> _slides = [];
   int currentIndex = 0;
-  final CarouselController _carouselController = CarouselController();
+  final carousel.CarouselController _carouselController = carousel.CarouselController(); // Use alias here
   Timer? _slideshowTimer;
 
   @override
@@ -116,10 +116,9 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
         children: [
           Expanded(
             flex: 6,
-            child: CarouselSlider(
-
+            child: carousel.CarouselSlider(
               carouselController: _carouselController,
-              options: CarouselOptions(
+              options: carousel.CarouselOptions(
                 height: MediaQuery.of(context).size.height * 0.6,
                 autoPlay: true,
                 enlargeCenterPage: true,
