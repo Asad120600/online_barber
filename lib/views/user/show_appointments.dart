@@ -55,11 +55,11 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
           } else {
             List<Appointment> appointments = snapshot.data!;
 
-// Sort appointments by date and time
+            // Sort appointments by date and time in descending order
             appointments.sort((a, b) {
               DateTime dateTimeA = a.date.toDate().add(_parseTime(a.time));
               DateTime dateTimeB = b.date.toDate().add(_parseTime(b.time));
-              return dateTimeA.compareTo(dateTimeB);
+              return dateTimeB.compareTo(dateTimeA); // Reversed the order here
             });
 
             return ListView.builder(
@@ -68,7 +68,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
               itemBuilder: (context, index) {
                 Appointment appointment = appointments[index];
 
-// Determine the background color based on the appointment status
+                // Determine the background color based on the appointment status
                 Color backgroundColor = Colors.white;
 
                 return Padding(
@@ -134,13 +134,18 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                               ),
                               const SizedBox(height: 8),
                               Row(
+                                crossAxisAlignment: CrossAxisAlignment.start, // Aligns the icon and text at the top
                                 children: [
                                   const Icon(Icons.location_on, size: 16),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    'Address: ${appointment.address}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                  Expanded(
+                                    child: Text(
+                                      'Address: ${appointment.address}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 2, // Limits the text to a maximum of 2 lines
+                                      overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds 2 lines
                                     ),
                                   ),
                                 ],
@@ -207,11 +212,11 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                 spacing: 8,
                                 children: appointment.services.isNotEmpty
                                     ? appointment.services.map((service) {
-                                        return Chip(
-                                          label:
-                                              Text(service.name ?? 'Unknown'),
-                                        );
-                                      }).toList()
+                                  return Chip(
+                                    label:
+                                    Text(service.name ?? 'Unknown'),
+                                  );
+                                }).toList()
                                     : [const Chip(label: Text('No services'))],
                               ),
                               const SizedBox(height: 16),
@@ -226,9 +231,9 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => BarberRatingScreen(
-                                          barberId: appointment.barberId,
-                                          barberName: appointment.barberName,
-                                          appointmentId:appointment.id
+                                            barberId: appointment.barberId,
+                                            barberName: appointment.barberName,
+                                            appointmentId:appointment.id
                                         ),
                                       ),
                                     ).then((_) {
@@ -286,3 +291,4 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     }
   }
 }
+

@@ -56,7 +56,8 @@ class BookingScreen extends StatelessWidget {
                       const SizedBox(height: 4.0),
                       Text('Services: $serviceNames'),
                       const SizedBox(height: 4.0),
-                      Text('Address: ${appointment.address ?? 'Not provided'}'),
+                      Text('Address: ${appointment.address ?? 'Not provided'
+                      }'),
                       const SizedBox(height: 4.0),
                       Text('Phone Number: ${appointment.phoneNumber ?? 'Not provided'}'),
                       const SizedBox(height: 4.0),

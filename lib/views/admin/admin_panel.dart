@@ -158,10 +158,14 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.location_on, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Address: ${appointment.address}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
+                                          Expanded(
+                                            child: Text(
+                                              'Address: ${appointment.address}',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 2, // Limits the text to a maximum of 2 lines
+                                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds 2 lines
                                             ),
                                           ),
                                         ],

@@ -10,8 +10,6 @@ import 'package:online_barber_app/push_notification_service.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-
 
 import '../../utils/cutom_google_map.dart';
 
@@ -23,13 +21,13 @@ class BookAppointment extends StatefulWidget {
   final String barberAddress;
 
   const BookAppointment({
-    Key? key,
+    super.key,
     required this.selectedServices,
     required this.uid,
     required this.barberId,
     required this.barberName,
     required this.barberAddress,
-  }) : super(key: key);
+  });
 
   @override
   State<BookAppointment> createState() => _BookAppointmentState();
@@ -44,13 +42,12 @@ class _BookAppointmentState extends State<BookAppointment> {
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _phoneNumberController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
-  final TextEditingController _homeServicePriceController = TextEditingController();
+  final TextEditingController _homeServicePriceController =
+      TextEditingController();
   String _userName = '';
   bool _isHomeService = false;
-  LatLng? _selectedLocation;
-  GoogleMapController? _mapController;
-
-
+  // LatLng? _selectedLocation;
+  // GoogleMapController? _mapController;
 
   @override
   void initState() {
@@ -77,7 +74,8 @@ class _BookAppointmentState extends State<BookAppointment> {
 
   Future<void> _getPhoneNumber() async {
     try {
-      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
+      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore
+          .instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
@@ -92,7 +90,8 @@ class _BookAppointmentState extends State<BookAppointment> {
 
   Future<void> _getUserName() async {
     try {
-      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore.instance
+      DocumentSnapshot<Map<String, dynamic>> document = await FirebaseFirestore
+          .instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
           .get();
@@ -112,8 +111,10 @@ class _BookAppointmentState extends State<BookAppointment> {
       for (var service in widget.selectedServices) {
         final servicePrices = service.barberPrices ?? [];
         for (var priceInfo in servicePrices) {
-          if (priceInfo['barberId'] == widget.barberId && priceInfo['isHomeService'] == true) {
-            homeServicePrice = double.tryParse(priceInfo['price'].toString()) ?? 0.0;
+          if (priceInfo['barberId'] == widget.barberId &&
+              priceInfo['isHomeService'] == true) {
+            homeServicePrice =
+                double.tryParse(priceInfo['price'].toString()) ?? 0.0;
             break;
           }
         }
@@ -157,11 +158,18 @@ class _BookAppointmentState extends State<BookAppointment> {
     });
 
     try {
-      String id = FirebaseFirestore.instance.collection('appointments').doc().id;
+      String id =
+          FirebaseFirestore.instance.collection('appointments').doc().id;
       Timestamp timestamp = Timestamp.fromDate(selectedDay);
 
-      DocumentSnapshot clientDoc = await FirebaseFirestore.instance.collection('users').doc(widget.uid).get();
-      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(widget.barberId).get();
+      DocumentSnapshot clientDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .get();
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance
+          .collection('barbers')
+          .doc(widget.barberId)
+          .get();
 
       double totalPrice = _calculateTotalPrice();
 
@@ -170,7 +178,8 @@ class _BookAppointmentState extends State<BookAppointment> {
         date: timestamp,
         time: _timeController.text,
         services: widget.selectedServices,
-        address: _isHomeService ? _addressController.text : widget.barberAddress,
+        address:
+            _isHomeService ? _addressController.text : widget.barberAddress,
         phoneNumber: _phoneNumberController.text,
         uid: widget.uid,
         barberName: widget.barberName,
@@ -178,7 +187,9 @@ class _BookAppointmentState extends State<BookAppointment> {
         clientName: _userName,
         barberId: widget.barberId,
         isHomeService: _isHomeService,
-        homeServicePrice: _isHomeService ? double.parse(_homeServicePriceController.text) : 0.0,
+        homeServicePrice: _isHomeService
+            ? double.parse(_homeServicePriceController.text)
+            : 0.0,
         totalPrice: totalPrice,
       );
 
@@ -186,18 +197,19 @@ class _BookAppointmentState extends State<BookAppointment> {
 
       String services = widget.selectedServices.map((s) => s.name).join(', ');
       String notificationBody = '''
-New Appointment Booked!
-Client: $_userName
-Date: ${selectedDay.toLocal().toString().split(' ')[0]}
-Time: ${_timeController.text}
-Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
-Phone: ${_phoneNumberController.text}
-Services: $services
-Home Service: $_isHomeService
-Total Price: ${totalPrice.toStringAsFixed(2)}
-''';
+      New Appointment Booked!
+      Client: $_userName
+       Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+      Time: ${_timeController.text}
+      Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
+      Phone: ${_phoneNumberController.text}
+      Services: $services
+      Home Service: $_isHomeService
+      Total Price: ${totalPrice.toStringAsFixed(2)}
+      ''';
 
-      final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);
+      final String barberDeviceToken =
+          await getBarberDeviceToken(widget.barberId);
       await PushNotificationService.sendNotification(
         barberDeviceToken,
         context,
@@ -218,7 +230,10 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
 
   Future<String> getBarberDeviceToken(String barberId) async {
     try {
-      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(barberId).get();
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance
+          .collection('barbers')
+          .doc(barberId)
+          .get();
       if (barberDoc.exists) {
         final data = barberDoc.data() as Map<String, dynamic>;
         final deviceToken = data['token'];
@@ -248,7 +263,7 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    (Route<dynamic> route) => false,
+                (Route<dynamic> route) => false,
               );
             },
             child: const Text('OK'),
@@ -291,7 +306,8 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
     });
 
     if (_isHomeService) {
-      double homeServicePrice = double.tryParse(_homeServicePriceController.text) ?? 0.0;
+      double homeServicePrice =
+          double.tryParse(_homeServicePriceController.text) ?? 0.0;
       return basePrice + homeServicePrice;
     }
     return basePrice;
@@ -310,7 +326,6 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
     }
   }
 
-
   void _openGoogleMap() async {
     final String? result = await Navigator.push(
       context,
@@ -320,10 +335,11 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
     );
     if (result != null) {
       setState(() {
-        _addressController.text = result; // Update the address field with the selected address
+        _addressController.text = result;
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -365,19 +381,22 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                   controller: _timeController,
                   readOnly: true,
                   onTap: _selectTime,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                     suffixIcon: const Icon(Icons.access_time),
                     hintText: 'Select time',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the radius as needed
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                      borderSide: const BorderSide(
+                          color: Colors.orange), // Adjust the color as needed
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                      borderSide: const BorderSide(
+                          color: Colors.grey), // Adjust the color as needed
                     ),
                   ),
                 ),
@@ -390,18 +409,21 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                 TextFormField(
                   controller: _phoneNumberController,
                   keyboardType: TextInputType.phone,
-                  decoration:  InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Enter phone number',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                      borderRadius: BorderRadius.circular(
+                          12.0), // Adjust the radius as needed
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                      borderSide: const BorderSide(
+                          color: Colors.orange), // Adjust the color as needed
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                      borderSide: const BorderSide(
+                          color: Colors.grey), // Adjust the color as needed
                     ),
                   ),
                 ),
@@ -411,7 +433,8 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                   children: [
                     const Text(
                       'Home Service',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     Switch(
                       value: _isHomeService,
@@ -429,32 +452,39 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                     children: [
                       const Text(
                         'Home Service Price',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         readOnly: true,
                         controller: _homeServicePriceController,
                         keyboardType: TextInputType.number,
-                        decoration:  InputDecoration(
+                        decoration: InputDecoration(
                           hintText: 'Home Service Price',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                            borderRadius: BorderRadius.circular(
+                                12.0), // Adjust the radius as needed
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                            borderSide: const BorderSide(
+                                color: Colors
+                                    .orange), // Adjust the color as needed
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                            borderSide: const BorderSide(
+                                color:
+                                    Colors.grey), // Adjust the color as needed
                           ),
                         ),
                       ),
                       const SizedBox(height: 16),
                       const Text(
                         'Address',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
@@ -462,15 +492,20 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                         decoration: InputDecoration(
                           hintText: 'Enter address',
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
+                            borderRadius: BorderRadius.circular(
+                                12.0), // Adjust the radius as needed
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
+                            borderSide: const BorderSide(
+                                color: Colors
+                                    .orange), // Adjust the color as needed
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
+                            borderSide: const BorderSide(
+                                color:
+                                    Colors.grey), // Adjust the color as needed
                           ),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.location_on),
@@ -495,7 +530,8 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                     final barberPrice = _getBarberPrice(service);
                     return ListTile(
                       title: Text(service.name),
-                      subtitle: Text('Price: ${barberPrice.toStringAsFixed(2)}'),
+                      subtitle:
+                          Text('Price: ${barberPrice.toStringAsFixed(2)}'),
                     );
                   },
                 ),
@@ -521,12 +557,13 @@ Total Price: ${totalPrice.toStringAsFixed(2)}
                   child: isBooking
                       ? const LoadingDots()
                       : ElevatedButton(
-                    onPressed: _bookAppointment,
-                    child: const Text('Book Appointment'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.orange,
-                    ),
-                  ),
+                          onPressed: _bookAppointment,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.orange,
+                          ),
+                          child: const Text('Book Appointment'),
+                        ),
                 ),
               ],
             ),

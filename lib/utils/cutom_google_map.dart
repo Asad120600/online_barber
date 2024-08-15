@@ -33,18 +33,11 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     _searchFocusNode.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Select Location'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.my_location),
-            onPressed: _selectCurrentLocation,
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -85,6 +78,19 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               onSubmitted: _searchLocation,
             ),
           ),
+          Positioned(
+            bottom: 80, // Adjust this value to place it above the FloatingActionButton
+            right: 15,
+            child: Material(
+              elevation: 4.0,
+              shape: const CircleBorder(),
+              color: Colors.white,
+              child: IconButton(
+                icon: const Icon(Icons.my_location, color: Colors.black),
+                onPressed: _selectCurrentLocation,
+              ),
+            ),
+          ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
@@ -92,10 +98,11 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         backgroundColor: Colors.orange,
         shape: const CircleBorder(),
         onPressed: _confirmLocation,
-        child: const Icon(Icons.check,color: Colors.black,),
+        child: const Icon(Icons.check, color: Colors.black),
       ),
     );
   }
+
 
   Future<void> _selectCurrentLocation() async {
     setState(() {

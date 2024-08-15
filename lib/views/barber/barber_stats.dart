@@ -114,7 +114,7 @@ class _StatsState extends State<Stats> {
 class BarberEarningsChart extends StatelessWidget {
   final Map<String, double> earnings;
 
-  BarberEarningsChart({required this.earnings});
+  const BarberEarningsChart({required this.earnings});
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +147,7 @@ class BarberEarningsChart extends StatelessWidget {
       BarChartData(
         barGroups: barGroups,
         titlesData: FlTitlesData(
-          leftTitles: AxisTitles(
+          leftTitles: const AxisTitles(
             sideTitles: SideTitles(showTitles: false),
           ),
           rightTitles: AxisTitles(
@@ -179,7 +179,7 @@ class BarberEarningsChart extends StatelessWidget {
             ),
           ),
         ),
-        gridData: FlGridData(show: true),
+        gridData: const FlGridData(show: true),
         borderData: FlBorderData(show: true),
       ),
     );
@@ -196,38 +196,41 @@ class CommissionDisplay extends StatelessWidget {
     double totalEarnings = earnings.values.reduce((a, b) => a + b);
     double commission = totalEarnings * 0.10;
 
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 4,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            'Total Earnings: ${totalEarnings.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        margin: const EdgeInsets.only(bottom: 16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 4,
+              offset: Offset(0, 2),
             ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Commission (10%): ${commission.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 20,
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              'Total Earnings: ${totalEarnings.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Text(
+              'Commission (10%): ${commission.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
