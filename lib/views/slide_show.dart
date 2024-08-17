@@ -117,6 +117,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               itemCount: _slides.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
+                  margin: EdgeInsets.only(left: 15,right: 15,top: 20),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.orange, width: 2),
                     image: DecorationImage(
