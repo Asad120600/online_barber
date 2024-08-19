@@ -50,21 +50,20 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCQrH3CoXmbSVl4sKQqroQzwsldjvHiFGk',
-    appId: '1:980382807544:android:9bedc09e4f680a1fae920d',
-    messagingSenderId: '980382807544',
-    projectId: 'online-barber-641ba',
-    storageBucket: 'online-barber-641ba.appspot.com',
+    apiKey: 'AIzaSyDcWHUoPk0MSdZzCN0uMflEy8ihLF4GbZM',
+    appId: '1:868392948570:android:5b546940fa69da46b15963',
+    messagingSenderId: '868392948570',
+    projectId: 'online-barber-def19',
+    storageBucket: 'online-barber-def19.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCnLlsnoQ12njaAF349_jLGn68SFP3vwOk',
-    appId: '1:980382807544:ios:e291bf6fac1f053fae920d',
-    messagingSenderId: '980382807544',
-    projectId: 'online-barber-641ba',
-    storageBucket: 'online-barber-641ba.appspot.com',
-    androidClientId: '980382807544-gb7n64bd0483pmpla3udjkd5dl40t6ba.apps.googleusercontent.com',
-    iosClientId: '980382807544-2e8gp0berf08frnv5441vcdg1fk5on8a.apps.googleusercontent.com',
+    apiKey: 'AIzaSyDHwN7uxeGjrZdTrnz2aRBx51vrG7ggWZw',
+    appId: '1:868392948570:ios:461fe1f6eacd0331b15963',
+    messagingSenderId: '868392948570',
+    projectId: 'online-barber-def19',
+    storageBucket: 'online-barber-def19.appspot.com',
     iosBundleId: 'com.example.onlineBarberApp',
   );
+
 }
