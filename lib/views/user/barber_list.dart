@@ -1,8 +1,9 @@
 import 'dart:developer';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
@@ -23,11 +24,57 @@ class _BarberListState extends State<BarberList> {
   List<Service> _selectedServices = [];
   String? _selectedBarberId;
   Barber? _selectedBarber;
+  Position? _currentPosition;
+  double _maxDistance = 10.0; // Default distance
 
   @override
   void initState() {
     super.initState();
     _selectedServices = widget.selectedServices;
+    _getCurrentLocation();
+  }
+
+  Future<void> _getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return Future.error('Location services are disabled.');
+    }
+
+    // Check for location permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return Future.error('Location permissions are denied.');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return Future.error('Location permissions are permanently denied.');
+    }
+
+    // Get the current location
+    _currentPosition = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    setState(() {});
+  }
+
+  Future<List<Location>> _getLatLongFromAddress(String address) async {
+    try {
+      return await locationFromAddress(address);
+    } catch (e) {
+      log('Error getting location from address: $e');
+      return [];
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000; // in kilometers
   }
 
   Stream<List<Barber>> getBarbers() {
@@ -72,8 +119,33 @@ class _BarberListState extends State<BarberList> {
       appBar: AppBar(
         title: const Text('Select a Barber'),
       ),
-      body: Column(
+      body: _currentPosition == null
+          ? const Center(child: LoadingDots()) // Show loading until location is fetched
+          : Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Text(
+                  'Max Distance: ${_maxDistance.toStringAsFixed(1)} km',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                Slider(
+                  value: _maxDistance,
+                  min: 1.0,
+                  max: 50.0,
+                  divisions: 49,
+                  label: '${_maxDistance.toStringAsFixed(1)} km',
+                  onChanged: (value) {
+                    setState(() {
+                      _maxDistance = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
           Expanded(
             child: StreamBuilder<List<Barber>>(
               stream: getBarbers(),
@@ -104,100 +176,130 @@ class _BarberListState extends State<BarberList> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             final barber = snapshot.data![index];
-                            final barberId = barber.id;
 
-                            final barberPrices = _selectedServices.map((service) {
-                              final price = prices[service.id]?[barberId] ?? service.price;
-                              return '${service.name}: ${price.toStringAsFixed(2)}';
-                            }).join(', ');
+                            return FutureBuilder<List<Location>>(
+                              future: _getLatLongFromAddress(barber.address),
+                              builder: (context, locationSnapshot) {
+                                if (!locationSnapshot.hasData ||
+                                    locationSnapshot.data!.isEmpty) {
+                                  return Container(); // Skip if no location data
+                                }
 
-                            final isSelected = barberId == _selectedBarberId;
+                                final barberLocation = locationSnapshot.data!.first;
+                                final distance = _calculateDistance(
+                                  _currentPosition!.latitude,
+                                  _currentPosition!.longitude,
+                                  barberLocation.latitude,
+                                  barberLocation.longitude,
+                                );
 
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                              child: Card(
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.0),
-                                ),
-                                color: isSelected ? Colors.orange[50] : Colors.white,
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.all(16.0),
-                                  leading: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: Colors.orange,
-                                        width: 2,
-                                      ),
+                                if (distance > _maxDistance) {
+                                  return Container(); // Skip barbers beyond max distance
+                                }
+
+                                final barberId = barber.id;
+                                final barberPrices = _selectedServices.map((service) {
+                                  final price = prices[service.id]?[barberId] ?? service.price;
+                                  return '${service.name}: ${price.toStringAsFixed(2)}';
+                                }).join(', ');
+
+                                final isSelected = barberId == _selectedBarberId;
+
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                                  child: Card(
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12.0),
                                     ),
-                                    child: ClipOval(
-                                      child: barber.imageUrl.isNotEmpty
-                                          ? Image.network(
-                                        barber.imageUrl,
-                                        width: 60,
-                                        height: 60,
-                                        fit: BoxFit.cover,
-                                      )
-                                          : const Icon(
-                                        Icons.person,
-                                        size: 40,
-                                        color: Colors.grey,
-                                      ),
-                                    ),
-                                  ),
-                                  title: Text(
-                                    barber.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                  subtitle: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Shop: ${barber.shopName}\nAddress: ${barber.address}',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      Text(
-                                        'Prices: $barberPrices',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          RatingBarIndicator(
-                                            rating: barber.rating,
-                                            itemBuilder: (context, index) => const Icon(
-                                              Icons.star,
-                                              color: Colors.amber,
-                                            ),
-                                            itemCount: 5,
-                                            itemSize: 20.0,
-                                            direction: Axis.horizontal,
+                                    color: isSelected ? Colors.orange[50] : Colors.white,
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.all(16.0),
+                                      leading: Container(
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: Colors.orange,
+                                            width: 2,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Text(barber.rating.toStringAsFixed(1)),
+                                        ),
+                                        child: ClipOval(
+                                          child: barber.imageUrl.isNotEmpty
+                                              ? Image.network(
+                                            barber.imageUrl,
+                                            width: 60,
+                                            height: 60,
+                                            fit: BoxFit.cover,
+                                          )
+                                              : const Icon(
+                                            Icons.person,
+                                            size: 40,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      title: Text(
+                                        barber.name,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Shop: ${barber.shopName}\nAddress: ${barber.address}',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          Text(
+                                            'Prices: $barberPrices',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              RatingBarIndicator(
+                                                rating: barber.rating,
+                                                itemBuilder: (context, index) => const Icon(
+                                                  Icons.star,
+                                                  color: Colors.amber,
+                                                ),
+                                                itemCount: 5,
+                                                itemSize: 20.0,
+                                                direction: Axis.horizontal,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(barber.rating.toStringAsFixed(1)),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            'Distance: ${distance.toStringAsFixed(1)} km',
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
                                         ],
                                       ),
-                                    ],
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedBarberId = barberId;
+                                          _selectedBarber = barber;
+                                        });
+                                      },
+                                    ),
                                   ),
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedBarberId = barberId;
-                                      _selectedBarber = barber;
-                                    });
-                                  },
-                                ),
-                              ),
+                                );
+                              },
                             );
                           },
                         );
