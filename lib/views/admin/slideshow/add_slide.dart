@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class AddSlidePage extends StatefulWidget {
-  const AddSlidePage({Key? key}) : super(key: key);
+  const AddSlidePage({super.key});
 
   @override
   _AddSlidePageState createState() => _AddSlidePageState();
@@ -21,19 +21,43 @@ class _AddSlidePageState extends State<AddSlidePage> {
   File? _imageFile;
 
   Future<void> _uploadImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image == null) return;
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) {
+        print('No image selected.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No image selected')),
+        );
+        return;
+      }
 
-    final file = File(image.path);
-    final fileName = DateTime.now().toIso8601String();
-    final ref = _storage.ref().child('slideshow_images/$fileName');
-    await ref.putFile(file);
-    final imageUrl = await ref.getDownloadURL();
+      print('Image selected: ${image.path}');
+      final file = File(image.path);
 
-    setState(() {
-      _imageFile = file;
-      _imageUrl = imageUrl;
-    });
+      if (!await file.exists()) {
+        print('File does not exist.');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('File does not exist')),
+        );
+        return;
+      }
+
+      final fileName = DateTime.now().toIso8601String();
+      final ref = _storage.ref().child('slideshow_images/$fileName');
+      await ref.putFile(file);
+      final imageUrl = await ref.getDownloadURL();
+
+      setState(() {
+        _imageFile = file;
+        _imageUrl = imageUrl;
+      });
+      print('Image uploaded successfully: $imageUrl');
+    } catch (e) {
+      print('Error during image upload: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload image')),
+      );
+    }
   }
 
   Future<void> _saveSlide() async {

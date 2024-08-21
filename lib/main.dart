@@ -9,10 +9,11 @@ import 'package:permission_handler/permission_handler.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    options: FirebaseOptions( apiKey: 'AIzaSyDcWHUoPk0MSdZzCN0uMflEy8ihLF4GbZM',
+    options: const FirebaseOptions( apiKey: 'AIzaSyDcWHUoPk0MSdZzCN0uMflEy8ihLF4GbZM',
       appId: '1:868392948570:android:5b546940fa69da46b15963',
       messagingSenderId: '868392948570',
       projectId: 'online-barber-def19',
+      storageBucket: 'online-barber-def19.appspot.com',
       )
   );
   LocalStorage.initStorage();

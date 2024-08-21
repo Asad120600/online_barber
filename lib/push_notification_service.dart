@@ -51,7 +51,7 @@ class PushNotificationService{
   static sendNotification(String token, BuildContext context, String message, String notificationBody) async {
 
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-641ba/messages:send';
+    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-def19/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
@@ -83,7 +83,7 @@ class PushNotificationService{
 
   static Future<void> sendNotificationToUser(String token, BuildContext context, String message, String notificationBody) async {
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-641ba/messages:send';
+    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-def19/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
