@@ -7,7 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
-import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/book_appointment.dart';
 
@@ -26,6 +25,7 @@ class _BarberListState extends State<BarberList> {
   Barber? _selectedBarber;
   Position? _currentPosition;
   double _maxDistance = 10.0; // Default distance
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -120,7 +120,7 @@ class _BarberListState extends State<BarberList> {
         title: const Text('Select a Barber'),
       ),
       body: _currentPosition == null
-          ? const Center(child: LoadingDots()) // Show loading until location is fetched
+          ? const Center(child: Text('Loading...')) // Removed LoadingDots, just show a simple text
           : Column(
         children: [
           Padding(
@@ -150,9 +150,7 @@ class _BarberListState extends State<BarberList> {
             child: StreamBuilder<List<Barber>>(
               stream: getBarbers(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: LoadingDots());
-                } else if (snapshot.hasError) {
+                if (snapshot.hasError) {
                   log('Error fetching barbers: ${snapshot.error}');
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -161,9 +159,7 @@ class _BarberListState extends State<BarberList> {
                   return FutureBuilder<Map<String, Map<String, double>>>(
                     future: _getBarberPrices(_selectedServices),
                     builder: (context, priceSnapshot) {
-                      if (priceSnapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: LoadingDots());
-                      } else if (priceSnapshot.hasError) {
+                      if (priceSnapshot.hasError) {
                         log('Error fetching barber prices: ${priceSnapshot.error}');
                         return Center(child: Text('Error: ${priceSnapshot.error}'));
                       } else if (!priceSnapshot.hasData) {
@@ -176,12 +172,10 @@ class _BarberListState extends State<BarberList> {
                           itemCount: snapshot.data!.length,
                           itemBuilder: (context, index) {
                             final barber = snapshot.data![index];
-
                             return FutureBuilder<List<Location>>(
                               future: _getLatLongFromAddress(barber.address),
                               builder: (context, locationSnapshot) {
-                                if (!locationSnapshot.hasData ||
-                                    locationSnapshot.data!.isEmpty) {
+                                if (!locationSnapshot.hasData || locationSnapshot.data!.isEmpty) {
                                   return Container(); // Skip if no location data
                                 }
 
@@ -249,7 +243,7 @@ class _BarberListState extends State<BarberList> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Shop: ${barber.shopName}\nAddress: ${barber.address}',
+                                            'Shop: ${barber.shopName}\nAddress: ${barber.address}\nDistance: ${distance.toStringAsFixed(2)} km', // Display the distance here
                                             style: TextStyle(
                                               fontSize: 14,
                                               fontWeight: FontWeight.bold,
@@ -280,19 +274,14 @@ class _BarberListState extends State<BarberList> {
                                               Text(barber.rating.toStringAsFixed(1)),
                                             ],
                                           ),
-                                          const SizedBox(height: 8),
-                                          Text(
-                                            'Distance: ${distance.toStringAsFixed(1)} km',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              color: Colors.grey[600],
-                                            ),
-                                          ),
                                         ],
                                       ),
+                                      trailing: isSelected
+                                          ? const Icon(Icons.check_circle, color: Colors.green)
+                                          : null,
                                       onTap: () {
                                         setState(() {
-                                          _selectedBarberId = barberId;
+                                          _selectedBarberId = barber.id;
                                           _selectedBarber = barber;
                                         });
                                       },
@@ -310,31 +299,33 @@ class _BarberListState extends State<BarberList> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Button(
-              onPressed: _selectedBarberId != null
-                  ? () {
-                if (_selectedBarber != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BookAppointment(
-                        selectedServices: _selectedServices,
-                        uid: LocalStorage.getUserID().toString(),
-                        barberId: _selectedBarber!.id,
-                        barberName: _selectedBarber!.name,
-                        barberAddress: _selectedBarber!.address,
-                      ),
-                    ),
-                  );
-                }
-              }
-                  : null,
-              child: const Text('Confirm'),
-            ),
-          ),
         ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Button(
+            onPressed: _selectedBarberId != null
+                ? () {
+              if (_selectedBarber != null) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => BookAppointment(
+                      selectedServices: _selectedServices,
+                      uid: LocalStorage.getUserID().toString(),
+                      barberId: _selectedBarber!.id,
+                      barberName: _selectedBarber!.name,
+                      barberAddress: _selectedBarber!.address,
+                    ),
+                  ),
+                );
+              }
+            }
+                : null,
+            child: const Text('Confirm'),
+          ),
+        ),
       ),
     );
   }

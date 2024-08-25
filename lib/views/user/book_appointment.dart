@@ -515,6 +515,14 @@ class _BookAppointmentState extends State<BookAppointment> {
                       ),
                     ],
                   ),
+                Text(
+                  'Barber: ${widget.barberName}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.orange
+                  ),
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Selected Services',

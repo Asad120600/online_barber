@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/admin/admin_contact_reply.dart';
 import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
-import 'package:online_barber_app/views/admin/app_settings/help_settings.dart';
 import 'package:online_barber_app/views/admin/barber%20admin/barber_stats.dart';
 import 'package:online_barber_app/views/admin/services/manage_services.dart';
 import 'package:online_barber_app/views/admin/services/service_list.dart';
@@ -135,6 +135,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     );
                   },
                 ),
+
               ],
             ),
             ExpansionTile(
@@ -161,16 +162,6 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (context)=>const AdminSlideshowScreen()));
                     // Navigate to PrivacySettings screen
-                  },
-                ),
-                ListTile(
-                  title: const Text(
-                    'Help Settings',
-                  ),
-                  onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const HelpSettings()));
-                    // Navigate to NotificationSettings screen
                   },
                 ),
                 ListTile(
@@ -235,6 +226,21 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>   BarberStatsScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat),
+              title: const Text(
+                'Chat',
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  AdminScreen(),
                   ),
                 );
               },

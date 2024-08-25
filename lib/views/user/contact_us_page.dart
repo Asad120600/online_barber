@@ -1,221 +1,242 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/views/user/chat_screen.dart';
 
-class ContactUsPage extends StatelessWidget {
-  const ContactUsPage({super.key});
+class ContactUsPage extends StatefulWidget {
+  @override
+  _ContactUsPageState createState() => _ContactUsPageState();
+}
 
-  void _launchEmail(String email) async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: email,
-    );
-    try {
-      final bool canLaunchEmail = await canLaunch(emailUri.toString());
-      if (canLaunchEmail) {
-        await launch(emailUri.toString());
-      } else {
-        throw 'Could not launch email';
-      }
-    } catch (e) {
-      print(e); // You can also show a snackbar or dialog to inform the user.
-    }
+class _ContactUsPageState extends State<ContactUsPage> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _subjectController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _setUserEmail();
   }
 
-  void _launchPhone(String phone) async {
-    final Uri phoneUri = Uri(
-      scheme: 'tel',
-      path: phone,
-    );
-    try {
-      final bool canLaunchPhone = await canLaunch(phoneUri.toString());
-      if (canLaunchPhone) {
-        await launch(phoneUri.toString());
-      } else {
-        throw 'Could not launch phone';
-      }
-    } catch (e) {
-      print(e); // You can also show a snackbar or dialog to inform the user.
+  Future<void> _setUserEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _emailController.text = user.email ?? ''; // Set the email controller's text
     }
   }
-
-  void _launchMap(String address) async {
-    final Uri mapUri = Uri(
-      scheme: 'geo',
-      queryParameters: {'q': address},
-    );
-    try {
-      final bool canLaunchMap = await canLaunch(mapUri.toString());
-      if (canLaunchMap) {
-        await launch(mapUri.toString());
-      } else {
-        throw 'Could not launch map';
-      }
-    } catch (e) {
-      print(e); // You can also show a snackbar or dialog to inform the user.
-    }
-  }
-
-  void _launchUrl(String url) async {
-    try {
-      final Uri uri = Uri.parse(url);
-      final bool canLaunchUrl = await canLaunch(uri.toString());
-      if (canLaunchUrl) {
-        await launch(uri.toString());
-      } else {
-        print('Could not launch URL: $url');
-        // Optionally show a Snackbar or Dialog to inform the user
-      }
-    } catch (e) {
-      print('Error launching URL: $e');
-      // Optionally show a Snackbar or Dialog to inform the user
-    }
-  }
-
-  final double iconSize = 35.0;
-  final double paddingSize = 8.0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Us'),
+        title: Text('Contact Us'),
+        backgroundColor: Colors.orange,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Online Barber',
-              style: TextStyle(
-                fontSize: 28.0,
-                fontWeight: FontWeight.bold,
-                color: Colors.orange,
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            GestureDetector(
-              onTap: () => _launchEmail('waseemafzal31@gmail.com'),
-              child: const Row(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
                 children: [
-                  Icon(Icons.email, color: Colors.orange),
-                  SizedBox(width: 8.0),
-                  Text(
-                    'waseemafzal31@gmail.com',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.black87,
-                      decoration: TextDecoration.underline,
+                  TextFormField(
+                    controller: _subjectController,
+                    decoration: InputDecoration(
+                      labelText: 'Subject',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter a subject';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: 'Name',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your name';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      border: OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    controller: _messageController,
+                    decoration: InputDecoration(
+                      labelText: 'Message',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 5,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your message';
+                      }
+                      return null;
+                    },
+                  ),
+                  SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        await _submitForm(context);
+                      }
+                    },
+                    child: Text('Submit'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 24.0),
-            GestureDetector(
-              onTap: () => _launchPhone('+92 341 7090031'),
-              child: const Row(
-                children: [
-                  Icon(Icons.phone, color: Colors.orange),
-                  SizedBox(width: 8.0),
-                  Text(
-                    '+92 341 7090031',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      color: Colors.black87,
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            GestureDetector(
-              onTap: () => _launchMap('Multan, Pakistan'),
-              child: const Row(
-                children: [
-                  Icon(Icons.location_on, color: Colors.orange),
-                  SizedBox(width: 8.0),
-                  Flexible(
-                    child: Text(
-                      'Multan, Pakistan',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Colors.black87,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24.0),
-            const Divider(color: Colors.grey),
-            // const Padding(
-            //   padding: EdgeInsets.symmetric(vertical: 16.0),
-            //   child: Center(
-            //     child: Text(
-            //       'Follow Us',
-            //       style: TextStyle(
-            //         fontSize: 20.0,
-            //         fontWeight: FontWeight.bold,
-            //       ),
-            //     ),
-            //   ),
-            // ),
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.center,
-            //   children: [
-            //     _socialMediaIcon(
-            //       'assets/img/facebook.png',
-            //       'https://www.facebook.com/',
-            //     ),
-            //     _socialMediaIcon(
-            //       'assets/img/instagram.png',
-            //       'https://www.instagram.com/',
-            //     ),
-            //     _socialMediaIcon(
-            //       'assets/img/whatsapp.png',
-            //       'https://www.whatsapp.com/',
-            //     ),
-            //     _socialMediaIcon(
-            //       'assets/img/linkedin.png',
-            //       'https://www.linkedin.com/',
-            //     ),
-            //     _socialMediaIcon(
-            //       'assets/img/twitter.png',
-            //       'https://www.twitter.com/',
-            //     ),
-            //   ],
-            // ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // Widget _socialMediaIcon(String assetPath, String url) {
-  //   return Flexible(
-  //     child: Container(
-  //       decoration: BoxDecoration(
-  //         border: Border.all(color: Colors.blue),
-  //         shape: BoxShape.circle,
+  // Future<void> _submitForm(BuildContext context) async {
+  //   final contactData = {
+  //     'subject': _subjectController.text,
+  //     'name': _nameController.text,
+  //     'email': _emailController.text,
+  //     'timestamp': FieldValue.serverTimestamp(),
+  //     'status': 'pending', // To track if admin has responded
+  //   };
+  //
+  //   try {
+  //     // Add data to Firestore
+  //     DocumentReference docRef = await FirebaseFirestore.instance
+  //         .collection('contactUs')
+  //         .add(contactData);
+  //
+  //     // Add initial message
+  //     await docRef.collection('messages').add({
+  //       'text': _messageController.text,
+  //       'sender': 'user',
+  //       'timestamp': FieldValue.serverTimestamp(),
+  //     });
+  //
+  //     // Send notification to the admin
+  //     String adminToken = '';  // You need to store/retrieve the admin FCM token
+  //     PushNotificationService.sendNotification(adminToken, context,
+  //         'New Contact Us Message',
+  //         'Subject: ${_subjectController.text}');
+  //
+  //     // After successful submission, navigate to chat screen
+  //     Navigator.of(context).pushReplacement(
+  //       MaterialPageRoute(
+  //         builder: (context) => ChatScreen(threadId: docRef.id),
   //       ),
-  //       margin: const EdgeInsets.symmetric(horizontal: 7.0),
-  //       child: GestureDetector(
-  //         onTap: () => _launchUrl(url),
-  //         child: Padding(
-  //           padding: EdgeInsets.all(paddingSize),
-  //           child: ClipOval(
-  //             child: Image.asset(
-  //               assetPath,
-  //               width: iconSize,
-  //               height: iconSize,
-  //             ),
-  //           ),
-  //         ),
-  //       ),
-  //     ),
-  //   );
+  //     );
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(content: Text('Failed to send your message. Please try again.')),
+  //     );
+  //   }
   // }
+
+  Future<void> _submitForm(BuildContext context) async {
+    final contactData = {
+      'subject': _subjectController.text,
+      'name': _nameController.text,
+      'email': _emailController.text,
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'pending', // To track if admin has responded
+    };
+
+    try {
+      // Add data to Firestore
+      DocumentReference docRef = await FirebaseFirestore.instance
+          .collection('contactUs')
+          .add(contactData);
+
+      // Add initial message
+      await docRef.collection('messages').add({
+        'text': _messageController.text,
+        'sender': 'user',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      // Fetch the admin's device token
+      String adminToken = await _fetchAdminToken();
+
+      if (adminToken.isNotEmpty) {
+        // Send notification to the admin
+        PushNotificationService.sendNotification(
+          adminToken,
+          context,
+          'New Contact Us Message',
+          'Subject: ${_subjectController.text}',
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Admin token not found. Notification not sent.')),
+        );
+      }
+
+      // After successful submission, navigate to chat screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => ChatScreen(threadId: docRef.id),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to send your message. Please try again.')),
+      );
+    }
+  }
+
+  Future<String> _fetchAdminToken() async {
+    try {
+      // Get the UID for the admin
+      final adminUid = 'OEQj3lxQnPcdcyeuJEIsm9MxDWx1'; // Replace with your admin UID if needed
+
+      // Fetch the admin document from Firestore using the UID
+      DocumentSnapshot adminSnapshot = await FirebaseFirestore.instance
+          .collection('admins')
+          .doc(adminUid)
+          .get();
+
+      if (adminSnapshot.exists) {
+        // Return the admin's FCM token
+        return adminSnapshot['token'] ?? '';
+      } else {
+        print('Admin not found');
+        return '';
+      }
+    } catch (e) {
+      print('Error fetching admin token: $e');
+      return '';
+    }
+  }
+
+
 }

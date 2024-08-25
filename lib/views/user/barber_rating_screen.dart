@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 
 class BarberRatingScreen extends StatefulWidget {
@@ -108,7 +109,7 @@ class _BarberRatingScreenState extends State<BarberRatingScreen> {
       _isLoading = true;
     });
 
-    final userId = 'USER_ID'; // Replace with actual user ID
+    final userId = LocalStorage().getCurrentUserId().toString(); // Replace with actual user ID
     try {
       // Fetch the barber document
       final docSnapshot = await FirebaseFirestore.instance

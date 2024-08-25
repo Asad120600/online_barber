@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:online_barber_app/views/admin/admin_contact_reply.dart';
 import 'package:online_barber_app/views/admin/admin_drawer.dart';
 
 class AdminPanel extends StatefulWidget {
@@ -48,6 +49,7 @@ class _AdminPanelState extends State<AdminPanel> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Admin Panel'),
+
       ),
       endDrawer: AdminDrawer(screenWidth: screenWidth),
       body: RefreshIndicator(

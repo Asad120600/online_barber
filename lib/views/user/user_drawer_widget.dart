@@ -5,11 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/chat_list.dart';
 import 'package:online_barber_app/views/user/contact_us_page.dart';
 import 'package:online_barber_app/views/user/notifications.dart';
 import '../auth/login_screen.dart';
 import 'faqs.dart';
-import 'help.dart';
 import 'privacy_policy.dart';
 import 'profile.dart';
 import 'show_appointments.dart';
@@ -232,27 +232,14 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.help),
-              title: const Text('Help'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const Help(),
-                  ),
-                );
-              },
-            ),
-            ListTile(
               leading: const Icon(Icons.contact_mail),
-              title: const Text('Contact Us'),
+              title: const Text('Contact Admin'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  const ContactUsPage(),
+                    builder: (context) =>   ChatListScreen(),
                   ),
                 );
               },
