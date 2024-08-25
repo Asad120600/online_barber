@@ -14,24 +14,17 @@ class NotificationsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Notifications'),
       ),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .collection('notifications')
-            .orderBy('date', descending: true)
-            .snapshots(),
+      body: StreamBuilder<List<NotificationModel>>(
+        stream: _getNotificationsStream(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No notifications found.'));
           } else {
-            List<NotificationModel> notifications = snapshot.data!.docs
-                .map((doc) => NotificationModel.fromFirestore(doc))
-                .toList();
+            List<NotificationModel> notifications = snapshot.data!;
 
             return ListView.builder(
               itemCount: notifications.length,
@@ -57,5 +50,33 @@ class NotificationsScreen extends StatelessWidget {
       ),
     );
   }
-}
 
+  Stream<List<NotificationModel>> _getNotificationsStream() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('notifications')
+        .snapshots()
+        .asyncMap((notificationSnapshot) async {
+      // Fetch announcements from a separate collection
+      final announcementSnapshot = await FirebaseFirestore.instance
+          .collection('announcements')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      // Convert Firestore documents to NotificationModel
+      List<NotificationModel> notifications = notificationSnapshot.docs
+          .map((doc) => NotificationModel.fromFirestore(doc))
+          .toList();
+
+      notifications.addAll(
+        announcementSnapshot.docs.map((doc) => NotificationModel.fromAnnouncementFirestore(doc)),
+      );
+
+      // Sort notifications by date
+      notifications.sort((a, b) => b.date.compareTo(a.date));
+
+      return notifications;
+    });
+  }
+}

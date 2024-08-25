@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/announcements_show.dart';
 import 'package:online_barber_app/views/user/chat_list.dart';
 import 'package:online_barber_app/views/user/contact_us_page.dart';
 import 'package:online_barber_app/views/user/notifications.dart';
@@ -231,6 +232,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               },
             ),
+
             ListTile(
               leading: const Icon(Icons.contact_mail),
               title: const Text('Contact Admin'),
@@ -240,6 +242,19 @@ class _AppDrawerState extends State<AppDrawer> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>   ChatListScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.announcement),
+              title: const Text('Announcements'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>   UserAnnouncementScreen(),
                   ),
                 );
               },

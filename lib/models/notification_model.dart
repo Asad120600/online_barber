@@ -13,13 +13,25 @@ class NotificationModel {
     required this.date,
   });
 
+  // Factory constructor to create an instance from a general Firestore document
   factory NotificationModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     return NotificationModel(
       id: doc.id,
       title: data['title'] ?? '',
-      body: data['body'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
+      body: data['message'] ?? data['body'] ?? '', // Handle both 'body' and 'message'
+      date: (data['date'] ?? data['timestamp'] as Timestamp).toDate(), // Handle both 'date' and 'timestamp'
+    );
+  }
+
+  // Factory constructor to create an instance from an announcement document
+  factory NotificationModel.fromAnnouncementFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data()!;
+    return NotificationModel(
+      id: doc.id,
+      title: data['title'] ?? '',
+      body: data['message'] ?? '', // Assuming 'message' field in announcements
+      date: (data['timestamp'] as Timestamp).toDate(), // Assuming 'timestamp' field in announcements
     );
   }
 
