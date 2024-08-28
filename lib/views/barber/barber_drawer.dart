@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/admin/announcement_screen_send.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/barber/barber_profile.dart';
 import 'package:online_barber_app/views/barber/barber_stats.dart';
@@ -136,6 +137,22 @@ class _BarberDrawerState extends State<BarberDrawer> {
                 );
               },
             ),
+             ListTile(
+              leading: const Icon(Icons.announcement),
+              title: const Text(
+                'Make Announcement',
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AnnouncementScreen(),
+                  ),
+                );
+              },
+            ),
+
 
             ListTile(
               leading: const Icon(Icons.logout),

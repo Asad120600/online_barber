@@ -117,7 +117,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               itemCount: _slides.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                  margin: EdgeInsets.only(left: 15,right: 15,top: 20),
+                  margin: EdgeInsets.only(left: 15,right: 15,top: 25),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.orange, width: 2),
                     image: DecorationImage(
@@ -147,7 +147,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: const EdgeInsets.all(15.0),
                     child: Text(
                       _slides.isNotEmpty ? _slides[currentIndex]['text'] as String : '',
                       style: const TextStyle(
@@ -162,7 +162,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                     padding: const EdgeInsets.only(top: 20.0),
                     child: Button(
                       onPressed: () {
-                        Navigator.push(
+                        Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
                             builder: (context) => const LoginScreen(),
