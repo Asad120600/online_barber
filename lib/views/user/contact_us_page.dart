@@ -121,47 +121,6 @@ class _ContactUsPageState extends State<ContactUsPage> {
     );
   }
 
-  // Future<void> _submitForm(BuildContext context) async {
-  //   final contactData = {
-  //     'subject': _subjectController.text,
-  //     'name': _nameController.text,
-  //     'email': _emailController.text,
-  //     'timestamp': FieldValue.serverTimestamp(),
-  //     'status': 'pending', // To track if admin has responded
-  //   };
-  //
-  //   try {
-  //     // Add data to Firestore
-  //     DocumentReference docRef = await FirebaseFirestore.instance
-  //         .collection('contactUs')
-  //         .add(contactData);
-  //
-  //     // Add initial message
-  //     await docRef.collection('messages').add({
-  //       'text': _messageController.text,
-  //       'sender': 'user',
-  //       'timestamp': FieldValue.serverTimestamp(),
-  //     });
-  //
-  //     // Send notification to the admin
-  //     String adminToken = '';  // You need to store/retrieve the admin FCM token
-  //     PushNotificationService.sendNotification(adminToken, context,
-  //         'New Contact Us Message',
-  //         'Subject: ${_subjectController.text}');
-  //
-  //     // After successful submission, navigate to chat screen
-  //     Navigator.of(context).pushReplacement(
-  //       MaterialPageRoute(
-  //         builder: (context) => ChatScreen(threadId: docRef.id),
-  //       ),
-  //     );
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       SnackBar(content: Text('Failed to send your message. Please try again.')),
-  //     );
-  //   }
-  // }
-
   Future<void> _submitForm(BuildContext context) async {
     final contactData = {
       'subject': _subjectController.text,
@@ -177,11 +136,12 @@ class _ContactUsPageState extends State<ContactUsPage> {
           .collection('contactUs')
           .add(contactData);
 
-      // Add initial message
+      // Add initial message with isRead field
       await docRef.collection('messages').add({
         'text': _messageController.text,
         'sender': 'user',
         'timestamp': FieldValue.serverTimestamp(),
+        'isRead': false, // Set the message as unread
       });
 
       // Fetch the admin's device token
@@ -237,6 +197,4 @@ class _ContactUsPageState extends State<ContactUsPage> {
       return '';
     }
   }
-
-
 }

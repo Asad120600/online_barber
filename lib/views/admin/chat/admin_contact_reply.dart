@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:online_barber_app/views/admin/reply_chat_screen.dart';
+import 'package:intl/intl.dart';
+import 'package:online_barber_app/views/admin/chat/reply_chat_screen.dart';
 
 class AdminScreen extends StatelessWidget {
   const AdminScreen({super.key});
@@ -48,6 +49,9 @@ class AdminScreen extends StatelessWidget {
                   var data = futureSnapshot.data!;
                   String preview = data['latestMessage'] ?? 'No messages yet';
                   String userEmail = data['userEmail'] ?? 'Unknown';
+                  String sender = data['sender'] ?? 'Unknown'; // Retrieve sender
+                  DateTime? timestamp = data['timestamp']; // Retrieve timestamp
+                  bool isRead = data['isRead'] ?? true; // Check if the message is read
 
                   return ListTile(
                     leading: CircleAvatar(
@@ -55,9 +59,28 @@ class AdminScreen extends StatelessWidget {
                       child: Icon(Icons.person, color: Colors.grey[700]),
                     ),
                     title: Text(userEmail), // Show user email
-                    subtitle: Text(preview), // Show latest message
+                    subtitle: Text('$sender: $preview'), // Show sender and latest message
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!isRead)
+                          Icon(Icons.circle, color: Colors.green, size: 10), // Show green dot for unread messages
+                        if (timestamp != null)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 8.0),
+                            child: Text(
+                              DateFormat('hh:mm a').format(timestamp),
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ),
+                      ],
+                    ),
                     contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                    onTap: () {
+                    onTap: () async {
+                      // Mark the message as read when tapped
+                      if (!isRead) {
+                        await _markAsRead(thread.id);
+                      }
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -78,9 +101,13 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _refreshData() async {
+    // No additional logic needed; StreamBuilder handles real-time updates
+  }
+
   Future<Map<String, dynamic>> _getLatestMessageAndUserEmail(QueryDocumentSnapshot thread) async {
     try {
-      // Fetch the latest message for the thread
+      // Fetch the latest message for the thread, regardless of who sent it
       var messageSnapshot = await FirebaseFirestore.instance
           .collection('contactUs')
           .doc(thread.id)
@@ -89,7 +116,11 @@ class AdminScreen extends StatelessWidget {
           .limit(1)
           .get();
 
-      var latestMessage = messageSnapshot.docs.isNotEmpty ? messageSnapshot.docs.first['text'] : null;
+      var latestMessageDoc = messageSnapshot.docs.isNotEmpty ? messageSnapshot.docs.first : null;
+      var latestMessage = latestMessageDoc?['text'];
+      var sender = latestMessageDoc?['sender'] ?? 'Unknown'; // Assuming you have a sender field
+      var timestamp = latestMessageDoc?['timestamp']?.toDate(); // Convert timestamp to DateTime
+      var isRead = latestMessageDoc?['isRead'] ?? true; // Check if the message is read
 
       // Get the user's email from the thread document
       var userEmail = thread['email']; // Adjust based on your field name
@@ -108,6 +139,9 @@ class AdminScreen extends StatelessWidget {
         'latestMessage': latestMessage,
         'userEmail': userEmail,
         'userId': userId,
+        'sender': sender, // Include the sender information
+        'timestamp': timestamp, // Include the timestamp
+        'isRead': isRead, // Include the read status
       };
     } catch (e) {
       print(e);
@@ -115,7 +149,30 @@ class AdminScreen extends StatelessWidget {
         'latestMessage': null,
         'userEmail': 'Unknown',
         'userId': 'Unknown',
+        'sender': 'Unknown',
+        'timestamp': null,
+        'isRead': true, // Default to read if there's an error
       };
+    }
+  }
+
+  Future<void> _markAsRead(String threadId) async {
+    try {
+      var messageSnapshot = await FirebaseFirestore.instance
+          .collection('contactUs')
+          .doc(threadId)
+          .collection('messages')
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
+
+      var latestMessageDoc = messageSnapshot.docs.isNotEmpty ? messageSnapshot.docs.first : null;
+
+      if (latestMessageDoc != null && !(latestMessageDoc['isRead'] ?? true)) {
+        await latestMessageDoc.reference.update({'isRead': true});
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }

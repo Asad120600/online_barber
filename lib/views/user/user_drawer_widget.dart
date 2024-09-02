@@ -9,6 +9,7 @@ import 'package:online_barber_app/views/user/announcements_show.dart';
 import 'package:online_barber_app/views/user/chat_list.dart';
 import 'package:online_barber_app/views/user/contact_us_page.dart';
 import 'package:online_barber_app/views/user/notifications.dart';
+import 'package:online_barber_app/views/user/shop/products.dart';
 import '../auth/login_screen.dart';
 import 'faqs.dart';
 import 'privacy_policy.dart';
@@ -217,6 +218,19 @@ class _AppDrawerState extends State<AppDrawer> {
                     const SnackBar(content: Text('User ID not found.')),
                   );
                 }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.card_travel),
+              title: const Text('Products'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>   ProductDisplayPage(),
+                  ),
+                );
               },
             ),
             ListTile(

@@ -16,10 +16,19 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController(); // Add scroll controller
 
   @override
+  void initState() {
+    super.initState();
+    // Scroll to the bottom when the screen is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin'),
+        title: Text('Chat'),
         backgroundColor: Colors.orange,
       ),
       body: Column(
@@ -46,19 +55,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 return ListView.builder(
                   controller: _scrollController, // Attach controller to ListView
-                  reverse: false,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     var message = messages[index];
                     bool isAdmin = message['sender'] == 'admin';
 
                     return Align(
-                      alignment:
-                      isAdmin ? Alignment.centerLeft : Alignment.centerRight,
+                      alignment: isAdmin ? Alignment.centerLeft : Alignment.centerRight,
                       child: Container(
                         padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.symmetric(
-                            vertical: 5, horizontal: 10),
+                        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                         decoration: BoxDecoration(
                           color: isAdmin ? Colors.grey[300] : Colors.orange[100],
                           borderRadius: BorderRadius.circular(15),
@@ -124,6 +130,7 @@ class _ChatScreenState extends State<ChatScreen> {
         'text': _messageController.text,
         'sender': 'user', // Change to 'admin' if needed
         'timestamp': FieldValue.serverTimestamp(),
+        'isRead': false, // New messages are unread by default
       });
 
       // Fetch the admin's device token

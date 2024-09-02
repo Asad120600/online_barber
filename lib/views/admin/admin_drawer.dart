@@ -2,10 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-import 'package:online_barber_app/views/admin/admin_contact_reply.dart';
+import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
+import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
+import 'package:online_barber_app/views/admin/admin_shop/edit_product.dart';
 import 'package:online_barber_app/views/admin/announcement_screen_send.dart';
 import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
 import 'package:online_barber_app/views/admin/barber%20admin/barber_stats.dart';
+import 'package:online_barber_app/views/admin/chat/admin_contact_reply.dart';
 import 'package:online_barber_app/views/admin/services/manage_services.dart';
 import 'package:online_barber_app/views/admin/services/service_list.dart';
 import 'package:online_barber_app/views/admin/slideshow/slideshow_mnage.dart';
@@ -99,6 +102,38 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 );
               },
             ),
+            ExpansionTile(
+              leading: const Icon(Icons.shopping_cart_outlined),
+              title: const Text(
+                'Shop',
+              ),
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.production_quantity_limits_sharp),
+                  title: const Text(
+                    'All Products',
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  AllProductsPage(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('Add Products'),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>AddProducts()));
+                  },
+                ),
+                 ],
+            ),
+
             ExpansionTile(
               leading: const Icon(Icons.supervised_user_circle_sharp),
               title: const Text(

@@ -4,7 +4,7 @@ import 'package:online_barber_app/push_notification_service.dart';
 
 class ReplyScreen extends StatefulWidget {
   final String threadId;
-  final String userId; // Use userId (uid) for document ID
+  final String userId;
 
   const ReplyScreen({super.key, required this.threadId, required this.userId});
 
@@ -27,7 +27,7 @@ class _ReplyScreenState extends State<ReplyScreen> {
     try {
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.userId)  // Use userId as the document ID (uid)
+          .doc(widget.userId)
           .get();
 
       if (userSnapshot.exists) {
@@ -80,7 +80,6 @@ class _ReplyScreenState extends State<ReplyScreen> {
 
                   return ListView.builder(
                     controller: _scrollController,
-                    reverse: false,
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       var message = messages[index];
@@ -171,7 +170,7 @@ class _ReplyScreenState extends State<ReplyScreen> {
       // Get the user's device token from the 'users' collection using userId (uid)
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.userId)  // Use userId as the document ID (uid)
+          .doc(widget.userId)
           .get();
 
       if (userSnapshot.exists) {
