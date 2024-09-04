@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/shop/checkout.dart';
 
 class CartPage extends StatelessWidget {
   final Map<String, int> productQuantities;
@@ -11,19 +14,49 @@ class CartPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Cart')),
-      body: ListView.builder(
-        itemCount: productQuantities.length,
-        itemBuilder: (context, index) {
-          final productId = productQuantities.keys.elementAt(index);
-          final quantity = productQuantities[productId]!;
-          // You may need to fetch product details from Firestore again here
-          // For simplicity, assuming product details are available
-          return ListTile(
-            title: Text('Product ID: $productId'),
-            subtitle: Text('Quantity: $quantity'),
+    // Filter the productQuantities map to show only products with quantity > 0
+    final cartItems = productQuantities.entries.where((entry) => entry.value > 0).toList();
 
+    return Scaffold(
+      appBar: AppBar(title: const Text('Cart')),
+      body: ListView.builder(
+        itemCount: cartItems.length,
+        itemBuilder: (context, index) {
+          final productId = cartItems[index].key;
+          final quantity = cartItems[index].value;
+
+          return FutureBuilder<DocumentSnapshot>(
+            future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const ListTile(
+                  title: Text('Loading...'),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return ListTile(
+                  title: Text('Error: ${snapshot.error}'),
+                );
+              }
+
+              final productData = snapshot.data?.data() as Map<String, dynamic>?;
+
+              if (productData == null) {
+                return const ListTile(
+                  title: Text('Product not found'),
+                );
+              }
+
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(productData['imageUrl']),
+                ),
+                title: Text(productData['description']),
+                subtitle: Text('Quantity: $quantity'),
+                trailing: Text('${(double.tryParse(productData['price']) ?? 0.0) * quantity}'),
+              );
+            },
           );
         },
       ),
@@ -33,12 +66,17 @@ class CartPage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Total: \$${totalPrice.toStringAsFixed(2)}'),
+            Text('Total: ${totalPrice.toStringAsFixed(2)}'),
             ElevatedButton(
               onPressed: () {
-                // Navigate to checkout page
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => CheckoutPage(
+                    productQuantities: productQuantities,
+                    totalPrice: totalPrice, userId: LocalStorage().getCurrentUserId().toString(),
+                  ),
+                ));
               },
-              child: Text('Checkout'),
+              child: const Text('Checkout'),
             ),
           ],
         ),

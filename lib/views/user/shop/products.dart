@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'cart.dart';
 
 class ProductDisplayPage extends StatefulWidget {
+  const ProductDisplayPage({super.key});
+
   @override
   _ProductDisplayPageState createState() => _ProductDisplayPageState();
 }
@@ -24,7 +26,7 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
   }
 
   void _addToCart() {
-    Navigator.of(context).push(MaterialPageRoute(
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => CartPage(
         productQuantities: _productQuantities,
         totalPrice: _totalPrice,
@@ -32,20 +34,37 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
     ));
   }
 
+  void _showImagePreview(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        child: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),  // Close the preview when tapped
+          child: InteractiveViewer(
+            child: Image.network(imageUrl, fit: BoxFit.contain),  // Enable pinch to zoom
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Product List'),
+        title: const Text('Product List'),
         actions: [
-          IconButton(onPressed: _addToCart, icon: Icon(Icons.card_travel_sharp))
+          IconButton(
+            onPressed: _addToCart,
+            icon: const Icon(Icons.card_travel_sharp),
+          ),
         ],
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('products').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -55,7 +74,7 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
           final products = snapshot.data?.docs;
 
           return GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
@@ -71,47 +90,55 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                 _productPrices[productId] = price;
               }
 
-              return Card(
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Image.network(product['imageUrl'], fit: BoxFit.cover),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Price: \$${price.toStringAsFixed(2)}'),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(product['description']),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(Icons.remove),
-                          onPressed: () {
-                            if (quantity > 0) {
+              return GestureDetector(
+                onTap: () => _showImagePreview(context, product['imageUrl']),
+                child: Card(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: Center(
+                          child: CircleAvatar(
+                            radius: 60,  // Adjust the radius as needed
+                            backgroundImage: NetworkImage(product['imageUrl']),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text('Price: ${price.toStringAsFixed(2)}'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(product['description']),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: () {
+                              if (quantity > 0) {
+                                setState(() {
+                                  _productQuantities[productId] = quantity - 1;
+                                  _updateTotalPrice();
+                                });
+                              }
+                            },
+                          ),
+                          Text('$quantity'),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
                               setState(() {
-                                _productQuantities[productId] = quantity - 1;
+                                _productQuantities[productId] = quantity + 1;
                                 _updateTotalPrice();
                               });
-                            }
-                          },
-                        ),
-                        Text('$quantity'),
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          onPressed: () {
-                            setState(() {
-                              _productQuantities[productId] = quantity + 1;
-                              _updateTotalPrice();
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               );
             },
@@ -126,10 +153,10 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Total: \$${_totalPrice.toStringAsFixed(2)}'),
+              Text('Total: ${_totalPrice.toStringAsFixed(2)}'),
               ElevatedButton(
                 onPressed: _addToCart,
-                child: Text('Add to Cart'),
+                child: const Text('Add to Cart'),
               ),
             ],
           ),

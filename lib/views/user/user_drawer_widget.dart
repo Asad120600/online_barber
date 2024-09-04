@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,9 +6,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/announcements_show.dart';
 import 'package:online_barber_app/views/user/chat_list.dart';
-import 'package:online_barber_app/views/user/contact_us_page.dart';
 import 'package:online_barber_app/views/user/notifications.dart';
 import 'package:online_barber_app/views/user/shop/products.dart';
+import 'package:online_barber_app/views/user/shop/recent_orders.dart';
 import '../auth/login_screen.dart';
 import 'faqs.dart';
 import 'privacy_policy.dart';
@@ -220,19 +219,43 @@ class _AppDrawerState extends State<AppDrawer> {
                 }
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.card_travel),
-              title: const Text('Products'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>   ProductDisplayPage(),
+            ExpansionTile(
+              leading: const Icon(Icons.shopping_cart),
+              title: const Text(
+                'Shop',
+              ),
+              children: <Widget>[
+                ListTile(
+                  leading: const Icon(Icons.card_travel),
+                  title: const Text('Products'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>   const ProductDisplayPage(),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history),
+                  title: const Text(
+                    'Recent Orders',
                   ),
-                );
-              },
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>   RecentOrdersPage(userId: LocalStorage.getUserID().toString(),),
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
+
             ListTile(
               leading: const Icon(Icons.question_answer),
               title: const Text('FAQs'),
@@ -255,7 +278,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>   ChatListScreen(),
+                    builder: (context) =>   const ChatListScreen(),
                   ),
                 );
               },
@@ -268,7 +291,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>   UserAnnouncementScreen(),
+                    builder: (context) =>   const UserAnnouncementScreen(),
                   ),
                 );
               },

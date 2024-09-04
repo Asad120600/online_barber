@@ -23,7 +23,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
 
   User? _currentUser;
   String? _firstName;
-  String? _imageUrl; // Add this variable to hold the barber's image URL
+  String? _imageUrl;
 
   @override
   void initState() {
@@ -39,7 +39,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
         if (snapshot.exists) {
           setState(() {
             _firstName = snapshot['name'];
-            _imageUrl = snapshot['imageUrl']; // Fetch image URL from Firestore
+            _imageUrl = snapshot['imageUrl']; 
           });
         }
       } catch (e) {

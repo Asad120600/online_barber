@@ -4,7 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/button.dart';
-import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
+import 'package:online_barber_app/utils/loading_dialog.dart';
+import 'package:online_barber_app/views/admin/admin_panel.dart';
 
 class AddProducts extends StatefulWidget {
   const AddProducts({super.key});
@@ -20,6 +21,7 @@ class _AddProductsState extends State<AddProducts> {
   String _imageUrl = '';
   String _price = '';
   String _description = '';
+  String _productName = ''; // Variable for product name
 
   Future<void> _pickImage() async {
     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -43,32 +45,58 @@ class _AddProductsState extends State<AddProducts> {
 
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
-      if (_imageFile != null) {
-        await _uploadImage();
-      }
-      await FirebaseFirestore.instance.collection('products').add({
-        'imageUrl': _imageUrl,
-        'price': _price,
-        'description': _description,
-      });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Product added')));
-      // Show success dialog and redirect
+      // Show the loading dialog
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Success'),
-          content: Text('Product added successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => AllProductsPage()));
-              },
-              child: Text('OK'),
-            ),
-          ],
+        barrierDismissible: false,
+        builder: (BuildContext context) => const LoadingDialog(
+          message: 'Product is adding....',
         ),
       );
+
+      try {
+        if (_imageFile != null) {
+          await _uploadImage();
+        }
+
+        await FirebaseFirestore.instance.collection('products').add({
+          'imageUrl': _imageUrl,
+          'price': _price,
+          'description': _description,
+          'productName': _productName, // Save product name
+        });
+
+        // Hide the loading dialog after successful upload
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Product added')));
+
+        // Show success dialog and redirect
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Success'),
+            content: Text('Product added successfully!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                    builder: (context) => AdminPanel(), // Navigate to AdminPanel
+                  ));
+                },
+                child: Text('OK'),
+              ),
+            ],
+          ),
+        );
+      } catch (e) {
+        // Hide the loading dialog in case of an error
+        Navigator.of(context).pop();
+
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add product: $e')));
+      }
     }
   }
 
@@ -94,6 +122,12 @@ class _AddProductsState extends State<AddProducts> {
                           ? Center(child: Text('Pick Image'))
                           : Image.file(File(_imageFile!.path), fit: BoxFit.cover),
                     ),
+                  ),
+                  SizedBox(height: 16),
+                  TextFormField(
+                    decoration: InputDecoration(labelText: 'Product Name'), // Add product name field
+                    onChanged: (value) => _productName = value,
+                    validator: (value) => value!.isEmpty ? 'Please enter a product name' : null,
                   ),
                   SizedBox(height: 16),
                   TextFormField(

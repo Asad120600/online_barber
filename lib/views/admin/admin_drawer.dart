@@ -1,10 +1,10 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
-import 'package:online_barber_app/views/admin/admin_shop/edit_product.dart';
+import 'package:online_barber_app/views/admin/admin_shop/orders.dart';
 import 'package:online_barber_app/views/admin/announcement_screen_send.dart';
 import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
 import 'package:online_barber_app/views/admin/barber%20admin/barber_stats.dart';
@@ -49,7 +49,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
           });
         }
       } catch (e) {
-        print('Error fetching first name: $e');
+        log('Error fetching first name: $e');
       }
     }
   }
@@ -128,7 +128,22 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   title: const Text('Add Products'),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>AddProducts()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const AddProducts()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.history_toggle_off),
+                  title: const Text(
+                    'Orders',
+                  ),
+                  onTap: () {
+                    Navigator.pop(context); // Close the drawer
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>  AdminOrdersPage(),
+                      ),
+                    );
                   },
                 ),
                  ],
@@ -276,7 +291,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  AdminScreen(),
+                    builder: (context) =>  const AdminScreen(),
                   ),
                 );
               },
@@ -291,7 +306,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  AnnouncementScreen(),
+                    builder: (context) =>  const AnnouncementScreen(),
                   ),
                 );
               },
