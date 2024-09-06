@@ -7,6 +7,7 @@ import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/admin/admin_drawer.dart';
+import 'package:online_barber_app/views/admin/admin_shop/order_notifications.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -17,11 +18,26 @@ class AdminPanel extends StatefulWidget {
 
 class _AdminPanelState extends State<AdminPanel> {
   late final AppointmentController _appointmentController;
+  int _notificationCount = 0;
+
 
   @override
   void initState() {
     super.initState();
     _appointmentController = AppointmentController();
+    _updateNotificationCount();
+
+  }
+  void _updateNotificationCount() {
+    setState(() {
+      _notificationCount++;
+    });
+  }
+
+  void _resetNotificationCount() {
+    setState(() {
+      _notificationCount = 0;
+    });
   }
 
   Future<String> _getUserName(String uid) async {
@@ -43,12 +59,59 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text('Admin Panel'),
-
+        actions: [
+          Stack(
+            children: [
+              IconButton(
+                icon: Icon(Icons.notifications),
+                onPressed: () {
+                  _resetNotificationCount(); // Reset the counter
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AdminNotificationsPage(),
+                    ),
+                  );
+                },
+              ),
+              if (_notificationCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: BoxConstraints(
+                      minWidth: 20,
+                      minHeight: 20,
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$_notificationCount',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          Builder(
+            builder: (context) => IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () => Scaffold.of(context).openEndDrawer(),
+            ),
+          ),
+        ],
       ),
       endDrawer: AdminDrawer(screenWidth: screenWidth),
       body: RefreshIndicator(
@@ -67,13 +130,9 @@ class _AdminPanelState extends State<AdminPanel> {
             } else {
               List<Appointment> appointments = snapshot.data!;
 
-              // Sort appointments by date and time
               appointments.sort((a, b) {
-                // First, compare by date
                 int dateComparison = a.date.compareTo(b.date);
                 if (dateComparison != 0) return dateComparison;
-
-                // If dates are equal, compare by time
                 return a.time.compareTo(b.time);
               });
 
@@ -165,8 +224,8 @@ class _AdminPanelState extends State<AdminPanel> {
                                               style: const TextStyle(
                                                 fontSize: 14,
                                               ),
-                                              maxLines: 2, // Limits the text to a maximum of 2 lines
-                                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds 2 lines
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                         ],

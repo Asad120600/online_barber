@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/shop/checkout.dart';
 
@@ -67,7 +68,8 @@ class CartPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Total: ${totalPrice.toStringAsFixed(2)}'),
-            ElevatedButton(
+            Button(
+              width: 106,
               onPressed: () {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
                   builder: (context) => CheckoutPage(

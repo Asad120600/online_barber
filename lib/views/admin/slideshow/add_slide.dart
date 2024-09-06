@@ -60,6 +60,8 @@ class _AddSlidePageState extends State<AddSlidePage> {
     }
   }
 
+
+
   Future<void> _saveSlide() async {
     if (_imageUrl != null && _textController.text.isNotEmpty) {
       try {

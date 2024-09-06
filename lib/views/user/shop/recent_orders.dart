@@ -45,16 +45,22 @@ class RecentOrdersPage extends StatelessWidget {
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8.0),
                 elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ExpansionTile(
                   title: Text('Order ID: $orderId'),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total: \$${order['totalPrice']?.toStringAsFixed(2) ?? '0.00'}'),
+                      Text('Total: ${order['totalPrice']?.toStringAsFixed(2) ?? '0.00'}'),
                       Text('Status: $orderStatus'),
                     ],
                   ),
-                  trailing: Text('${orderDate.toLocal()}'),
+                  trailing: Text(
+                    '${orderDate.toLocal()}',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                   childrenPadding: const EdgeInsets.all(16.0),
                   children: [
                     ListTile(
@@ -91,9 +97,19 @@ class RecentOrdersPage extends StatelessWidget {
                           }
 
                           return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            leading: CircleAvatar(
+                              backgroundImage: productData['imageUrl'] != null
+                                  ? NetworkImage(productData['imageUrl'])
+                                  : null,
+                              radius: 25,
+                              child: productData['imageUrl'] == null
+                                  ? const Icon(Icons.image, size: 30, color: Colors.grey)
+                                  : null,
+                            ),
                             title: Text(productData['description'] ?? 'No description'),
                             subtitle: Text('Quantity: ${entry.value}'),
+                            trailing: Text('${(double.tryParse(productData['price']) ?? 0.0 * entry.value).toStringAsFixed(2)}'),
                           );
                         },
                       );

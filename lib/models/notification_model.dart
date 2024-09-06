@@ -42,4 +42,16 @@ class NotificationModel {
       'date': Timestamp.fromDate(date),
     };
   }
+
+  // Factory method for order status updates
+  factory NotificationModel.fromOrderStatusFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return NotificationModel(
+      title: data['status'] ?? 'Order Status Update',
+      body: data['message'] ?? 'No details provided.',
+      date: (data['timestamp'] as Timestamp).toDate(), id: '',
+    );
+  }
 }
+
+

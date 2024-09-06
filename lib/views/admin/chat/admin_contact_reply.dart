@@ -1,16 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/views/admin/chat/reply_chat_screen.dart';
 
-class AdminScreen extends StatelessWidget {
+class AdminScreen extends StatefulWidget {
   const AdminScreen({super.key});
 
+  @override
+  State<AdminScreen> createState() => _AdminScreenState();
+}
+
+class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin Panel'),
+        title: const Text('Help'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('contactUs').snapshots(),
@@ -25,70 +31,96 @@ class AdminScreen extends StatelessWidget {
             itemCount: threads.length,
             separatorBuilder: (context, index) => Divider(
               height: 1,
-              color: Colors.grey[300], // Light color for the divider
+              color: Colors.grey[300],
             ),
             itemBuilder: (context, index) {
               var thread = threads[index];
 
-              // Fetch the latest message for the thread
-              return FutureBuilder<Map<String, dynamic>>(
-                future: _getLatestMessageAndUserEmail(thread),
-                builder: (context, futureSnapshot) {
-                  if (!futureSnapshot.hasData) {
+              return StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('contactUs')
+                    .doc(thread.id)
+                    .collection('messages')
+                    .orderBy('timestamp', descending: true)
+                    .limit(1)
+                    .snapshots(),
+                builder: (context, messageSnapshot) {
+                  if (!messageSnapshot.hasData) {
                     return ListTile(
                       leading: CircleAvatar(
                         backgroundColor: Colors.grey[300],
                         child: Icon(Icons.person, color: Colors.grey[700]),
                       ),
-                      title: Text('Loading user email...'),
-                      subtitle: Text('Loading latest message...'),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      title: const Text('Loading user email...'),
+                      subtitle: const Text('Loading latest message...'),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     );
                   }
 
-                  var data = futureSnapshot.data!;
-                  String preview = data['latestMessage'] ?? 'No messages yet';
-                  String userEmail = data['userEmail'] ?? 'Unknown';
-                  String sender = data['sender'] ?? 'Unknown'; // Retrieve sender
-                  DateTime? timestamp = data['timestamp']; // Retrieve timestamp
-                  bool isRead = data['isRead'] ?? true; // Check if the message is read
+                  var latestMessageDoc = messageSnapshot.data!.docs.isNotEmpty
+                      ? messageSnapshot.data!.docs.first
+                      : null;
+                  var latestMessage = latestMessageDoc?['text'];
+                  var sender = latestMessageDoc?['sender'] ?? 'Unknown';
+                  var timestamp = latestMessageDoc?['timestamp']?.toDate();
+                  var isRead = latestMessageDoc?['isRead'] ?? true;
 
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.grey[300],
-                      child: Icon(Icons.person, color: Colors.grey[700]),
-                    ),
-                    title: Text(userEmail), // Show user email
-                    subtitle: Text('$sender: $preview'), // Show sender and latest message
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (!isRead)
-                          Icon(Icons.circle, color: Colors.green, size: 10), // Show green dot for unread messages
-                        if (timestamp != null)
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0),
-                            child: Text(
-                              DateFormat('hh:mm a').format(timestamp),
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
+                  return FutureBuilder<Map<String, dynamic>>(
+                    future: _getUserData(thread),
+                    builder: (context, userSnapshot) {
+                      if (!userSnapshot.hasData) {
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: Colors.grey[300],
+                            child: Icon(Icons.person, color: Colors.grey[700]),
                           ),
-                      ],
-                    ),
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                    onTap: () async {
-                      // Mark the message as read when tapped
-                      if (!isRead) {
-                        await _markAsRead(thread.id);
+                          title: const Text('Loading user email...'),
+                          subtitle: Text('$sender: Loading message...'),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        );
                       }
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ReplyScreen(
-                            threadId: thread.id,
-                            userId: data['userId'], // Pass the user ID to the ReplyScreen
-                          ),
+
+                      var data = userSnapshot.data!;
+                      String preview = latestMessage ?? 'No messages yet';
+                      String userEmail = data['userEmail'] ?? 'Unknown';
+
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.grey[300],
+                          child: Icon(Icons.person, color: Colors.grey[700]),
                         ),
+                        title: Text(userEmail),
+                        subtitle: Text('$sender: $preview'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isRead)
+                              const Icon(Icons.circle, color: Colors.green, size: 10),
+                            if (timestamp != null)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0),
+                                child: Text(
+                                  DateFormat('hh:mm a').format(timestamp),
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ),
+                          ],
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                        onTap: () async {
+                          if (!isRead) {
+                            await _markAsRead(thread.id);
+                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ReplyScreen(
+                                threadId: thread.id,
+                                userId: data['userId'],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   );
@@ -101,31 +133,9 @@ class AdminScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _refreshData() async {
-    // No additional logic needed; StreamBuilder handles real-time updates
-  }
-
-  Future<Map<String, dynamic>> _getLatestMessageAndUserEmail(QueryDocumentSnapshot thread) async {
+  Future<Map<String, dynamic>> _getUserData(DocumentSnapshot thread) async {
     try {
-      // Fetch the latest message for the thread, regardless of who sent it
-      var messageSnapshot = await FirebaseFirestore.instance
-          .collection('contactUs')
-          .doc(thread.id)
-          .collection('messages')
-          .orderBy('timestamp', descending: true)
-          .limit(1)
-          .get();
-
-      var latestMessageDoc = messageSnapshot.docs.isNotEmpty ? messageSnapshot.docs.first : null;
-      var latestMessage = latestMessageDoc?['text'];
-      var sender = latestMessageDoc?['sender'] ?? 'Unknown'; // Assuming you have a sender field
-      var timestamp = latestMessageDoc?['timestamp']?.toDate(); // Convert timestamp to DateTime
-      var isRead = latestMessageDoc?['isRead'] ?? true; // Check if the message is read
-
-      // Get the user's email from the thread document
-      var userEmail = thread['email']; // Adjust based on your field name
-
-      // Fetch the user document using the email
+      var userEmail = thread['email'];
       var userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .where('email', isEqualTo: userEmail)
@@ -136,22 +146,16 @@ class AdminScreen extends StatelessWidget {
       var userId = userDoc?.id ?? 'Unknown';
 
       return {
-        'latestMessage': latestMessage,
         'userEmail': userEmail,
         'userId': userId,
-        'sender': sender, // Include the sender information
-        'timestamp': timestamp, // Include the timestamp
-        'isRead': isRead, // Include the read status
       };
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       return {
-        'latestMessage': null,
         'userEmail': 'Unknown',
         'userId': 'Unknown',
-        'sender': 'Unknown',
-        'timestamp': null,
-        'isRead': true, // Default to read if there's an error
       };
     }
   }
@@ -172,7 +176,9 @@ class AdminScreen extends StatelessWidget {
         await latestMessageDoc.reference.update({'isRead': true});
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
     }
   }
 }

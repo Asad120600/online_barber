@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
 
@@ -40,7 +41,9 @@ class _ReplyScreenState extends State<ReplyScreen> {
         });
       }
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        print(e);
+      }
       setState(() {
         userEmail = 'Error fetching email';
       });
@@ -52,7 +55,6 @@ class _ReplyScreenState extends State<ReplyScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Reply to $userEmail'),
-        backgroundColor: Colors.orange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -193,7 +195,15 @@ class _ReplyScreenState extends State<ReplyScreen> {
       // Scroll to the bottom after sending the message
       _scrollToBottom();
     } catch (e) {
-      print(e);
+      if (kDebugMode) {
+        if (kDebugMode) {
+          if (kDebugMode) {
+            if (kDebugMode) {
+              print(e);
+            }
+          }
+        }
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Failed to send the reply. Please try again.')),
       );
@@ -204,7 +214,7 @@ class _ReplyScreenState extends State<ReplyScreen> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     }

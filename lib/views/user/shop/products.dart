@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/button.dart';
 import 'cart.dart';
 
 class ProductDisplayPage extends StatefulWidget {
@@ -154,7 +155,8 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Total: ${_totalPrice.toStringAsFixed(2)}'),
-              ElevatedButton(
+              Button(
+                width: 106,
                 onPressed: _addToCart,
                 child: const Text('Add to Cart'),
               ),

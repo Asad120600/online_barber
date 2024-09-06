@@ -47,6 +47,7 @@ dependencies:
   flutter_swiper_view: ^1.1.8
   flutter_launcher_icons: ^0.13.1
   firebase_app_check: ^0.3.0+5
+  firebase_analytics: ^11.3.0
 
 
 #  google_place: ^0.4.0

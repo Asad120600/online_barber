@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/shop/recent_orders.dart';
 
@@ -30,6 +32,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
+
+  bool _isLoading = false; // New state variable to manage loading indicator
 
   @override
   void initState() {
@@ -108,7 +112,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   Future<void> _confirmOrder() async {
     if (_formKey.currentState?.validate() ?? false) {
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+
       try {
+        // Retrieve the current user ID and device token
+        String currentUserId = LocalStorage().getCurrentUserId();
+        String? deviceToken = LocalStorage().getFirebaseToken(); // deviceToken is nullable
+
+        if (deviceToken == null) {
+          // Handle the case where deviceToken is null
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Device token is not available')),
+          );
+          setState(() {
+            _isLoading = false; // Hide loading indicator
+          });
+          return;
+        }
+
         // Store the order in Firestore
         DocumentReference orderRef = await FirebaseFirestore.instance.collection('orders').add({
           'userId': widget.userId,
@@ -120,6 +143,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
           'products': widget.productQuantities,
           'totalPrice': widget.totalPrice,
           'orderDate': Timestamp.now(),
+          'uid': currentUserId, // Store the current user ID
+          'deviceToken': deviceToken, // Store the device token
         });
 
         // Send notification to the admin (example uid used here)
@@ -137,7 +162,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           context,
           MaterialPageRoute(
             builder: (context) => RecentOrdersPage(
-              userId: LocalStorage().getCurrentUserId().toString(),
+              userId: LocalStorage().getCurrentUserId(),
             ),
           ),
         );
@@ -145,6 +170,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error placing order: ${e.toString()}')),
         );
+      } finally {
+        setState(() {
+          _isLoading = false; // Hide loading indicator
+        });
       }
     }
   }
@@ -158,140 +187,103 @@ class _CheckoutPageState extends State<CheckoutPage> {
         title: const Text('Checkout'),
       ),
       resizeToAvoidBottomInset: true,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Order Summary',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            const SizedBox(height: 16),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: cartItems.length,
-              itemBuilder: (context, index) {
-                final productId = cartItems[index].key;
-                final quantity = cartItems[index].value;
-
-                return FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const ListTile(
-                        title: Text('Loading...'),
-                      );
-                    }
-
-                    if (snapshot.hasError) {
-                      return ListTile(
-                        title: Text('Error: ${snapshot.error}'),
-                      );
-                    }
-
-                    final productData = snapshot.data?.data() as Map<String, dynamic>?;
-
-                    if (productData == null) {
-                      return const ListTile(
-                        title: Text('Product not found'),
-                      );
-                    }
-
-                    final price = double.tryParse(productData['price']) ?? 0.0;
-
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: NetworkImage(productData['imageUrl']),
-                      ),
-                      title: Text(productData['description']),
-                      subtitle: Text('Quantity: $quantity'),
-                      trailing: Text((price * quantity).toStringAsFixed(2)),
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 16),
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('User Details', style: Theme.of(context).textTheme.titleLarge),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your email';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _firstNameController,
-                    decoration: const InputDecoration(labelText: 'First Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your first name';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _lastNameController,
-                    decoration: const InputDecoration(labelText: 'Last Name'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your last name';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _phoneController,
-                    decoration: const InputDecoration(labelText: 'Phone'),
-                    keyboardType: TextInputType.phone,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your phone number';
-                      }
-                      return null;
-                    },
-                  ),
-                  TextFormField(
-                    controller: _addressController,
-                    decoration: const InputDecoration(labelText: 'Address'),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your address';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Total: ${widget.totalPrice.toStringAsFixed(2)}',
+                  'Order Summary',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
-                ElevatedButton(
-                  onPressed: _confirmOrder,
-                  child: const Text('Confirm Order'),
+                const SizedBox(height: 16),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: cartItems.length,
+                  itemBuilder: (context, index) {
+                    final productId = cartItems[index].key;
+                    final quantity = cartItems[index].value;
+
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+
+                        if (snapshot.hasError || !snapshot.hasData) {
+                          return ListTile(
+                            title: Text('Product not found'),
+                          );
+                        }
+
+                        var productData = snapshot.data!.data() as Map<String, dynamic>;
+
+                        return ListTile(
+                          title: Text(productData['description'] ?? 'No Description'),
+                          subtitle: Text('Quantity: $quantity'),
+                          trailing: Text('\$${(productData['price'] ?? 0) * quantity}'),
+                        );
+                      },
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Total Price: \$${widget.totalPrice}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 16),
+                Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _emailController,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your email' : null,
+                      ),
+                      TextFormField(
+                        controller: _firstNameController,
+                        decoration: const InputDecoration(labelText: 'First Name'),
+                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your first name' : null,
+                      ),
+                      TextFormField(
+                        controller: _lastNameController,
+                        decoration: const InputDecoration(labelText: 'Last Name'),
+                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your last name' : null,
+                      ),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: const InputDecoration(labelText: 'Phone'),
+                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your phone number' : null,
+                      ),
+                      TextFormField(
+                        controller: _addressController,
+                        decoration: const InputDecoration(labelText: 'Address'),
+                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your address' : null,
+                      ),
+                      const SizedBox(height: 16),
+                      Button(
+                        onPressed: _confirmOrder,
+                         child: Text("Confirm Order"),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
+          ),
+          if (_isLoading) ...[
+            Container(
+              color: Colors.black54,
+              child: const Center(child: LoadingDots()), // Show LoadingDots when loading
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
