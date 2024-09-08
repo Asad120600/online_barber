@@ -109,9 +109,6 @@ class _MyAppState extends State<MyApp> {
       log("Failed to update user location: $e");
     }
   }
-
-
-
   void requestPermission() async {
     FirebaseMessaging message = FirebaseMessaging.instance;
 
