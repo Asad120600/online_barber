@@ -196,6 +196,9 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
+      // Log the error using debugPrint
+      debugPrint('Error during Google sign-in: $e');
+
       Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

@@ -64,23 +64,36 @@ class CartPage extends StatelessWidget {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(8.0),
         color: Colors.grey[200],
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text('Total: ${totalPrice.toStringAsFixed(2)}'),
-            Button(
-              width: 106,
-              onPressed: () {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => CheckoutPage(
-                    productQuantities: productQuantities,
-                    totalPrice: totalPrice, userId: LocalStorage().getCurrentUserId().toString(),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Adjust the font size based on the available width
+            double fontSize = constraints.maxWidth > 200 ? 16 : 14; // Adjust font size as needed
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Total: ${totalPrice.toStringAsFixed(2)}'),
+                SizedBox(
+                  width: 118, // Ensure this width fits the button content without wrapping
+                  child: Button(
+                    onPressed: () {
+                      Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => CheckoutPage(
+                          productQuantities: productQuantities,
+                          totalPrice: totalPrice,
+                          userId: LocalStorage().getCurrentUserId().toString(),
+                        ),
+                      ));
+                    },
+                    child: Text(
+                      'Checkout',
+                      style: TextStyle(fontSize: fontSize),
+                    ),
                   ),
-                ));
-              },
-              child: const Text('Checkout'),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
