@@ -307,7 +307,7 @@ class AdminOrdersPage extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const SizedBox(width: 250,),
+                          const SizedBox(width: 240,),
                           PopupMenuButton<String>(
                             onSelected: (value) => _updateOrderStatus(context, orderId, value, userToken),
                             itemBuilder: (BuildContext context) {

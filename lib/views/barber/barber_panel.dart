@@ -1,4 +1,3 @@
-// barber panel
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -23,12 +22,58 @@ class BarberPanel extends StatefulWidget {
 class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStateMixin {
   late final AppointmentController _appointmentController;
   TabController? _tabController;
+  bool _showSnackBar = false;
 
   @override
   void initState() {
     super.initState();
+    // _showProfileIncompleteSnackBar();
     _appointmentController = AppointmentController();
     _tabController = TabController(length: 3, vsync: this);
+
+    _checkBarberProfile();
+  }
+
+  Future<void> _checkBarberProfile() async {
+    try {
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(widget.barberId).get();
+      if (barberDoc.exists) {
+        final data = barberDoc.data() as Map<String, dynamic>;
+        final address = data['address'] as String?;
+        final shopName = data['shopName'] as String?;
+
+        // Show snackbar if address or shopName is missing
+        if (address == null || address.isEmpty || shopName == null || shopName.isEmpty) {
+          // Trigger UI update to show Snackbar
+          setState(() {
+            _showSnackBar = true;
+          });
+
+          // Use addPostFrameCallback to ensure Snackbar is shown after the frame is built
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Please update your Address and Shop Name in profile settings.'),
+                duration: Duration(seconds: 5),
+              ),
+            );
+          });
+        }
+      }
+    } catch (e) {
+      log('Error fetching barber profile: $e');
+    }
+  }
+
+  void _showProfileIncompleteSnackBar() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please update your Address and Shop Name in profile settings.'),
+          duration: Duration(seconds: 5),
+        ),
+      );
+    });
   }
 
   @override
@@ -37,27 +82,27 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
     super.dispose();
   }
 
-
   Future<String> getUserDeviceToken(String uid) async {
-    try {
-      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection(
-          'users').doc(uid).get();
-      if (barberDoc.exists) {
-        final data = barberDoc.data() as Map<String, dynamic>;
-        final deviceToken = data['token'];
-        if (deviceToken != null) {
-          return deviceToken;
-        } else {
-          throw Exception('Device token is missing in the document');
-        }
+  try {
+    DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection(
+        'users').doc(uid).get();
+    if (barberDoc.exists) {
+      final data = barberDoc.data() as Map<String, dynamic>;
+      final deviceToken = data['token'];
+      if (deviceToken != null) {
+        return deviceToken;
       } else {
-        throw Exception('Barber document does not exist');
+        throw Exception('Device token is missing in the document');
       }
-    } catch (e) {
-      log('Error fetching barber device token: $e');
-      rethrow;
+    } else {
+      throw Exception('Barber document does not exist');
     }
+  } catch (e) {
+    log('Error fetching barber device token: $e');
+    rethrow;
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +146,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
           : const Center(child: Text('Failed to initialize tabs.')),
     );
   }
+
 
   Widget _buildAppointmentsTab(
       List<Appointment> Function(List<Appointment>) filterFunction,
@@ -224,7 +270,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
                                     throw 'Could not launch $url';
                                   }
                                 },
-                                icon: Icon(Icons.pin_drop_outlined),
+                                icon: const Icon(Icons.pin_drop_outlined),
                               ),
                             ],
                           )
@@ -413,3 +459,6 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
     }).toList();
   }
 }
+
+
+
