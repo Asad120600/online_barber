@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
@@ -8,6 +7,7 @@ import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/admin/admin_drawer.dart';
 import 'package:online_barber_app/views/admin/admin_shop/order_notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -20,24 +20,40 @@ class _AdminPanelState extends State<AdminPanel> {
   late final AppointmentController _appointmentController;
   int _notificationCount = 0;
 
-
   @override
   void initState() {
     super.initState();
     _appointmentController = AppointmentController();
-    _updateNotificationCount();
-
+    _loadNotificationCount();  // Load saved notification count
+    _updateNotificationCount(); // This can still increase the count
   }
+
+  // Load the notification count from local storage
+  Future<void> _loadNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationCount = prefs.getInt('notificationCount') ?? 0;
+    });
+  }
+
+  // Save the notification count to local storage
+  Future<void> _saveNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('notificationCount', _notificationCount);
+  }
+
   void _updateNotificationCount() {
     setState(() {
       _notificationCount++;
     });
+    _saveNotificationCount();  // Save the updated count
   }
 
   void _resetNotificationCount() {
     setState(() {
       _notificationCount = 0;
     });
+    _saveNotificationCount();  // Save the reset count
   }
 
   Future<String> _getUserName(String uid) async {
@@ -67,15 +83,16 @@ class _AdminPanelState extends State<AdminPanel> {
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications),
-                onPressed: () {
-                  _resetNotificationCount(); // Reset the counter
-                  Navigator.push(
+                icon: const Icon(Icons.notifications),
+                onPressed: () async {
+                  await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => AdminNotificationsPage(),
                     ),
                   );
+                  // Reset the notification count when the notifications screen is opened
+                  _resetNotificationCount();
                 },
               ),
               if (_notificationCount > 0)
@@ -83,19 +100,19 @@ class _AdminPanelState extends State<AdminPanel> {
                   right: 8,
                   top: 8,
                   child: Container(
-                    padding: EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    constraints: BoxConstraints(
+                    constraints: const BoxConstraints(
                       minWidth: 20,
                       minHeight: 20,
                     ),
                     child: Center(
                       child: Text(
                         '$_notificationCount',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                         ),
@@ -107,7 +124,7 @@ class _AdminPanelState extends State<AdminPanel> {
           ),
           Builder(
             builder: (context) => IconButton(
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
               onPressed: () => Scaffold.of(context).openEndDrawer(),
             ),
           ),
@@ -148,7 +165,6 @@ class _AdminPanelState extends State<AdminPanel> {
                       if (userNameSnapshot.hasError) {
                         return Center(child: Text('Error: ${userNameSnapshot.error}'));
                       } else {
-                        String userName = userNameSnapshot.data ?? 'Unknown User';
 
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -275,7 +291,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: appointment.services.isNotEmpty
                                             ? appointment.services.map((service) {
                                           return Chip(
-                                            label: Text(service.name ?? 'Unknown Service'),
+                                            label: Text(service.name),
                                           );
                                         }).toList()
                                             : [const Chip(label: Text('No services'))],
