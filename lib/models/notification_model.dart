@@ -5,12 +5,14 @@ class NotificationModel {
   final String title;
   final String body;
   final DateTime date;
+  final String userId;
 
   NotificationModel({
     required this.id,
     required this.title,
     required this.body,
     required this.date,
+    required this.userId,
   });
 
   // Factory constructor to create an instance from a general Firestore document
@@ -20,7 +22,8 @@ class NotificationModel {
       id: doc.id,
       title: data['title'] ?? '',
       body: data['message'] ?? data['body'] ?? '', // Handle both 'body' and 'message'
-      date: (data['date'] ?? data['timestamp'] as Timestamp).toDate(), // Handle both 'date' and 'timestamp'
+      date: (data['date'] ?? data['timestamp'] as Timestamp).toDate(),
+      userId: data['userId'] ?? '', // Handle both 'date' and 'timestamp'
     );
   }
 
@@ -31,7 +34,8 @@ class NotificationModel {
       id: doc.id,
       title: data['title'] ?? '',
       body: data['message'] ?? '', // Assuming 'message' field in announcements
-      date: (data['timestamp'] as Timestamp).toDate(), // Assuming 'timestamp' field in announcements
+      date: (data['timestamp'] as Timestamp).toDate(),
+      userId: data['userId'] ?? '', // Assuming 'timestamp' field in announcements
     );
   }
 
@@ -40,6 +44,7 @@ class NotificationModel {
       'title': title,
       'body': body,
       'date': Timestamp.fromDate(date),
+      'userId': userId,
     };
   }
 
@@ -50,6 +55,7 @@ class NotificationModel {
       title: data['status'] ?? 'Order Status Update',
       body: data['message'] ?? 'No details provided.',
       date: (data['timestamp'] as Timestamp).toDate(), id: '',
+      userId: data['userId'] ?? '',
     );
   }
 }

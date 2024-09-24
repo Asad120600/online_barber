@@ -106,7 +106,8 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return
+      Scaffold(
       body: _slides.isEmpty
           ? Center(child: CircularProgressIndicator())
           : Column(
@@ -146,16 +147,19 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Text(
-                      _slides.isNotEmpty ? _slides[currentIndex]['text'] as String : '',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.black,
-                        fontFamily: 'Acumin Pro',
+                  SizedBox(
+                    height: 100, // Set a fixed height for the text container
+                    child: Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Text(
+                        _slides.isNotEmpty ? _slides[currentIndex]['text'] as String : '',
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.black,
+                          fontFamily: 'Acumin Pro',
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
                     ),
                   ),
                   Padding(
@@ -170,7 +174,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
                         );
                       },
                       child: const Text(
-                        'Enter App',
+                        'Continue',
                         style: TextStyle(
                           fontFamily: 'Acumin Pro',
                         ),

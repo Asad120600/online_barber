@@ -99,13 +99,13 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                       Expanded(
                         child: Center(
                           child: CircleAvatar(
-                            radius: 60,  // Adjust the radius as needed
+                            radius: 80,  // Increased radius for larger CircleAvatar
                             backgroundImage: NetworkImage(product['imageUrl']),
                           ),
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(6.0),
                         child: Text('Price: ${price.toStringAsFixed(2)}'),
                       ),
                       Padding(
@@ -146,42 +146,42 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
           );
         },
       ),
-        bottomNavigationBar: Visibility(
-          visible: _productQuantities.isNotEmpty,
-          child: Container(
-            padding: const EdgeInsets.all(8.0),
-            color: Colors.grey[200],
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                // Adjust the font size based on the available width
-                double fontSize = constraints.maxWidth * 0.04; // Adjust the multiplier as needed
+      bottomNavigationBar: Visibility(
+        visible: _productQuantities.isNotEmpty,
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          color: Colors.grey[200],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Adjust the font size based on the available width
+              double fontSize = constraints.maxWidth * 0.04; // Adjust the multiplier as needed
 
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Total: ${_totalPrice.toStringAsFixed(2)}',
-                      style: TextStyle(fontSize: fontSize), // Adjust font size as needed
-                    ),
-                    SizedBox(
-                      width: 106, // Button width
-                      child: Button(
-                        onPressed: _addToCart,
-                        child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Text(
-                            'Add to Cart',
-                            style: TextStyle(fontSize: fontSize),
-                          ),
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total: ${_totalPrice.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: fontSize), // Adjust font size as needed
+                  ),
+                  SizedBox(
+                    width: 106, // Button width
+                    child: Button(
+                      onPressed: _addToCart,
+                      child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(
+                          'Add to Cart',
+                          style: TextStyle(fontSize: fontSize),
                         ),
                       ),
                     ),
-                  ],
-                );
-              },
-            ),
+                  ),
+                ],
+              );
+            },
           ),
-        )
+        ),
+      ),
     );
   }
 }

@@ -383,7 +383,7 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
         body: 'Your appointment on ${DateFormat('dd/MM/yyyy').format(
             appointment.date.toDate())} at ${appointment
             .time} has been confirmed.',
-        date: DateTime.now(), // Current date and time
+        date: DateTime.now(),  userId: 'userId' ?? '',  // Current date and time
       );
 
       // Save notification to Firestore

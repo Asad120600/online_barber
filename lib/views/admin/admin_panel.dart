@@ -24,8 +24,8 @@ class _AdminPanelState extends State<AdminPanel> {
   void initState() {
     super.initState();
     _appointmentController = AppointmentController();
-    _loadNotificationCount();  // Load saved notification count
-    _updateNotificationCount(); // This can still increase the count
+    _loadNotificationCount();
+    _updateNotificationCount();
   }
 
   // Load the notification count from local storage
