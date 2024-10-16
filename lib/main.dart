@@ -22,8 +22,6 @@ void main() async {
   LocalStorage.initStorage();
   runApp(const MyApp());
 }
-
-
 class MyApp extends StatefulWidget {
 
   const MyApp({super.key});
