@@ -1,49 +1,42 @@
 {
   "project_info": {
-    "project_number": "868392948570",
-    "project_id": "online-barber-def19",
-    "storage_bucket": "online-barber-def19.appspot.com"
+    "project_number": "563327464865",
+    "project_id": "online-barber-85e57",
+    "storage_bucket": "online-barber-85e57.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:868392948570:android:5b546940fa69da46b15963",
+        "mobilesdk_app_id": "1:563327464865:android:ce8f4ba47ba93f4c6f47e0",
         "android_client_info": {
-          "package_name": "com.online.barber"
+          "package_name": "com.getbarberonline.app"
         }
       },
       "oauth_client": [
         {
-          "client_id": "868392948570-l9fl405pnh8qo7femte48irpatm0spls.apps.googleusercontent.com",
+          "client_id": "563327464865-ot3l9aluorfbffni9ot7b5hcl0glcovu.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.online.barber",
-            "certificate_hash": "c775945d680733edd9b04e27fd588c1a3df93648"
+            "package_name": "com.getbarberonline.app",
+            "certificate_hash": "688c4154f5eaf9a8981988965f33b35ff7e36a2d"
           }
         },
         {
-          "client_id": "868392948570-udlj7ai0ckqjljdkdjsfahi495t541ms.apps.googleusercontent.com",
+          "client_id": "563327464865-vd0i3sc1o019blvkhdu8p79t90taipfn.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDcWHUoPk0MSdZzCN0uMflEy8ihLF4GbZM"
+          "current_key": "AIzaSyD18hzcdH9C7wkJs9o2bcYIxXCOUCbQg38"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "868392948570-udlj7ai0ckqjljdkdjsfahi495t541ms.apps.googleusercontent.com",
+              "client_id": "563327464865-vd0i3sc1o019blvkhdu8p79t90taipfn.apps.googleusercontent.com",
               "client_type": 3
-            },
-            {
-              "client_id": "868392948570-s9sr670oe8am30lspldq5f9iohh10vgk.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.onlineBarberApp"
-              }
             }
           ]
         }

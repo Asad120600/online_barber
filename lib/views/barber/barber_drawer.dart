@@ -74,14 +74,18 @@ class _BarberDrawerState extends State<BarberDrawer> {
                         : null,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'Hello 👋, ${_firstName ?? 'Barber'}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
+                  Flexible(
+                    child: Text(
+                      'Hello 👋, ${_firstName ?? 'Barber'}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                      ),
+                      maxLines: 2, // Allow up to two lines
+                      overflow: TextOverflow.ellipsis, // Use ellipsis if it exceeds two lines
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
+
                 ],
               ),
             ),

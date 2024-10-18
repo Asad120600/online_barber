@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/models/notification_model.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/order_notifications.dart';
 
 class NotificationsScreen extends StatelessWidget {
   final String uid;
@@ -17,15 +20,15 @@ class NotificationsScreen extends StatelessWidget {
           title: const Text('Notifications'),
           bottom: const TabBar(
             tabs: [
-              Tab(text: 'General Notifications'),  // Show Other Notifications first
-              Tab(text: 'Order Notifications'),
+              Tab(text: 'General Notifications'),  // General Notifications
+              Tab(text: 'Order Notifications'),    // Order Notifications
             ],
           ),
         ),
-        body: const TabBarView(
+        body: TabBarView(
           children: [
-            OtherNotificationsTab(uid: 'some-uid'),  // Other Notifications tab
-            OrderNotifications(),  // Order Notifications tab
+            OtherNotificationsTab(uid: LocalStorage().getCurrentUserId()),  // Pass the uid to the other notifications tab
+            OrderNotificationsTab(uid:  LocalStorage().getCurrentUserId()),  // Pass the uid to the order notifications tab
           ],
         ),
       ),
@@ -33,64 +36,6 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
-class OrderNotifications extends StatelessWidget {
-  const OrderNotifications({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('notifications').orderBy('timestamp', descending: true).snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        final notifications = snapshot.data?.docs;
-
-        if (notifications == null || notifications.isEmpty) {
-          return const Center(child: Text('No notifications available'));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: notifications.length,
-          itemBuilder: (context, index) {
-            final notification = notifications[index].data() as Map<String, dynamic>;
-            final orderId = notification['orderId'] ?? 'N/A';
-            final message = notification['message'] ?? 'No message available';
-            final notificationBody = notification['body'] ?? 'No details available';
-
-            return Card(
-              elevation: 4.0,
-              margin: const EdgeInsets.symmetric(vertical: 8.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: ListTile(
-                title: Text('Order ID: $orderId'),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Message: $message'),
-                    Text('Details: $notificationBody'),
-                  ],
-                ),
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.orangeAccent,
-                  child: Icon(Icons.notifications),
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
 
 class OtherNotificationsTab extends StatelessWidget {
   final String uid;
@@ -103,7 +48,7 @@ class OtherNotificationsTab extends StatelessWidget {
       stream: _getNotificationsStream(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: LoadingDots());
         } else if (snapshot.hasError) {
           return Center(child: Text('Error: ${snapshot.error}'));
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -138,7 +83,7 @@ class OtherNotificationsTab extends StatelessWidget {
   Stream<List<NotificationModel>> _getNotificationsStream() {
     return FirebaseFirestore.instance
         .collection('users')
-        .doc(uid)
+        .doc(uid) // Use the provided uid to filter notifications
         .collection('notifications')
         .snapshots()
         .asyncMap((notificationSnapshot) async {

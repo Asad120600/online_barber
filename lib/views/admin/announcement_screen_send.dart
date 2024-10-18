@@ -16,6 +16,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final TextEditingController _messageController = TextEditingController();
   List<DocumentSnapshot> allUsers = []; // Store all users
   List<String> selectedUserTokens = []; // List of selected user tokens
+  bool selectAll = false; // Track select all state
 
   @override
   void initState() {
@@ -36,6 +37,21 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     }
   }
 
+  void toggleSelectAll() {
+    setState(() {
+      if (selectAll) {
+        // Deselect all users
+        selectedUserTokens.clear();
+      } else {
+        // Select all users and cast tokens to List<String>
+        selectedUserTokens = allUsers
+            .map((user) => user['token'] as String) // Cast each token as String
+            .toList();
+      }
+      selectAll = !selectAll;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,17 +61,28 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(labelText: 'Title'),
             ),
+            const SizedBox(height: 10),
             TextField(
               controller: _messageController,
               decoration: const InputDecoration(labelText: 'Message'),
             ),
             const SizedBox(height: 20),
-            const Text('Select Users:'),
+            const Text('Select Users:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: toggleSelectAll,
+                  child: Text(selectAll ? 'Deselect All' : 'Select All'),
+                ),
+              ],
+            ),
             Expanded(
               child: ListView.builder(
                 itemCount: allUsers.length,
@@ -76,7 +103,6 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         } else {
                           selectedUserTokens.remove(userToken);
                         }
-                        // Debug log
                         log('Selected User Tokens: $selectedUserTokens');
                       });
                     },
@@ -84,22 +110,35 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 },
               ),
             ),
-            Button(
-              onPressed: () {
-                createAnnouncement(
-                  _titleController.text,
-                  _messageController.text,
-                  context,
-                );
-              },
-              child: const Text('Send Announcement'),
+            const SizedBox(height: 20),
+            Center(
+              child: Button(
+                onPressed: () {
+                  if (_titleController.text.isEmpty || _messageController.text.isEmpty) {
+                    // Show error message if title or message is empty
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter both a title and a message.'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } else {
+                    // If both title and message are filled, send the announcement
+                    createAnnouncement(
+                      _titleController.text,
+                      _messageController.text,
+                      context,
+                    );
+                  }
+                },
+                child: const Text('Send Announcement'),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
 
   Future<void> createAnnouncement(String title, String message, BuildContext context) async {
     try {

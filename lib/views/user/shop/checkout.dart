@@ -148,7 +148,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         });
 
         // Send notification to the admin (example uid used here)
-        await _sendNotificationToAdmin('OEQj3lxQnPcdcyeuJEIsm9MxDWx1', orderRef.id);
+        await _sendNotificationToAdmin('NF0CnhZ0nBZY3fOB7l0zUvio5Zk1', orderRef.id);
 
         // Empty the cart
         await FirebaseFirestore.instance.collection('carts').doc(widget.userId).delete();
@@ -243,29 +243,59 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     children: [
                       TextFormField(
                         controller: _emailController,
-                        decoration: const InputDecoration(labelText: 'Email'),
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Circular border
+                          ),
+                        ),
                         validator: (value) => value?.isEmpty ?? true ? 'Please enter your email' : null,
                       ),
+                      const SizedBox(height: 16), // Spacing between fields
                       TextFormField(
                         controller: _firstNameController,
-                        decoration: const InputDecoration(labelText: 'First Name'),
+                        decoration: InputDecoration(
+                          labelText: 'First Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Circular border
+                          ),
+                        ),
                         validator: (value) => value?.isEmpty ?? true ? 'Please enter your first name' : null,
                       ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _lastNameController,
-                        decoration: const InputDecoration(labelText: 'Last Name'),
+                        decoration: InputDecoration(
+                          labelText: 'Last Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Circular border
+                          ),
+                        ),
                         validator: (value) => value?.isEmpty ?? true ? 'Please enter your last name' : null,
                       ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _phoneController,
-                        decoration: const InputDecoration(labelText: 'Phone'),
+                        decoration: InputDecoration(
+                          labelText: 'Phone',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Circular border
+                          ),
+                        ),
                         validator: (value) => value?.isEmpty ?? true ? 'Please enter your phone number' : null,
                       ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         controller: _addressController,
-                        decoration: const InputDecoration(labelText: 'Address'),
+                        decoration: InputDecoration(
+                          labelText: 'Address',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.0), // Circular border
+                          ),
+                        ),
                         validator: (value) => value?.isEmpty ?? true ? 'Please enter your address' : null,
                       ),
+
                       const SizedBox(height: 16),
                       Button(
                         onPressed: _confirmOrder,

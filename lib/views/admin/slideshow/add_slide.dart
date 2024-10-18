@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 
 class AddSlidePage extends StatefulWidget {
   const AddSlidePage({super.key});
@@ -19,6 +20,7 @@ class _AddSlidePageState extends State<AddSlidePage> {
   final TextEditingController _textController = TextEditingController();
   String? _imageUrl;
   File? _imageFile;
+  bool _isUploading = false; // State to track the upload status
 
   Future<void> _uploadImage() async {
     try {
@@ -42,6 +44,10 @@ class _AddSlidePageState extends State<AddSlidePage> {
         return;
       }
 
+      setState(() {
+        _isUploading = true; // Start showing the loading indicator
+      });
+
       final fileName = DateTime.now().toIso8601String();
       final ref = _storage.ref().child('slideshow_images/$fileName');
       await ref.putFile(file);
@@ -50,17 +56,21 @@ class _AddSlidePageState extends State<AddSlidePage> {
       setState(() {
         _imageFile = file;
         _imageUrl = imageUrl;
+        _isUploading = false; // Hide loading indicator after upload
       });
+
       print('Image uploaded successfully: $imageUrl');
     } catch (e) {
       print('Error during image upload: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to upload image')),
       );
+
+      setState(() {
+        _isUploading = false; // Hide loading indicator if upload fails
+      });
     }
   }
-
-
 
   Future<void> _saveSlide() async {
     if (_imageUrl != null && _textController.text.isNotEmpty) {
@@ -101,12 +111,15 @@ class _AddSlidePageState extends State<AddSlidePage> {
                 decoration: InputDecoration(labelText: 'Image Text'),
               ),
               SizedBox(height: 20),
-              ElevatedButton.icon(
+              _isUploading
+                  ? LoadingDots() // Show LoadingDots widget while uploading
+                  : ElevatedButton.icon(
                 onPressed: _uploadImage,
                 icon: Icon(Icons.image),
                 label: Text('Upload Image'),
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange,
                 ),
               ),
               SizedBox(height: 20),
@@ -114,7 +127,8 @@ class _AddSlidePageState extends State<AddSlidePage> {
                 onPressed: _saveSlide,
                 child: Text('Save Slide'),
                 style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white, backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.orange,
                 ),
               ),
             ],

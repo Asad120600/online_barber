@@ -36,19 +36,21 @@ class _PrivacySettingsState extends State<PrivacySettings> {
       builder: (context) {
         return AlertDialog(
           title: const Text('Edit Privacy Policy'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _titleController,
-                decoration: const InputDecoration(labelText: 'Title'),
-              ),
-              TextField(
-                controller: _contentController,
-                decoration: const InputDecoration(labelText: 'Content'),
-                maxLines: 5,
-              ),
-            ],
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _titleController,
+                  decoration: const InputDecoration(labelText: 'Title'),
+                ),
+                TextField(
+                  controller: _contentController,
+                  decoration: const InputDecoration(labelText: 'Content'),
+                  maxLines: 5,
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
@@ -93,111 +95,120 @@ class _PrivacySettingsState extends State<PrivacySettings> {
           automaticallyImplyLeading: true,
           title: const Text('Privacy Policy Settings'),
         ),
+        resizeToAvoidBottomInset: true, // Ensure the UI resizes when the keyboard opens
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8.0),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 4.0,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(labelText: 'Title'),
-                    ),
-                    const SizedBox(height: 8.0),
-                    TextField(
-                      controller: _contentController,
-                      decoration: const InputDecoration(labelText: 'Content'),
-                      maxLines: 5,
-                    ),
-                    const SizedBox(height: 16.0),
-                    Button(
-                      onPressed: _addPolicy,
-                      child: const Text('Add Policy'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16.0),
               Expanded(
-                child: StreamBuilder<QuerySnapshot>(
-                  stream: _firestore.collection('privacyPolicies').snapshots(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (snapshot.hasError) {
-                      return const Center(child: Text('Error loading privacy policies.'));
-                    }
-
-                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Center(child: Text('No privacy policies available.'));
-                    }
-
-                    final policyDocs = snapshot.data!.docs;
-
-                    return ListView.builder(
-                      itemCount: policyDocs.length,
-                      itemBuilder: (context, index) {
-                        final policy = policyDocs[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          padding: const EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8.0),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 4.0,
-                                offset: Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: ListTile(
-                            title: Text(
-                              policy['title'],
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8.0),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4.0,
+                              offset: Offset(0, 2),
                             ),
-                            subtitle: Text(
-                              policy['content'],
-                              style: const TextStyle(fontSize: 16),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: _titleController,
+                              decoration: const InputDecoration(labelText: 'Title'),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit),
-                                  onPressed: () {
-                                    _editPolicy(policy.id, policy['title'], policy['content']);
-                                  },
+                            const SizedBox(height: 8.0),
+                            TextField(
+                              controller: _contentController,
+                              decoration: const InputDecoration(labelText: 'Content'),
+                              maxLines: 5,
+                            ),
+                            const SizedBox(height: 16.0),
+                            Button(
+                              onPressed: _addPolicy,
+                              child: const Text('Add Policy'),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _firestore.collection('privacyPolicies').snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+
+                          if (snapshot.hasError) {
+                            return const Center(child: Text('Error loading privacy policies.'));
+                          }
+
+                          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                            return const Center(child: Text('No privacy policies available.'));
+                          }
+
+                          final policyDocs = snapshot.data!.docs;
+
+                          return ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: policyDocs.length,
+                            itemBuilder: (context, index) {
+                              final policy = policyDocs[index];
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 16.0),
+                                padding: const EdgeInsets.all(16.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 4.0,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete),
-                                  onPressed: () {
-                                    _deletePolicy(policy.id);
-                                  },
+                                child: ListTile(
+                                  title: Text(
+                                    policy['title'],
+                                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Text(
+                                    policy['content'],
+                                    style: const TextStyle(fontSize: 16),
+                                  ),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit),
+                                        onPressed: () {
+                                          _editPolicy(policy.id, policy['title'], policy['content']);
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete),
+                                        onPressed: () {
+                                          _deletePolicy(policy.id);
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDcWHUoPk0MSdZzCN0uMflEy8ihLF4GbZM',
-    appId: '1:868392948570:android:5b546940fa69da46b15963',
-    messagingSenderId: '868392948570',
-    projectId: 'online-barber-def19',
-    storageBucket: 'online-barber-def19.appspot.com',
+    apiKey: 'AIzaSyD18hzcdH9C7wkJs9o2bcYIxXCOUCbQg38',
+    appId: '1:563327464865:android:ce8f4ba47ba93f4c6f47e0',
+    messagingSenderId: '563327464865',
+    projectId: 'online-barber-85e57',
+    storageBucket: 'online-barber-85e57.appspot.com',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

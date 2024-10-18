@@ -7,6 +7,7 @@ import 'package:online_barber_app/utils/button.dart';
 import 'dart:io';
 
 import 'package:online_barber_app/utils/loading_dialog.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 
 class ManageService extends StatefulWidget {
   final Service? service;
@@ -26,6 +27,7 @@ class _ManageServiceState extends State<ManageService> {
   File? _image;
   String? _imageUrl;
   bool _isHomeService = false;
+  bool _isUploading = false; // New state to track the uploading process
 
   @override
   void initState() {
@@ -52,11 +54,21 @@ class _ManageServiceState extends State<ManageService> {
   }
 
   Future<String> _uploadImage(File image) async {
+    setState(() {
+      _isUploading = true;  //Start showing loading indicator
+    });
+
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
     Reference storageReference = FirebaseStorage.instance.ref().child('services/$fileName');
     UploadTask uploadTask = storageReference.putFile(image);
     TaskSnapshot taskSnapshot = await uploadTask;
-    return await taskSnapshot.ref.getDownloadURL();
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+    setState(() {
+      _isUploading = false;  // Hide loading indicator after upload
+    });
+
+    return downloadUrl;
   }
 
   void _saveService() async {
@@ -66,7 +78,7 @@ class _ManageServiceState extends State<ManageService> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return const LoadingDialog(message: 'Service is Adding ',);
+          return const LoadingDialog(message: 'Service is Adding ');
         },
       );
 
@@ -195,6 +207,9 @@ class _ManageServiceState extends State<ManageService> {
                     onPressed: _pickImage,
                     child: const Text('Pick Image'),
                   ),
+                  const SizedBox(height: 20),
+                  if (_isUploading)
+                    const LoadingDots(), // Show LoadingDots while uploading
                   const SizedBox(height: 20),
                   Button(
                     onPressed: _saveService,
