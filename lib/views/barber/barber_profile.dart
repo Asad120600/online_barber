@@ -259,7 +259,7 @@ class _BarberProfileState extends State<BarberProfile> {
                     labelText: 'Address',
                     icon: const Icon(Icons.location_on, color: Colors.orange),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.map, color: Colors.orange),
+                      icon: const Icon(Icons.pin_drop_rounded, color: Colors.orange),
                       onPressed: _openMap, // Call the method to open Google Maps
                     ),
                     border: OutlineInputBorder(
