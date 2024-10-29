@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:online_barber_app/models/notification_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-import 'package:online_barber_app/views/user/order_notifications.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/order_notifications.dart';
 
 class NotificationsScreen extends StatelessWidget {
   final String uid;

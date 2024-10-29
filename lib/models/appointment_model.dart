@@ -18,6 +18,7 @@ class Appointment {
   final double homeServicePrice;
   final String? status;
   final bool hasBeenRated; // New field added
+  final String? paymentMethod; // New field for payment method
 
   Appointment({
     required this.id,
@@ -36,6 +37,7 @@ class Appointment {
     required this.totalPrice,
     this.status,
     this.hasBeenRated = false, // New field initialized
+    this.paymentMethod, // Add this line
   });
 
   // Convert Appointment to a map for Firestore
@@ -57,6 +59,7 @@ class Appointment {
       'totalPrice': totalPrice,
       'status': status,
       'hasBeenRated': hasBeenRated, // New field added
+      'paymentMethod': paymentMethod, // Include this line
     };
   }
 
@@ -83,6 +86,7 @@ class Appointment {
       homeServicePrice: (data['homeServicePrice'] as num?)?.toDouble() ?? 0.0,
       status: data['status'],
       hasBeenRated: data['hasBeenRated'] ?? false, // Default to false if not present
+      paymentMethod: data['paymentMethod'], // Add this line
     );
   }
 }

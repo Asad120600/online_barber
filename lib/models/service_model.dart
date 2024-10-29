@@ -6,9 +6,10 @@ class Service {
   final double price;
   final String category;
   final String? imageUrl;
-  final List<Map<String, dynamic>>? barberPrices;
+  final List<Map<String, dynamic>>? barberPrices; // List of maps containing barberId and price
   final bool isHomeService;
-  final double homeServicePrice;// List of maps containing barberId and price
+  final double homeServicePrice;
+  final String productId; // This field is for IAP product linking
 
   Service({
     required this.id,
@@ -19,6 +20,7 @@ class Service {
     this.barberPrices,
     required this.isHomeService,
     required this.homeServicePrice,
+    required this.productId, // Add productId initialization
   });
 
   // Convert a Service object to a Map for Firestore operations
@@ -32,6 +34,7 @@ class Service {
       'barberPrices': barberPrices,
       'isHomeService': isHomeService,
       'homeServicePrice': homeServicePrice,
+      'productId': productId, // Include productId in the map
     };
   }
 
@@ -46,6 +49,7 @@ class Service {
       isHomeService: data['isHomeService'] ?? false,
       homeServicePrice: (data['homeServicePrice'] ?? 0.0).toDouble(),
       barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
+      productId: data['productId'] ?? '', // Initialize productId
     );
   }
 
@@ -62,6 +66,7 @@ class Service {
       barberPrices: data['barberPrices'] != null ? List<Map<String, dynamic>>.from(data['barberPrices']) : null,
       isHomeService: data['isHomeService'] ?? false,
       homeServicePrice: (data['homeServicePrice'] ?? 0.0).toDouble(),
+      productId: data['productId'] ?? '', // Initialize productId from snapshot data
     );
   }
 }

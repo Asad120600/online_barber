@@ -9,6 +9,7 @@ import 'package:online_barber_app/views/admin/announcement_screen_send.dart';
 import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
 import 'package:online_barber_app/views/admin/barber%20admin/barber_stats.dart';
 import 'package:online_barber_app/views/admin/chat/admin_contact_reply.dart';
+import 'package:online_barber_app/views/admin/claim_request.dart';
 import 'package:online_barber_app/views/admin/services/manage_services.dart';
 import 'package:online_barber_app/views/admin/services/service_list.dart';
 import 'package:online_barber_app/views/admin/slideshow/slideshow_mnage.dart';
@@ -307,6 +308,21 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>  const AnnouncementScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.request_page_outlined),
+              title: const Text(
+                'Claim Requests',
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>  const ClaimRequestsScreen(),
                   ),
                 );
               },

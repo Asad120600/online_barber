@@ -88,6 +88,8 @@ class _ManageServiceState extends State<ManageService> {
         imageUrl = await _uploadImage(_image!);
       }
 
+      // Here, you should provide a productId.
+      // You can either generate it based on the service name or another logic.
       final service = Service(
         id: widget.service?.id ?? '',  // Provide an ID for both new and existing services
         name: _nameController.text,
@@ -96,6 +98,7 @@ class _ManageServiceState extends State<ManageService> {
         imageUrl: imageUrl,
         isHomeService: _isHomeService,
         homeServicePrice: double.parse(_homeServicePriceController.text),
+        productId: widget.service?.productId ?? _generateProductId(_nameController.text), // Generate productId
       );
 
       if (widget.service != null) {
@@ -118,6 +121,11 @@ class _ManageServiceState extends State<ManageService> {
 
       Navigator.pop(context); // Close the ManageService screen
     }
+  }
+
+// This method generates a productId based on the service name
+  String _generateProductId(String serviceName) {
+    return serviceName.toLowerCase().replaceAll(' ', '_'); // Basic example of productId generation
   }
 
   @override

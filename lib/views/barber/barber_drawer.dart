@@ -120,7 +120,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
                       price: 0.0,
                       category: 'Hair Styles',
                       imageUrl: null,
-                      barberPrices: null, isHomeService: false, homeServicePrice: 0.0,
+                      barberPrices: null, isHomeService: false, homeServicePrice: 0.0, productId: '',
                     ), barberId: '', ),
                   ),
                 );

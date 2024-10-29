@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:online_barber_app/views/user/chat_screen.dart';
-import 'package:online_barber_app/views/user/contact_us_page.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/chat_screen.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/contact_us_page.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});

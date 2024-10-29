@@ -1,12 +1,11 @@
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/alert_dialog.dart';
+import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
-import '../../utils/button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
-import '../../utils/button.dart';
+import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
 
 class AppointmentsShow extends StatefulWidget {

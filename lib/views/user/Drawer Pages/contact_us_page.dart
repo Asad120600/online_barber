@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
-import 'package:online_barber_app/views/user/chat_screen.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/chat_screen.dart';
 
 class ContactUsPage extends StatefulWidget {
   @override

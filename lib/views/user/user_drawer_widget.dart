@@ -4,16 +4,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/chat_list.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/notifications.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/privacy_policy.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/profile.dart';
+import 'package:online_barber_app/views/user/Drawer%20Pages/show_appointments.dart';
 import 'package:online_barber_app/views/user/announcements_show.dart';
-import 'package:online_barber_app/views/user/chat_list.dart';
-import 'package:online_barber_app/views/user/notifications.dart';
+import 'package:online_barber_app/views/user/claim_buisness.dart';
+
 import 'package:online_barber_app/views/user/shop/products.dart';
 import 'package:online_barber_app/views/user/shop/recent_orders.dart';
 import '../auth/login_screen.dart';
-import 'faqs.dart';
-import 'privacy_policy.dart';
-import 'profile.dart';
-import 'show_appointments.dart';
+import 'Drawer Pages/faqs.dart';
+
 
 class AppDrawer extends StatefulWidget {
   final double screenWidth;
@@ -279,6 +282,19 @@ class _AppDrawerState extends State<AppDrawer> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>   const ChatListScreen(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_bag_rounded),
+              title: const Text('Find Your Shop'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>    ClaimBusiness(),
                   ),
                 );
               },
