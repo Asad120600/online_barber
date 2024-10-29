@@ -5,8 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:geocoding/geocoding.dart'; // Import geocoding package
 import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/cutom_google_map.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
@@ -42,8 +44,7 @@ class _BarberProfileState extends State<BarberProfile> {
 
   void _fetchBarberData() async {
     try {
-      DocumentSnapshot snapshot =
-      await _firestore.collection('barbers').doc(_currentUser?.uid).get();
+      DocumentSnapshot snapshot = await _firestore.collection('barbers').doc(_currentUser?.uid).get();
       if (snapshot.exists) {
         setState(() {
           _phoneController.text = snapshot['phoneNumber'] ?? '';
@@ -51,7 +52,7 @@ class _BarberProfileState extends State<BarberProfile> {
           _shopNameController.text = snapshot['shopName'] ?? '';
           _nameController.text = snapshot['name'] ?? '';
           _imageUrl = snapshot['imageUrl'];
-          _rating = snapshot['rating']?.toDouble() ?? 0.0; // Fetch rating and convert to double
+          _rating = snapshot['rating']?.toDouble() ?? 0.0;
         });
       }
     } catch (e) {
@@ -80,6 +81,16 @@ class _BarberProfileState extends State<BarberProfile> {
     );
 
     try {
+      double? latitude;
+      double? longitude;
+
+      // Get latitude and longitude from address
+      if (_addressController.text.isNotEmpty) {
+        List<Location> locations = await locationFromAddress(_addressController.text);
+        latitude = locations.first.latitude;
+        longitude = locations.first.longitude;
+      }
+
       if (_imageFile != null) {
         _imageUrl = await _uploadImage(_imageFile!);
       }
@@ -90,6 +101,10 @@ class _BarberProfileState extends State<BarberProfile> {
         'shopName': _shopNameController.text,
         'name': _nameController.text,
         'imageUrl': _imageUrl,
+        'location': {
+          'latitude': latitude,
+          'longitude': longitude,
+        },
       }, SetOptions(merge: true));
 
       Navigator.of(context).pop();
@@ -121,17 +136,26 @@ class _BarberProfileState extends State<BarberProfile> {
 
   Future<String> _uploadImage(File imageFile) async {
     try {
-      String imageName =
-          _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = FirebaseStorage.instance
-          .ref()
-          .child('barber_images/$imageName.jpg');
+      String imageName = _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
+      Reference ref = FirebaseStorage.instance.ref().child('barber_images/$imageName.jpg');
       await ref.putFile(imageFile);
       String downloadUrl = await ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
       print('Error uploading image: $e');
       throw Exception('Error uploading image');
+    }
+  }
+
+  Future<void> _openMap() async {
+    final address = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CustomGoogleMap()),
+    );
+    if (address != null) {
+      setState(() {
+        _addressController.text = address; // Update the address field with the selected address
+      });
     }
   }
 
@@ -234,6 +258,10 @@ class _BarberProfileState extends State<BarberProfile> {
                   decoration: InputDecoration(
                     labelText: 'Address',
                     icon: const Icon(Icons.location_on, color: Colors.orange),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.map, color: Colors.orange),
+                      onPressed: _openMap, // Call the method to open Google Maps
+                    ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
@@ -252,7 +280,7 @@ class _BarberProfileState extends State<BarberProfile> {
                   controller: _shopNameController,
                   decoration: InputDecoration(
                     labelText: 'Shop Name',
-                    icon: const Icon(Icons.store, color: Colors.orange),
+                    icon: const Icon(Icons.business, color: Colors.orange),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),
@@ -267,48 +295,26 @@ class _BarberProfileState extends State<BarberProfile> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                // Display the rating
-                _rating != null
-                    ? Column(
-                  children: [
-                    const Text(
-                      'Rating:',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        RatingBar.builder(
-                          initialRating: _rating!,
-                          minRating: 1,
-                          direction: Axis.horizontal,
-                          allowHalfRating: true,
-                          itemCount: 5,
-                          itemPadding:
-                          const EdgeInsets.symmetric(horizontal: 4.0),
-                          itemBuilder: (context, _) => const Icon(
-                            Icons.star,
-                            color: Colors.orange,
-                          ),
-                          onRatingUpdate: (rating) {
-                            // Do nothing on rating update
-                          },
-                          ignoreGestures: true, // Prevents user from updating rating
-                        ),
-                        Text(
-                          _rating!.toStringAsFixed(1),
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-                    : const SizedBox.shrink(),
-                const SizedBox(height: 16),
+                RatingBar.builder(
+                  initialRating: _rating ?? 0.0,
+                  minRating: 1,
+                  itemCount: 5,
+                  itemSize: 40.0,
+                  glowColor: Colors.orange,
+                  itemBuilder: (context, _) => const Icon(
+                    Icons.star,
+                    color: Colors.orange,
+                  ),
+                  onRatingUpdate: (rating) {
+                    setState(() {
+                      _rating = rating;
+                    });
+                  },
+                ),
+                const SizedBox(height: 20),
                 Button(
                   onPressed: _updateBarberProfile,
-                  child: const Text('Update Profile'),
+                  child: Text('Update Profile'),
                 ),
               ],
             ),
