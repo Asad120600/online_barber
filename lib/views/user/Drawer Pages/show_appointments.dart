@@ -1,9 +1,10 @@
 import 'dart:developer';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
+import 'package:online_barber_app/utils/barbers_map.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
 
@@ -23,6 +24,35 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
   void initState() {
     super.initState();
     _appointmentController = AppointmentController();
+  }
+
+  Future<void> _openBarberLocation(String barberId) async {
+    // Retrieve the barber's location and open the map screen
+    try {
+      DocumentSnapshot barberSnapshot = await FirebaseFirestore.instance
+          .collection('barbers')
+          .doc(barberId)
+          .get();
+      if (barberSnapshot.exists) {
+        double latitude = barberSnapshot['location.latitude'];
+        double longitude = barberSnapshot['location.longitude'];
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BarberLocationMap(
+              latitude: latitude,
+              longitude: longitude,
+              barberName: barberSnapshot['name'],
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      log('Error fetching barber location: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error loading barber location')),
+      );
+    }
   }
 
   @override
@@ -134,18 +164,28 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                               ),
                               const SizedBox(height: 8),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start, // Aligns the icon and text at the top
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Icon(Icons.location_on, size: 16),
                                   const SizedBox(width: 8),
                                   Expanded(
-                                    child: Text(
-                                      'Address: ${appointment.address}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                      ),
-                                      maxLines: 2, // Limits the text to a maximum of 2 lines
-                                      overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds 2 lines
+                                    child: Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            'Address: ${appointment.address}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.map, color: Colors.orange),
+                                          onPressed: () => _openBarberLocation(appointment.barberId),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -213,41 +253,45 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                 children: appointment.services.isNotEmpty
                                     ? appointment.services.map((service) {
                                   return Chip(
-                                    label:
-                                    Text(service.name ?? 'Unknown'),
+                                    label: Text(service.name ?? 'Unknown'),
                                   );
                                 }).toList()
                                     : [const Chip(label: Text('No services'))],
                               ),
                               const SizedBox(height: 16),
-// Show "Rate Barber" button only if the status is 'Done'
                               if (appointment.status == 'Done')
                                 Button(
                                   width: 125,
                                   onPressed: appointment.hasBeenRated
-                                      ? null // Disable the button if already rated
+                                      ? null
                                       : () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => BarberRatingScreen(
-                                            barberId: appointment.barberId,
-                                            barberName: appointment.barberName,
-                                            appointmentId:appointment.id
-                                        ),
+                                        builder: (context) =>
+                                            BarberRatingScreen(
+                                                barberId:
+                                                appointment.barberId,
+                                                barberName:
+                                                appointment.barberName,
+                                                appointmentId:
+                                                appointment.id),
                                       ),
                                     ).then((_) {
-                                      // Refresh the state after rating
                                       setState(() {});
                                     });
                                   },
                                   child: Text(
-                                    appointment.hasBeenRated ? 'Already Rated' : 'Rate Barber',
-                                    textAlign: TextAlign.center, // Center align the text
+                                    appointment.hasBeenRated
+                                        ? 'Already Rated'
+                                        : 'Rate Barber',
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 14, // Increase font size
-                                      fontWeight: FontWeight.w700, // Make text bold
-                                      color: appointment.hasBeenRated ? Colors.white : Colors.white, // Different colors
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: appointment.hasBeenRated
+                                          ? Colors.white
+                                          : Colors.white,
                                     ),
                                   ),
                                 ),
@@ -279,7 +323,6 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     );
   }
 
-// Helper method to parse time string to Duration
   Duration _parseTime(String? time) {
     if (time == null || time.isEmpty) return Duration.zero;
     try {
@@ -291,4 +334,3 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     }
   }
 }
-

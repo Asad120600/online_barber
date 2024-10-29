@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
@@ -27,6 +29,7 @@ class _ClaimBusinessDialogState extends State<ClaimBusinessDialog> {
   final TextEditingController phoneNumberController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController nationalIdController = TextEditingController();
+
   String claimStatus = 'pending'; // Default status
   bool isClaimed = false; // To check if business is already claimed
   bool isLoading = false; // To manage loading state
@@ -47,6 +50,38 @@ class _ClaimBusinessDialogState extends State<ClaimBusinessDialog> {
     emailController.dispose();
     nationalIdController.dispose();
     super.dispose();
+  }
+
+  Future<void> _sendNotificationToAdmin(String uid) async {
+    try {
+      // Fetch the admin document based on uid
+      DocumentSnapshot adminDoc = await FirebaseFirestore.instance.collection('admins').doc(uid).get();
+
+      if (adminDoc.exists) {
+        var adminData = adminDoc.data() as Map<String, dynamic>;
+        String adminToken = adminData['token'];
+
+        log('Sending notification to admin with token: $adminToken'); // Debug log
+
+        // Send notification to admin using PushNotificationService
+        await PushNotificationService.sendNotification(
+          adminToken,
+          context,
+          'New Claim Submitted',
+          'A new business claim has been submitted for ${barberNameController.text}.',
+        );
+      } else {
+        log('Admin document not found');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Admin document not found')),
+        );
+      }
+    } catch (e) {
+      log('Error sending notification to admin: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending notification: ${e.toString()}')),
+      );
+    }
   }
 
   // Check if the business is already claimed
@@ -82,54 +117,32 @@ class _ClaimBusinessDialogState extends State<ClaimBusinessDialog> {
       isLoading = true; // Start loading
     });
 
-    // Save claim to Firestore
-    await FirebaseFirestore.instance.collection('claim_business').add({
-      'barberName': barberNameController.text,
-      'shopName': shopNameController.text,
-      'address': addressController.text,
-      'phoneNumber': phoneNumberController.text,
-      'email': emailController.text,
-      'nationalId': nationalIdController.text,
-      'status': 'pending',
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-
-    // Fetch admin FCM token from the 'admins' collection using admin UID
     try {
-      DocumentSnapshot adminDoc = await FirebaseFirestore.instance
-          .collection('admins')
-          .doc(widget.adminUid)
-          .get();
+      // Save claim to Firestore
+      await FirebaseFirestore.instance.collection('claim_business').add({
+        'barberName': barberNameController.text,
+        'shopName': shopNameController.text,
+        'address': addressController.text,
+        'phoneNumber': phoneNumberController.text,
+        'email': emailController.text,
+        'nationalId': nationalIdController.text,
+        'status': 'pending',
+        'timestamp': FieldValue.serverTimestamp(),
+      });
 
-      if (adminDoc.exists) {
-        String? adminToken = adminDoc.get('token');
+      await _sendNotificationToAdmin(widget.adminUid); // Pass the admin UID to send notification
 
-        if (adminToken != null && adminToken.isNotEmpty) {
-          // Send notification to the admin
-          await PushNotificationService.sendNotification(
-            adminToken,
-            context,
-            'New Claim Submitted',
-            'A new business claim has been submitted for ${barberNameController.text}.',
-          );
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Notification sent to admin.')),
-          );
-        } else {
-          debugPrint('Admin FCM token is missing');
-        }
-      } else {
-        debugPrint('Admin document not found');
-      }
+      Navigator.of(context).pop();
     } catch (e) {
-      debugPrint('Error fetching admin FCM token: $e');
+      log('Error submitting claim: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error submitting claim: ${e.toString()}')),
+      );
     } finally {
       setState(() {
         isLoading = false; // Stop loading
       });
     }
-
-    Navigator.of(context).pop();
   }
 
   @override
@@ -174,13 +187,6 @@ class _ClaimBusinessDialogState extends State<ClaimBusinessDialog> {
               enabled: !isClaimed,
             ),
             const SizedBox(height: 10),
-            Text(
-              'Status: $claimStatus',
-              style: TextStyle(
-                color: claimStatus == 'approved' ? Colors.green : Colors.orange,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
             if (isLoading) const LoadingDots(), // Show loading indicator if isLoading is true
           ],
         ),

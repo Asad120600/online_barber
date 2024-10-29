@@ -13,18 +13,26 @@ class ClaimBusiness extends StatefulWidget {
 class _ClaimBusinessState extends State<ClaimBusiness> {
   final CollectionReference barbersRef = FirebaseFirestore.instance.collection('barbers');
   final CollectionReference claimsRef = FirebaseFirestore.instance.collection('claim_business');
+  String? adminUid; // Store admin UID
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAdminUid(); // Fetch admin UID on initialization
+  }
 
   // Method to fetch admin UID
-  Future<String?> fetchAdminUid() async {
+  Future<void> fetchAdminUid() async {
     try {
       var adminSnapshot = await FirebaseFirestore.instance.collection('admins').limit(1).get();
       if (adminSnapshot.docs.isNotEmpty) {
-        return adminSnapshot.docs.first.id; // Assuming the document ID is the admin UID
+        setState(() {
+          adminUid = adminSnapshot.docs.first.id; // Store admin UID
+        });
       }
     } catch (e) {
       debugPrint('Error fetching admin UID: $e');
     }
-    return null; // Return null if not found or on error
   }
 
   Future<bool> isBusinessClaimed(String barberName) async {
@@ -32,21 +40,27 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  void showClaimDialog(String barberName, String adminUid) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return ClaimBusinessDialog(
-          barberName: barberName,
-          onSubmit: (String barberName, String shopName, String address, String phoneNumber, String email, String nationalId) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Claim submitted for $barberName!')),
-            );
-          },
-          adminUid: adminUid,
-        );
-      },
-    );
+  void showClaimDialog(String barberName) {
+    if (adminUid != null) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return ClaimBusinessDialog(
+            barberName: barberName,
+            onSubmit: (String barberName, String shopName, String address, String phoneNumber, String email, String nationalId) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Claim submitted for $barberName!')),
+              );
+            },
+            adminUid: adminUid!, // Pass admin UID to dialog
+          );
+        },
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error fetching admin UID.')),
+      );
+    }
   }
 
   @override
@@ -77,37 +91,32 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
                 future: isBusinessClaimed(name),
                 builder: (context, claimedSnapshot) {
                   bool isClaimed = claimedSnapshot.data ?? false;
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                    child: ListTile(
-                      title: Text(name),
-                      subtitle: Text('$shopName\n$address'),
-                      trailing: Button(
-                        width: 138,
-                        onPressed: isClaimed ? null : () async {
-                          // Fetch the admin UID when button is pressed
-                          String? adminUid = await fetchAdminUid();
-                          if (adminUid != null) {
-                            showClaimDialog(name, adminUid);
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Error fetching admin UID.')),
-                            );
-                          }
-                        },
-                        child: Text(
-                          isClaimed ? 'Already Claimed' : 'Claim Business',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                        ),
-                      ),
-                    ),
-                  );
+                  return _buildBarberCard(name, shopName, address, isClaimed);
                 },
               );
             },
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildBarberCard(String name, String shopName, String address, bool isClaimed) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      child: ListTile(
+        title: Text(name),
+        subtitle: Text('$shopName\n$address'),
+        trailing: Button(
+          width: 150,
+          onPressed: isClaimed ? null : () {
+            showClaimDialog(name);
+          },
+          child: Text(
+            isClaimed ? 'Already Claimed' : 'Claim Business',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          ),
+        ),
       ),
     );
   }
