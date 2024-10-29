@@ -142,7 +142,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
               },
             ),
              ListTile(
-              leading: const Icon(Icons.announcement),
+              leading: const Icon(Icons.campaign),
               title: const Text(
                 'Make Announcement',
               ),

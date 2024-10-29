@@ -298,7 +298,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.announcement),
+              leading: const Icon(Icons.campaign),
               title: const Text(
                 'Announcement',
               ),

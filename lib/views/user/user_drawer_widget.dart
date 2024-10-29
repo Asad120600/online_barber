@@ -300,7 +300,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.announcement),
+              leading: const Icon(Icons.campaign),
               title: const Text('Announcements'),
               onTap: () {
                 Navigator.pop(context);
