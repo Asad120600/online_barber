@@ -1,5 +1,5 @@
-import 'dart:convert';
 import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -14,7 +14,6 @@ import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../utils/cutom_google_map.dart';
-import 'package:http/http.dart' as http;
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
@@ -326,24 +325,6 @@ class BookAppointment extends StatefulWidget {
         print('Email not sent. \n' + e.toString());
       }
     }
-
-// Function to send an email notification
-//     Future<void> _sendEmailNotification(String notificationBody) async {
-//       final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
-//
-//       final message = Message()
-//         ..from = Address('ios.cypersol@gmail.com', 'Online Barber')
-//         ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
-//         ..subject = 'New Appointment Booked!'
-//         ..text = notificationBody;
-//
-//       try {
-//         final sendReport = await send(message, smtpServer);
-//         print('Email sent: ' + sendReport.toString());
-//       } on MailerException catch (e) {
-//         print('Email not sent. \n' + e.toString());
-//       }
-//     }
 
     double _getBarberPrice(Service service) {
       for (var priceInfo in service.barberPrices ?? []) {
