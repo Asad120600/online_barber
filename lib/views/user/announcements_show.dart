@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 
 class UserAnnouncementScreen extends StatelessWidget {
   const UserAnnouncementScreen({super.key});
@@ -13,7 +14,7 @@ class UserAnnouncementScreen extends StatelessWidget {
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('announcements').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return CircularProgressIndicator();
+          if (!snapshot.hasData) return Center(child: LoadingDots());
           var announcements = snapshot.data!.docs;
           return ListView.builder(
             itemCount: announcements.length,
@@ -23,7 +24,7 @@ class UserAnnouncementScreen extends StatelessWidget {
                 child: ListTile(
                   title: Text(announcement['title']),
                   subtitle: Text(announcement['message']),
-                  trailing: Icon(Icons.announcement),
+                  trailing: Icon( Icons.campaign),
                 ),
               );
             },
