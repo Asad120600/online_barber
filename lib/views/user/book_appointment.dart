@@ -3,8 +3,9 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter_mailer/flutter_mailer.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
@@ -235,8 +236,7 @@ class BookAppointment extends StatefulWidget {
 
     Future<void> _completeAppointment() async {
       try {
-        String id =
-            FirebaseFirestore.instance.collection('appointments').doc().id;
+        String id = FirebaseFirestore.instance.collection('appointments').doc().id;
         Timestamp timestamp = Timestamp.fromDate(selectedDay);
 
         // Fetch client and barber documents
@@ -258,8 +258,7 @@ class BookAppointment extends StatefulWidget {
           date: timestamp,
           time: _timeController.text,
           services: widget.selectedServices,
-          address:
-              _isHomeService ? _addressController.text : widget.barberAddress,
+          address: _isHomeService ? _addressController.text : widget.barberAddress,
           phoneNumber: _phoneNumberController.text,
           uid: widget.uid,
           barberName: widget.barberName,
@@ -276,30 +275,32 @@ class BookAppointment extends StatefulWidget {
         // Book the appointment in Firestore
         await _appointmentController.bookAppointment(appointment);
 
-        // Prepare notification message
+        // Prepare notification message with barber name
         String services = widget.selectedServices.map((s) => s.name).join(', ');
         String notificationBody = '''
-          New Appointment Booked!
-          Client: $_userName
-          Date: ${selectedDay.toLocal().toString().split(' ')[0]}
-          Time: ${_timeController.text}
-          Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
-          Phone: ${_phoneNumberController.text}
-          Services: $services
-          Home Service: $_isHomeService
-          Total Price: ${totalPrice.toStringAsFixed(2)}
-          ''';
+      New Appointment Booked!
+      Client: $_userName
+      Barber: ${widget.barberName}
+      Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+      Time: ${_timeController.text}
+      Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
+      Phone: ${_phoneNumberController.text}
+      Services: $services
+      Home Service: $_isHomeService
+      Total Price: ${totalPrice.toStringAsFixed(2)}
+    ''';
 
         // Send notification to the barber
-        final String barberDeviceToken =
-            await getBarberDeviceToken(widget.barberId);
+        final String barberDeviceToken = await getBarberDeviceToken(widget.barberId);
         await PushNotificationService.sendNotification(
           barberDeviceToken,
           context,
           'You have a new appointment booked!',
           notificationBody,
         );
-        log(barberDeviceToken);
+
+        // Send Email Notification with barber name
+        await _sendEmailNotification(notificationBody);
 
         // Show success dialog
         _showSuccessDialog();
@@ -307,6 +308,42 @@ class BookAppointment extends StatefulWidget {
         _showErrorDialog(e.toString());
       }
     }
+
+// Function to send an email notification
+    Future<void> _sendEmailNotification(String notificationBody) async {
+      final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
+
+      final message = Message()
+        ..from = Address('ios.cypersol@gmail.com', 'Online Barber')
+        ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
+        ..subject = 'New Appointment Booked!'
+        ..text = notificationBody;
+
+      try {
+        final sendReport = await send(message, smtpServer);
+        print('Email sent: ' + sendReport.toString());
+      } on MailerException catch (e) {
+        print('Email not sent. \n' + e.toString());
+      }
+    }
+
+// Function to send an email notification
+//     Future<void> _sendEmailNotification(String notificationBody) async {
+//       final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
+//
+//       final message = Message()
+//         ..from = Address('ios.cypersol@gmail.com', 'Online Barber')
+//         ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
+//         ..subject = 'New Appointment Booked!'
+//         ..text = notificationBody;
+//
+//       try {
+//         final sendReport = await send(message, smtpServer);
+//         print('Email sent: ' + sendReport.toString());
+//       } on MailerException catch (e) {
+//         print('Email not sent. \n' + e.toString());
+//       }
+//     }
 
     double _getBarberPrice(Service service) {
       for (var priceInfo in service.barberPrices ?? []) {

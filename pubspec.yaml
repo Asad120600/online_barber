@@ -39,9 +39,7 @@ dependencies:
   flutter_swiper_view: ^1.1.8
   flutter_launcher_icons: ^0.13.1
   in_app_purchase: ^3.2.0
-  flutter_mailer: ^2.1.2
-  firebase_admin: ^0.3.0
-  messaging: ^0.3.0
+  mailer: ^6.2.0
 
 
 #  google_place: ^0.4.0
