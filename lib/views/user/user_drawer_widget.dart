@@ -260,20 +260,6 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
 
             ListTile(
-              leading: const Icon(Icons.question_answer),
-              title: const Text('FAQs'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const FAQ(),
-                  ),
-                );
-              },
-            ),
-
-            ListTile(
               leading: const Icon(Icons.contact_mail),
               title: const Text('Contact Admin'),
               onTap: () {
@@ -294,7 +280,7 @@ class _AppDrawerState extends State<AppDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>    ClaimBusiness(),
+                    builder: (context) => const ClaimBusiness(),
                   ),
                 );
               },
@@ -312,6 +298,22 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               },
             ),
+
+            ListTile(
+              leading: const Icon(Icons.question_answer),
+              title: const Text('FAQs'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const FAQ(),
+                  ),
+                );
+              },
+            ),
+
+
             ListTile(
               leading: const Icon(Icons.privacy_tip),
               title: const Text('Privacy Policy'),
@@ -326,7 +328,7 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.delete),
+              leading: const Icon(Icons.do_disturb_alt_sharp,color: Colors.red,),
               title: const Text('Delete Account'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
