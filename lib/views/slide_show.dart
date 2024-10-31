@@ -38,7 +38,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
 
   Future<void> _checkLoginStatus() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
+    if (user != null && mounted) {  // Added mounted check here
       String? userType = await LocalStorage.getUserType();
       switch (userType) {
         case '1': // Admin
@@ -81,12 +81,17 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
         };
       }).toList();
 
-      setState(() {
-        _slides = slides;
-      });
+      if (mounted) {
+        setState(() {
+          _slides = slides;
+        });
+      }
     } catch (e) {
-      print('Error fetching slides: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load slides')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load slides')),
+        );
+      }
     }
   }
 
@@ -106,8 +111,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return
-      Scaffold(
+    return Scaffold(
       body: _slides.isEmpty
           ? Center(child: CircularProgressIndicator())
           : Column(
@@ -118,7 +122,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               itemCount: _slides.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                  margin: EdgeInsets.only(left: 15,right: 15,top: 25),
+                  margin: EdgeInsets.only(left: 15, right: 15, top: 25),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.orange, width: 2),
                     image: DecorationImage(

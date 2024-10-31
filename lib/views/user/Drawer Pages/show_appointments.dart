@@ -7,6 +7,7 @@ import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/barbers_map.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AppointmentsShow extends StatefulWidget {
   final String uid;
@@ -27,25 +28,27 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
   }
 
   Future<void> _openBarberLocation(String barberId) async {
-    // Retrieve the barber's location and open the map screen
     try {
+      // Retrieve the barber's location data from Firestore
       DocumentSnapshot barberSnapshot = await FirebaseFirestore.instance
           .collection('barbers')
           .doc(barberId)
           .get();
+
       if (barberSnapshot.exists) {
         double latitude = barberSnapshot['location.latitude'];
         double longitude = barberSnapshot['location.longitude'];
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BarberLocationMap(
-              latitude: latitude,
-              longitude: longitude,
-              barberName: barberSnapshot['name'],
-            ),
-          ),
-        );
+        String barberName = barberSnapshot['name'];
+
+        // Construct Google Maps URL
+        String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+
+        // Launch Google Maps
+        if (await canLaunch(googleMapsUrl)) {
+          await launch(googleMapsUrl);
+        } else {
+          throw 'Could not open Google Maps.';
+        }
       }
     } catch (e) {
       log('Error fetching barber location: $e');
@@ -54,7 +57,6 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
     if (widget.uid.isEmpty) {
@@ -162,35 +164,27 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.center, // Align items in the center vertically
                                 children: [
                                   const Icon(Icons.location_on, size: 16),
                                   const SizedBox(width: 8),
                                   Expanded(
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            'Address: ${appointment.address}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                        IconButton(
-                                          icon: const Icon(Icons.map, color: Colors.orange),
-                                          onPressed: () => _openBarberLocation(appointment.barberId),
-                                        ),
-                                      ],
+                                    child: Text(
+                                      'Address: ${appointment.address}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.pin_drop_outlined, color: Colors.orange),
+                                    onPressed: () => _openBarberLocation(appointment.barberId),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
                               Row(
                                 children: [
                                   const Icon(Icons.phone, size: 16),
@@ -325,12 +319,20 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
 
   Duration _parseTime(String? time) {
     if (time == null || time.isEmpty) return Duration.zero;
+
     try {
-      final parts = time.split(':');
-      return Duration(hours: int.parse(parts[0]), minutes: int.parse(parts[1]));
+      // Remove any leading or trailing whitespace from the time string
+      time = time.trim();
+
+      // Parse the time using a DateFormat for 12-hour format with AM/PM
+      final format = DateFormat.jm(); // This will handle "hh:mm AM/PM"
+      DateTime dateTime = format.parse(time);
+
+      // Return the duration from the parsed DateTime
+      return Duration(hours: dateTime.hour, minutes: dateTime.minute);
     } catch (e) {
-      log('Error parsing time: $e');
-      return Duration.zero;
+      // log('Error parsing time: $e');
+      return Duration.zero; // Return zero duration if parsing fails
     }
   }
 }

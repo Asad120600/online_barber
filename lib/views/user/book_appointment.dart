@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -269,6 +268,8 @@ class BookAppointment extends StatefulWidget {
               ? double.parse(_homeServicePriceController.text)
               : 0.0,
           totalPrice: totalPrice,
+          paymentMethod: _selectedPaymentMethod
+
         );
 
         // Book the appointment in Firestore
@@ -287,6 +288,7 @@ class BookAppointment extends StatefulWidget {
       Services: $services
       Home Service: $_isHomeService
       Total Price: ${totalPrice.toStringAsFixed(2)}
+      Payment Method:$_selectedPaymentMethod
     ''';
 
         // Send notification to the barber

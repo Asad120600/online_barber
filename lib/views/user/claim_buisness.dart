@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/claim_buisness_user_dialog.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 
 class ClaimBusiness extends StatefulWidget {
   const ClaimBusiness({super.key});
@@ -11,8 +12,10 @@ class ClaimBusiness extends StatefulWidget {
 }
 
 class _ClaimBusinessState extends State<ClaimBusiness> {
-  final CollectionReference barbersRef = FirebaseFirestore.instance.collection('barbers');
-  final CollectionReference claimsRef = FirebaseFirestore.instance.collection('claim_business');
+  final CollectionReference barbersRef =
+      FirebaseFirestore.instance.collection('barbers');
+  final CollectionReference claimsRef =
+      FirebaseFirestore.instance.collection('claim_business');
   String? adminUid; // Store admin UID
 
   @override
@@ -24,7 +27,8 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
   // Method to fetch admin UID
   Future<void> fetchAdminUid() async {
     try {
-      var adminSnapshot = await FirebaseFirestore.instance.collection('admins').limit(1).get();
+      var adminSnapshot =
+          await FirebaseFirestore.instance.collection('admins').limit(1).get();
       if (adminSnapshot.docs.isNotEmpty) {
         setState(() {
           adminUid = adminSnapshot.docs.first.id; // Store admin UID
@@ -36,7 +40,8 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
   }
 
   Future<bool> isBusinessClaimed(String barberName) async {
-    final querySnapshot = await claimsRef.where('barberName', isEqualTo: barberName).get();
+    final querySnapshot =
+        await claimsRef.where('barberName', isEqualTo: barberName).get();
     return querySnapshot.docs.isNotEmpty;
   }
 
@@ -47,7 +52,8 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
         builder: (context) {
           return ClaimBusinessDialog(
             barberName: barberName,
-            onSubmit: (String barberName, String shopName, String address, String phoneNumber, String email, String nationalId) {
+            onSubmit: (String barberName, String shopName, String address,
+                String phoneNumber, String email, String nationalId) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Claim submitted for $barberName!')),
               );
@@ -63,45 +69,53 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
     }
   }
 
+  Future<void> _refreshBarbers() async {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Claim Business')),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: barbersRef.snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("No barbers available"));
-          }
+      body: RefreshIndicator(
+        onRefresh: _refreshBarbers,
+        child: StreamBuilder<QuerySnapshot>(
+          stream: barbersRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: LoadingDots());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text("No barbers available"));
+            }
 
-          final barbers = snapshot.data!.docs;
+            final barbers = snapshot.data!.docs;
 
-          return ListView.builder(
-            itemCount: barbers.length,
-            itemBuilder: (context, index) {
-              var barber = barbers[index];
-              var name = barber['name'] ?? 'No Name';
-              var shopName = barber['shopName'] ?? 'No Shop Name';
-              var address = barber['address'] ?? 'No Address';
+            return ListView.builder(
+              itemCount: barbers.length,
+              itemBuilder: (context, index) {
+                var barber = barbers[index];
+                var name = barber['name'] ?? 'No Name';
+                var shopName = barber['shopName'] ?? 'No Shop Name';
+                var address = barber['address'] ?? 'No Address';
 
-              return FutureBuilder<bool>(
-                future: isBusinessClaimed(name),
-                builder: (context, claimedSnapshot) {
-                  bool isClaimed = claimedSnapshot.data ?? false;
-                  return _buildBarberCard(name, shopName, address, isClaimed);
-                },
-              );
-            },
-          );
-        },
+                return FutureBuilder<bool>(
+                  future: isBusinessClaimed(name),
+                  builder: (context, claimedSnapshot) {
+                    bool isClaimed = claimedSnapshot.data ?? false;
+                    return _buildBarberCard(name, shopName, address, isClaimed);
+                  },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildBarberCard(String name, String shopName, String address, bool isClaimed) {
+  Widget _buildBarberCard(
+      String name, String shopName, String address, bool isClaimed) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: ListTile(
@@ -109,9 +123,11 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
         subtitle: Text('$shopName\n$address'),
         trailing: Button(
           width: 150,
-          onPressed: isClaimed ? null : () {
-            showClaimDialog(name);
-          },
+          onPressed: isClaimed
+              ? null
+              : () {
+                  showClaimDialog(name);
+                },
           child: Text(
             isClaimed ? 'Already Claimed' : 'Claim Business',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),

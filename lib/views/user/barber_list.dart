@@ -38,13 +38,11 @@ class _BarberListState extends State<BarberList> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       return Future.error('Location services are disabled.');
     }
 
-    // Check for location permissions
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -57,7 +55,6 @@ class _BarberListState extends State<BarberList> {
       return Future.error('Location permissions are permanently denied.');
     }
 
-    // Get the current location
     _currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
 
@@ -75,8 +72,7 @@ class _BarberListState extends State<BarberList> {
 
   double _calculateDistance(
       double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) /
-        1000; // in kilometers
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000;
   }
 
   Stream<List<Barber>> getBarbers() {
@@ -121,6 +117,15 @@ class _BarberListState extends State<BarberList> {
     return prices;
   }
 
+  Future<bool> _isBarberApproved(String barberName) async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('claim_business')
+        .where('barberName', isEqualTo: barberName)
+        .where('status', isEqualTo: 'approved')
+        .get();
+    return querySnapshot.docs.isNotEmpty;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -128,9 +133,7 @@ class _BarberListState extends State<BarberList> {
         title: const Text('Select a Barber'),
       ),
       body: _currentPosition == null
-          ? const Center(
-              child: Text(
-                  'Loading...')) // Removed LoadingDots, just show a simple text
+          ? const Center(child: Text('Loading...'))
           : Column(
               children: [
                 Padding(
@@ -184,66 +187,73 @@ class _BarberListState extends State<BarberList> {
                                 itemCount: snapshot.data!.length,
                                 itemBuilder: (context, index) {
                                   final barber = snapshot.data![index];
-                                  return FutureBuilder<List<Location>>(
-                                    future:
-                                        _getLatLongFromAddress(barber.address),
-                                    builder: (context, locationSnapshot) {
-                                      if (!locationSnapshot.hasData ||
-                                          locationSnapshot.data!.isEmpty) {
-                                        return Container(); // Skip if no location data
-                                      }
+                                  return FutureBuilder<bool>(
+                                    future: _isBarberApproved(barber.name),
+                                    builder: (context, approvalSnapshot) {
+                                      final isApproved =
+                                          approvalSnapshot.data ?? false;
 
-                                      final barberLocation =
-                                          locationSnapshot.data!.first;
-                                      final distance = _calculateDistance(
-                                        _currentPosition!.latitude,
-                                        _currentPosition!.longitude,
-                                        barberLocation.latitude,
-                                        barberLocation.longitude,
-                                      );
+                                      return FutureBuilder<List<Location>>(
+                                        future: _getLatLongFromAddress(
+                                            barber.address),
+                                        builder: (context, locationSnapshot) {
+                                          if (!locationSnapshot.hasData ||
+                                              locationSnapshot.data!.isEmpty) {
+                                            return Container();
+                                          }
 
-                                      if (distance > _maxDistance) {
-                                        return Container(); // Skip barbers beyond max distance
-                                      }
+                                          final barberLocation =
+                                              locationSnapshot.data!.first;
+                                          final distance = _calculateDistance(
+                                            _currentPosition!.latitude,
+                                            _currentPosition!.longitude,
+                                            barberLocation.latitude,
+                                            barberLocation.longitude,
+                                          );
 
-                                      final barberId = barber.id;
-                                      final barberPrices =
-                                          _selectedServices.map((service) {
-                                        final price = prices[service.id]
-                                                ?[barberId] ??
-                                            service.price;
-                                        return '${service.name}: ${price.toStringAsFixed(2)}';
-                                      }).join(', ');
+                                          if (distance > _maxDistance) {
+                                            return Container();
+                                          }
 
-                                      final isSelected =
-                                          barberId == _selectedBarberId;
+                                          final barberId = barber.id;
+                                          final barberPrices =
+                                              _selectedServices.map((service) {
+                                            final price = prices[service.id]
+                                                    ?[barberId] ??
+                                                service.price;
+                                            return '${service.name}: ${price.toStringAsFixed(2)}';
+                                          }).join(', ');
 
-                                      return Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 8.0, horizontal: 16.0),
-                                        child: Card(
-                                          elevation: 4,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
-                                          ),
-                                          color: isSelected
-                                              ? Colors.orange[50]
-                                              : Colors.white,
-                                          child: ListTile(
-                                            contentPadding:
-                                                const EdgeInsets.all(16.0),
-                                            leading: Container(
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: Colors.orange,
-                                                  width: 2,
-                                                ),
+                                          final isSelected =
+                                              barberId == _selectedBarberId;
+
+                                          return Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8.0,
+                                                horizontal: 16.0),
+                                            child: Card(
+                                              elevation: 4,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(12.0),
                                               ),
-                                              child: ClipOval(
-                                                child:
-                                                    barber.imageUrl.isNotEmpty
+                                              color: isSelected
+                                                  ? Colors.orange[50]
+                                                  : Colors.white,
+                                              child: ListTile(
+                                                contentPadding:
+                                                    const EdgeInsets.all(16.0),
+                                                leading: Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(
+                                                      color: Colors.orange,
+                                                      width: 2,
+                                                    ),
+                                                  ),
+                                                  child: ClipOval(
+                                                    child: barber
+                                                            .imageUrl.isNotEmpty
                                                         ? Image.network(
                                                             barber.imageUrl,
                                                             width: 60,
@@ -255,78 +265,93 @@ class _BarberListState extends State<BarberList> {
                                                             size: 40,
                                                             color: Colors.grey,
                                                           ),
-                                              ),
-                                            ),
-                                            title: Text(
-                                              barber.name,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                              ),
-                                            ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  'Shop: ${barber.shopName}\nAddress: ${barber.address}\nDistance: ${distance.toStringAsFixed(2)} km', // Display the distance here
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.grey[600],
                                                   ),
                                                 ),
-                                                Text(
-                                                  'Prices: $barberPrices',
-                                                  style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey[600],
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Row(
+                                                title: Row(
                                                   children: [
-                                                    RatingBarIndicator(
-                                                      rating: barber.rating,
-                                                      itemBuilder:
-                                                          (context, index) =>
-                                                              const Icon(
-                                                        Icons.star,
-                                                        color: Colors.amber,
+                                                    Text(
+                                                      barber.name,
+                                                      style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 18,
                                                       ),
-                                                      itemCount: 5,
-                                                      itemSize: 20.0,
-                                                      direction:
-                                                          Axis.horizontal,
                                                     ),
-                                                    const SizedBox(width: 8),
-                                                    Text(barber.rating
-                                                        .toStringAsFixed(1)),
+                                                    if (isApproved)
+                                                      const Icon(
+                                                        Icons.verified,
+                                                        color: Colors.green,
+                                                        size: 18,
+                                                      ),
                                                   ],
                                                 ),
-                                              ],
+                                                subtitle: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Shop: ${barber.shopName}\nAddress: ${barber.address}\nDistance: ${distance.toStringAsFixed(2)} km',
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      'Prices: $barberPrices',
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 8),
+                                                    Row(
+                                                      children: [
+                                                        RatingBarIndicator(
+                                                          rating: barber.rating,
+                                                          itemBuilder: (context,
+                                                                  index) =>
+                                                              const Icon(
+                                                            Icons.star,
+                                                            color: Colors.amber,
+                                                          ),
+                                                          itemCount: 5,
+                                                          itemSize: 20.0,
+                                                          direction:
+                                                              Axis.horizontal,
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 8),
+                                                        Text(barber.rating
+                                                            .toStringAsFixed(
+                                                                1)),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                                trailing: isSelected
+                                                    ? const Icon(
+                                                        Icons.check_circle,
+                                                        color: Colors.green)
+                                                    : null,
+                                                onTap: () {
+                                                  setState(() {
+                                                    if (_selectedBarberId ==
+                                                        barber.id) {
+                                                      _selectedBarberId = null;
+                                                      _selectedBarber = null;
+                                                    } else {
+                                                      _selectedBarberId =
+                                                          barber.id;
+                                                      _selectedBarber = barber;
+                                                    }
+                                                  });
+                                                },
+                                              ),
                                             ),
-                                            trailing: isSelected
-                                                ? const Icon(Icons.check_circle,
-                                                    color: Colors.green)
-                                                : null,
-                                            onTap: () {
-                                              setState(() {
-                                                if (_selectedBarberId == barber.id) {
-                                                  // If the barber is already selected, unselect it
-                                                  _selectedBarberId = null;
-                                                  _selectedBarber = null;
-                                                } else {
-                                                  // Select the tapped barber
-                                                  _selectedBarberId = barber.id;
-                                                  _selectedBarber = barber;
-                                                }
-                                                print('Selected Barber ID: $_selectedBarberId'); // Debugging print
-                                              });
-                                            },
-
-                                          ),
-                                        ),
+                                          );
+                                        },
                                       );
                                     },
                                   );
