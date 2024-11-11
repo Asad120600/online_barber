@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/book_appointment.dart';
 
@@ -24,14 +25,26 @@ class _BarberListState extends State<BarberList> {
   String? _selectedBarberId;
   Barber? _selectedBarber;
   Position? _currentPosition;
-  double _maxDistance = 10.0; // Default distance
+  double _maxDistance = 10.0; // Default distance (in km)
   bool _isLoading = false;
+
+  List<Barber> barbers = [];
+  Map<String, bool> approvalStatus = {};
+  Map<String, Map<String, double>> prices = {};
 
   @override
   void initState() {
     super.initState();
     _selectedServices = widget.selectedServices;
-    _getCurrentLocation();
+    _loadDataInBackground();
+  }
+
+  Future<void> _loadDataInBackground() async {
+    // Fetch current location
+    await _getCurrentLocation();
+
+    // Fetch barber list and prices in the background while showing loading indicator
+    _fetchData();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -61,18 +74,32 @@ class _BarberListState extends State<BarberList> {
     setState(() {});
   }
 
-  Future<List<Location>> _getLatLongFromAddress(String address) async {
-    try {
-      return await locationFromAddress(address);
-    } catch (e) {
-      log('Error getting location from address: $e');
-      return [];
-    }
-  }
+  Future<void> _fetchData() async {
+    setState(() => _isLoading = true);
 
-  double _calculateDistance(
-      double lat1, double lon1, double lat2, double lon2) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000;
+    try {
+      // Fetch barber data
+      final barberList = await getBarbers().first;
+
+      // Fetch prices for the selected services
+      final fetchedPrices = await _getBarberPrices(_selectedServices);
+
+      // Check barber approval status
+      final approvals = {
+        for (var barber in barberList)
+          barber.name: await _isBarberApproved(barber.name)
+      };
+
+      setState(() {
+        barbers = barberList;
+        prices = fetchedPrices;
+        approvalStatus = approvals;
+        _isLoading = false;
+      });
+    } catch (e) {
+      log('Error fetching data: $e');
+      setState(() => _isLoading = false);
+    }
   }
 
   Stream<List<Barber>> getBarbers() {
@@ -97,15 +124,14 @@ class _BarberListState extends State<BarberList> {
         final serviceData = Service.fromSnapshot(snapshot);
 
         final barberPrices = serviceData.barberPrices
-                ?.fold<Map<String, double>>({}, (acc, priceMap) {
-              final barberId = priceMap['barberId'] as String;
-              final price = (priceMap['price'] as num).toDouble();
-              if (!acc.containsKey(barberId)) {
-                acc[barberId] = price;
-              }
-              return acc;
-            }) ??
-            {};
+            ?.fold<Map<String, double>>({}, (acc, priceMap) {
+          final barberId = priceMap['barberId'] as String;
+          final price = (priceMap['price'] as num).toDouble();
+          if (!acc.containsKey(barberId)) {
+            acc[barberId] = price;
+          }
+          return acc;
+        }) ?? {};
 
         prices[service.id] = barberPrices;
       }
@@ -126,252 +152,82 @@ class _BarberListState extends State<BarberList> {
     return querySnapshot.docs.isNotEmpty;
   }
 
+  double _calculateDistanceTo(Barber barber) {
+    return Geolocator.distanceBetween(
+      _currentPosition!.latitude,
+      _currentPosition!.longitude,
+      barber.latitude,
+      barber.longitude,
+    ) / 1000; // convert to km
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading || _currentPosition == null) {
+      return const Scaffold(
+        body: Center(child: LoadingDots()),
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Select a Barber'),
-      ),
-      body: _currentPosition == null
-          ? const Center(child: Text('Loading...'))
-          : Column(
+      appBar: AppBar(title: const Text('Select a Barber')),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Max Distance: ${_maxDistance.toStringAsFixed(1)} km',
-                        style: const TextStyle(fontSize: 16),
-                      ),
-                      Slider(
-                        value: _maxDistance,
-                        min: 1.0,
-                        max: 50.0,
-                        divisions: 49,
-                        label: '${_maxDistance.toStringAsFixed(1)} km',
-                        onChanged: (value) {
-                          setState(() {
-                            _maxDistance = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                Text(
+                  'Max Distance: ${_maxDistance.toStringAsFixed(1)} km',
+                  style: const TextStyle(fontSize: 16),
                 ),
-                Expanded(
-                  child: StreamBuilder<List<Barber>>(
-                    stream: getBarbers(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        log('Error fetching barbers: ${snapshot.error}');
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('No barbers found'));
-                      } else {
-                        return FutureBuilder<Map<String, Map<String, double>>>(
-                          future: _getBarberPrices(_selectedServices),
-                          builder: (context, priceSnapshot) {
-                            if (priceSnapshot.hasError) {
-                              log('Error fetching barber prices: ${priceSnapshot.error}');
-                              return Center(
-                                  child: Text('Error: ${priceSnapshot.error}'));
-                            } else if (!priceSnapshot.hasData) {
-                              return const Center(
-                                  child: Text('No pricing data found'));
-                            } else {
-                              final prices = priceSnapshot.data!;
-
-                              return ListView.builder(
-                                padding: const EdgeInsets.all(8.0),
-                                itemCount: snapshot.data!.length,
-                                itemBuilder: (context, index) {
-                                  final barber = snapshot.data![index];
-                                  return FutureBuilder<bool>(
-                                    future: _isBarberApproved(barber.name),
-                                    builder: (context, approvalSnapshot) {
-                                      final isApproved =
-                                          approvalSnapshot.data ?? false;
-
-                                      return FutureBuilder<List<Location>>(
-                                        future: _getLatLongFromAddress(
-                                            barber.address),
-                                        builder: (context, locationSnapshot) {
-                                          if (!locationSnapshot.hasData ||
-                                              locationSnapshot.data!.isEmpty) {
-                                            return Container();
-                                          }
-
-                                          final barberLocation =
-                                              locationSnapshot.data!.first;
-                                          final distance = _calculateDistance(
-                                            _currentPosition!.latitude,
-                                            _currentPosition!.longitude,
-                                            barberLocation.latitude,
-                                            barberLocation.longitude,
-                                          );
-
-                                          if (distance > _maxDistance) {
-                                            return Container();
-                                          }
-
-                                          final barberId = barber.id;
-                                          final barberPrices =
-                                              _selectedServices.map((service) {
-                                            final price = prices[service.id]
-                                                    ?[barberId] ??
-                                                service.price;
-                                            return '${service.name}: ${price.toStringAsFixed(2)}';
-                                          }).join(', ');
-
-                                          final isSelected =
-                                              barberId == _selectedBarberId;
-
-                                          return Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8.0,
-                                                horizontal: 16.0),
-                                            child: Card(
-                                              elevation: 4,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(12.0),
-                                              ),
-                                              color: isSelected
-                                                  ? Colors.orange[50]
-                                                  : Colors.white,
-                                              child: ListTile(
-                                                contentPadding:
-                                                    const EdgeInsets.all(16.0),
-                                                leading: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    border: Border.all(
-                                                      color: Colors.orange,
-                                                      width: 2,
-                                                    ),
-                                                  ),
-                                                  child: ClipOval(
-                                                    child: barber
-                                                            .imageUrl.isNotEmpty
-                                                        ? Image.network(
-                                                            barber.imageUrl,
-                                                            width: 60,
-                                                            height: 60,
-                                                            fit: BoxFit.cover,
-                                                          )
-                                                        : const Icon(
-                                                            Icons.person,
-                                                            size: 40,
-                                                            color: Colors.grey,
-                                                          ),
-                                                  ),
-                                                ),
-                                                title: Row(
-                                                  children: [
-                                                    Text(
-                                                      barber.name,
-                                                      style: const TextStyle(
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 18,
-                                                      ),
-                                                    ),
-                                                    if (isApproved)
-                                                      const Icon(
-                                                        Icons.verified,
-                                                        color: Colors.green,
-                                                        size: 18,
-                                                      ),
-                                                  ],
-                                                ),
-                                                subtitle: Column(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      'Shop: ${barber.shopName}\nAddress: ${barber.address}\nDistance: ${distance.toStringAsFixed(2)} km',
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ),
-                                                    Text(
-                                                      'Prices: $barberPrices',
-                                                      style: TextStyle(
-                                                        fontSize: 14,
-                                                        color: Colors.grey[600],
-                                                      ),
-                                                    ),
-                                                    const SizedBox(height: 8),
-                                                    Row(
-                                                      children: [
-                                                        RatingBarIndicator(
-                                                          rating: barber.rating,
-                                                          itemBuilder: (context,
-                                                                  index) =>
-                                                              const Icon(
-                                                            Icons.star,
-                                                            color: Colors.amber,
-                                                          ),
-                                                          itemCount: 5,
-                                                          itemSize: 20.0,
-                                                          direction:
-                                                              Axis.horizontal,
-                                                        ),
-                                                        const SizedBox(
-                                                            width: 8),
-                                                        Text(barber.rating
-                                                            .toStringAsFixed(
-                                                                1)),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                                trailing: isSelected
-                                                    ? const Icon(
-                                                        Icons.check_circle,
-                                                        color: Colors.green)
-                                                    : null,
-                                                onTap: () {
-                                                  setState(() {
-                                                    if (_selectedBarberId ==
-                                                        barber.id) {
-                                                      _selectedBarberId = null;
-                                                      _selectedBarber = null;
-                                                    } else {
-                                                      _selectedBarberId =
-                                                          barber.id;
-                                                      _selectedBarber = barber;
-                                                    }
-                                                  });
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      );
-                                    },
-                                  );
-                                },
-                              );
-                            }
-                          },
-                        );
-                      }
-                    },
-                  ),
+                Slider(
+                  value: _maxDistance,
+                  min: 1.0,
+                  max: 50.0,
+                  divisions: 49,
+                  label: '${_maxDistance.toStringAsFixed(1)} km',
+                  onChanged: (value) {
+                    setState(() {
+                      _maxDistance = value;
+                    });
+                  },
                 ),
               ],
             ),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: barbers.length,
+              itemBuilder: (context, index) {
+                final barber = barbers[index];
+                final isApproved = approvalStatus[barber.name] ?? false;
+                final distance = _calculateDistanceTo(barber);
+
+                if (distance > _maxDistance) return Container(); // Skip if too far
+
+                return BarberListTile(
+                  barber: barber,
+                  isApproved: isApproved,
+                  distance: distance,
+                  prices: _selectedServices.map((s) => prices[s.id]?[barber.id] ?? s.price).toList(),
+                  isSelected: barber.id == _selectedBarberId,
+                  onSelect: () => setState(() {
+                    _selectedBarberId = barber.id;
+                    _selectedBarber = barber;
+                  }),
+                  selectedServices: _selectedServices,
+                );
+              },
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Visibility(
-            visible:
-                _selectedBarberId != null, // Show only if a barber is selected
+            visible: _selectedBarberId != null,
             child: Button(
               onPressed: () {
                 if (_selectedBarber != null) {
@@ -392,6 +248,129 @@ class _BarberListState extends State<BarberList> {
               child: const Text('Confirm'),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class BarberListTile extends StatelessWidget {
+  final Barber barber;
+  final bool isApproved;
+  final double distance;
+  final List<Service> selectedServices;
+  final List<double> prices;  // The list holds prices for each selected service.
+  final bool isSelected;
+  final VoidCallback onSelect;
+
+  const BarberListTile({
+    required this.barber,
+    required this.isApproved,
+    required this.distance,
+    required this.selectedServices,
+    required this.prices,
+    required this.isSelected,
+    required this.onSelect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Display the price for each selected service for the barber
+    final servicePriceWidgets = List<Widget>.generate(selectedServices.length, (index) {
+      final price = prices[index];
+      return Text(
+        '${selectedServices[index].name}: ${price.toStringAsFixed(2)}',  // Remove the dollar sign
+        style: const TextStyle(fontSize: 14, color: Colors.grey),
+      );
+    });
+
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        color: isSelected ? Colors.orange[50] : Colors.white,
+        child: ListTile(
+          contentPadding: const EdgeInsets.all(16.0),
+          leading: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.orange,
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: barber.imageUrl.isNotEmpty
+                  ? Image.network(
+                barber.imageUrl,
+                width: 60,
+                height: 60,
+                fit: BoxFit.cover,
+              )
+                  : const Icon(
+                Icons.person,
+                size: 40,
+                color: Colors.grey,
+              ),
+            ),
+          ),
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  barber.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
+                ),
+              ),
+              if (isApproved)
+                const Icon(
+                  Icons.check_circle,
+                  color: Colors.green,
+                  size: 18,
+                ),
+            ],
+          ),
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Distance: ${distance.toStringAsFixed(1)} km'),
+              ...servicePriceWidgets,  // Display prices for selected services
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  RatingBarIndicator(
+                    rating: barber.rating,
+                    itemBuilder: (context, index) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    itemCount: 5,
+                    itemSize: 20.0,
+                    direction: Axis.horizontal,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(barber.rating.toStringAsFixed(1)),
+                ],
+              ),
+            ],
+          ),
+          trailing: isSelected
+              ? const Icon(
+            Icons.check_circle,
+            color: Colors.green,
+            size: 30,
+          )
+              : null,
+          onTap: onSelect,
         ),
       ),
     );

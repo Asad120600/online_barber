@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:online_barber_app/views/admin/admin_csv_upload.dart';
 import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/orders.dart';
@@ -297,6 +298,22 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 );
               },
             ),
+            ListTile(
+              leading: const Icon(Icons.cut),
+              title: const Text(
+                'Upload Barbers',
+              ),
+              onTap: () {
+                Navigator.pop(context); // Close the drawer
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>   AdminCsvUploadPage(),
+                  ),
+                );
+              },
+            ),
+
             ListTile(
               leading: const Icon(Icons.campaign),
               title: const Text(

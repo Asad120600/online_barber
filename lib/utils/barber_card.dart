@@ -37,7 +37,7 @@ class BarberCard extends StatelessWidget {
                   )
                       : null,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 4),
                 Text(
                   barber.name ?? 'Unknown Barber',
                   style: TextStyle(
@@ -47,7 +47,7 @@ class BarberCard extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 5),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

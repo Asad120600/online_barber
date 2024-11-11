@@ -4,38 +4,44 @@ class Barber {
   final String phoneNumber;
   final String address;
   final String imageUrl;
-  String token;
-  String email;
-  String userType;
-  String shopName;
-  double rating; // New field for the barber's rating
-  int ratingCount; // New field for the number of ratings received
+  final String token;
+  final String email;
+  final String userType;
+  final String shopName;
+  final double latitude;
+  final double longitude;
+  double rating;
+  int ratingCount;
 
   Barber({
-    required this.email,
-    required this.userType,
     required this.id,
     required this.name,
     required this.phoneNumber,
     required this.address,
     required this.imageUrl,
     required this.token,
+    required this.email,
+    required this.userType,
     required this.shopName,
-    this.rating = 0.0, // Initialize rating to 0.0
-    this.ratingCount = 0, // Initialize ratingCount to 0
+    required this.latitude, // Make sure latitude is a required parameter
+    required this.longitude, // Make sure longitude is a required parameter
+    this.rating = 0.0,
+    this.ratingCount = 0,
   });
 
   factory Barber.fromSnapshot(doc) {
     return Barber(
       id: doc['id'] ?? '',
       name: doc['name'] ?? '',
-      email: doc['email'] ?? '',
       phoneNumber: doc['phoneNumber'] ?? '',
       address: doc['address'] ?? '',
       imageUrl: doc['imageUrl'] ?? '',
-      userType: doc['userType'] ?? '3',
       token: doc['token'] ?? '',
+      email: doc['email'] ?? '',
+      userType: doc['userType'] ?? '3',
       shopName: doc['shopName'] ?? '',
+      latitude: doc['location']?['latitude']?.toDouble() ?? 0.0,
+      longitude: doc['location']?['longitude']?.toDouble() ?? 0.0,
       rating: doc['rating']?.toDouble() ?? 0.0,
       ratingCount: doc['ratingCount'] ?? 0,
     );
@@ -48,10 +54,12 @@ class Barber {
       phoneNumber: data['phoneNumber'] ?? '',
       address: data['address'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
+      token: data['token'] ?? '',
       email: data['email'] ?? '',
       userType: data['userType'] ?? '3',
-      token: data['token'] ?? '',
       shopName: data['shopName'] ?? '',
+      latitude: data['location']?['latitude']?.toDouble() ?? 0.0,
+      longitude: data['location']?['longitude']?.toDouble() ?? 0.0,
       rating: data['rating']?.toDouble() ?? 0.0,
       ratingCount: data['ratingCount'] ?? 0,
     );
@@ -64,10 +72,14 @@ class Barber {
       'phoneNumber': phoneNumber,
       'address': address,
       'imageUrl': imageUrl,
+      'token': token,
       'email': email,
       'userType': userType,
-      'token': token,
       'shopName': shopName,
+      'location': {
+        'latitude': latitude,
+        'longitude': longitude,
+      },
       'rating': rating,
       'ratingCount': ratingCount,
     };
