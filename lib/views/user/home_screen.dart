@@ -1,12 +1,15 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/notifications.dart';
 import 'package:online_barber_app/views/user/barber_list.dart';
+import 'package:provider/provider.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
 import 'user_drawer_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,6 +18,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
+enum Language {english , urdu}
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Service> _hairStyles = [];
@@ -91,15 +95,34 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          "Online Barber",
+        title:  Text(
+          AppLocalizations.of(context)!.online_barber,
           style: TextStyle(
             fontFamily: 'Acumin Pro',
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
+
         actions: [
+          Consumer<LanguageChangeController>(
+            builder: (context, provider, child) {
+              return PopupMenuButton(
+                onSelected: (Language item) {
+                  if (Language.english.name == item.name) {
+                    provider.changeLanguage(Locale("en"));
+                  } else {
+                    provider.changeLanguage(Locale("ur"));
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+                  PopupMenuItem(value: Language.english, child: Text("English")),
+                  PopupMenuItem(value: Language.urdu, child: Text("Urdu"))
+                ],
+              );
+            },
+          ),
+
           Stack(
             children: [
               IconButton(

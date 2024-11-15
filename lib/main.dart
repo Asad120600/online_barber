@@ -4,27 +4,34 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  final String languageCode = sp.getString('language_code') ?? '';
   await Firebase.initializeApp();
   LocalStorage.initStorage();
-  runApp(const MyApp());
+  runApp(MyApp(locale: languageCode));
 }
-class MyApp extends StatefulWidget {
 
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  final String locale;
+  const MyApp({Key? key, required this.locale}) : super(key: key);
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-
   @override
   void initState() {
     super.initState();
@@ -34,6 +41,7 @@ class _MyAppState extends State<MyApp> {
     getToken();
   }
 
+  // Function to update user location
   Future<void> updateUserLocation() async {
     try {
       // Get the current user ID
@@ -128,25 +136,25 @@ class _MyAppState extends State<MyApp> {
       }
     });
   }
+  // Function to request location permission
   Future<void> requestLocationPermission() async {
     var status = await Permission.location.status;
     if (status.isDenied) {
       if (await Permission.location.request().isGranted) {
-        // The user granted permission
         log("Location permission granted.");
       } else {
-        // The user denied the permission
         log("Location permission denied.");
       }
     } else if (status.isPermanentlyDenied) {
-      // Handle the case where the user has permanently denied the permission.
       openAppSettings();
     } else if (status.isGranted) {
-      // Permission already granted
       log("Location permission already granted.");
     }
   }
-  String myToken="";
+
+  String myToken = "";
+
+  // Function to get Firebase token
   void getToken() async {
     await FirebaseMessaging.instance.getToken().then((value) {
       setState(() {
@@ -159,15 +167,44 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Online Barber App',
-      theme: ThemeData(
-        fontFamily: 'Acumin Pro',
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LanguageChangeController()),
+      ],
+      child: Consumer<LanguageChangeController>(
+        builder: (context, provider, child) {
+          // Set initial language based on the stored locale
+          if (provider.appLocale == null) {
+            if (widget.locale.isEmpty) {
+              provider.changeLanguage(Locale('en'));
+            } else {
+              provider.changeLanguage(Locale(widget.locale));
+            }
+          }
+
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Online Barber App',
+            locale: provider.appLocale ?? Locale(widget.locale.isEmpty ? 'en' : widget.locale),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [
+              Locale('en'),
+              Locale('ur'),
+            ],
+            theme: ThemeData(
+              fontFamily: 'Acumin Pro',
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
+              useMaterial3: true,
+            ),
+            home: const SplashScreen(),
+          );
+        },
       ),
-      home:  const SplashScreen(),
     );
   }
 }
