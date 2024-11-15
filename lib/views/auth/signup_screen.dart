@@ -85,6 +85,44 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
+  // Future<void> _handleSignUp() async {
+  //   String firstName = firstNameController.text.trim();
+  //   String lastName = lastNameController.text.trim();
+  //   String email = emailController.text.trim();
+  //   String password = passwordController.text.trim();
+  //   String confirmPassword = confirmPasswordController.text.trim();
+  //   String phoneNumber = phoneNumberController.text.trim();
+  //   String userType = isUserSelected ? '3' : '2'; // 3 for user, 2 for barber
+  //
+  //   if (password != confirmPassword) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Passwords do not match. Please try again.'),
+  //       ),
+  //     );
+  //     return;
+  //   }
+  //
+  //   bool signUpSuccess = await _authController.signUpWithEmail(
+  //     email,
+  //     password,
+  //     firstName,
+  //     lastName,
+  //     phoneNumber,
+  //     userType,
+  //     context,
+  //   );
+  //
+  //   if (signUpSuccess) {
+  //     _showLoadingDialog(context);
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Sign up failed. Please try again.'),
+  //       ),
+  //     );
+  //   }
+  // }
   Future<void> _handleSignUp() async {
     String firstName = firstNameController.text.trim();
     String lastName = lastNameController.text.trim();
@@ -93,6 +131,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String confirmPassword = confirmPasswordController.text.trim();
     String phoneNumber = phoneNumberController.text.trim();
     String userType = isUserSelected ? '3' : '2'; // 3 for user, 2 for barber
+
+    // Validation
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('All fields are required. Please fill out every field.'),
+        ),
+      );
+      return;
+    }
+
+    final phoneRegex = RegExp(r'^\+?[0-9]{10,13}$'); // Validate phone number
+    if (!phoneRegex.hasMatch(phoneNumber)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a valid phone number.'),
+        ),
+      );
+      return;
+    }
+
+    // if (password.length < 8 || !RegExp(r'[A-Z]').hasMatch(password) || !RegExp(r'[0-9]').hasMatch(password)) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text('Password must be at least 8 characters long and include a number and an uppercase letter.'),
+    //     ),
+    //   );
+    //   return;
+    // }
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,6 +170,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
+    // Proceed with signup
     bool signUpSuccess = await _authController.signUpWithEmail(
       email,
       password,
@@ -118,7 +186,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Sign up failed. Please try again.'),
+          content: Text('Sign up failed. Phone number already registered.'),
         ),
       );
     }

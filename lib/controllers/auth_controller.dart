@@ -17,6 +17,90 @@ class AuthController {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
+  // Future<bool> signUpWithEmail(
+  //     String email,
+  //     String password,
+  //     String firstName,
+  //     String lastName,
+  //     String phone,
+  //     String userType,
+  //     BuildContext context
+  //     ) async {
+  //   try {
+  //     UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+  //       email: email,
+  //       password: password,
+  //     );
+  //     User? user = userCredential.user;
+  //
+  //     if (user != null) {
+  //       String? token = await _firebaseMessaging.getToken();
+  //       if (token != null) {
+  //         LocalStorage.setFirebaseToken(token);
+  //       }
+  //
+  //       var userData = BaseUserModel(
+  //         uid: user.uid,
+  //         email: email,
+  //         firstName: firstName,
+  //         lastName: lastName,
+  //         userType: userType,
+  //         phone: phone,
+  //         token: token ?? '',
+  //       ).toMap();
+  //
+  //       // Set user data based on user type
+  //       switch (userType) {
+  //         case '1': // Admin
+  //           userData = AdminModel(
+  //             uid: user.uid,
+  //             email: email,
+  //             firstName: firstName,
+  //             lastName: lastName,
+  //             userType: userType,
+  //             phone: phone,
+  //             token: token ?? '',
+  //           ).toMap();
+  //           await _firestore.collection('admins').doc(user.uid).set(userData);
+  //           break;
+  //         case '2': // Barber
+  //           userData = Barber(
+  //             id: user.uid,
+  //             email: email,
+  //             name: firstName,
+  //             userType: userType,
+  //             phoneNumber: phone,
+  //             address: '',
+  //             imageUrl: '',
+  //             token: token ?? '',
+  //             shopName: '', latitude: 0.0, longitude: 0.0,
+  //           ).toMap();
+  //           await _firestore.collection('barbers').doc(user.uid).set(userData);
+  //           break;
+  //         case '3': // User
+  //           userData = BaseUserModel(
+  //             uid: user.uid,
+  //             email: email,
+  //             firstName: firstName,
+  //             lastName: lastName,
+  //             userType: userType,
+  //             phone: phone,
+  //             token: token ?? '',
+  //           ).toMap();
+  //           await _firestore.collection('users').doc(user.uid).set(userData);
+  //           break;
+  //         default: // Regular user
+  //           break;
+  //       }
+  //       return true; // Return true on successful signup
+  //     }
+  //     return false; // Return false if user is null
+  //   } catch (e) {
+  //     log("Sign Up Error: ${e.toString()}");
+  //     return false; // Return false on error
+  //   }
+  // }
+
   Future<bool> signUpWithEmail(
       String email,
       String password,
@@ -27,6 +111,22 @@ class AuthController {
       BuildContext context
       ) async {
     try {
+      // Step 1: Check if phone number already exists
+      var existingUserQuery = await _firestore
+          .collection('barbers')
+          .where('phoneNumber', isEqualTo: phone)
+          .get();
+
+      if (existingUserQuery.docs.isNotEmpty) {
+        // If a user with the same phone number exists, show error and return
+        log("Sign Up Error: Phone number already registered.");
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Phone number is already registered."))
+        );
+        return false; // Stop signup if phone number is already in use
+      }
+
+      // Step 2: Proceed with signup if phone number is unique
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
@@ -100,6 +200,7 @@ class AuthController {
       return false; // Return false on error
     }
   }
+
 
   Future<User?> signInWithEmail(String email, String password, String userType) async {
     try {
