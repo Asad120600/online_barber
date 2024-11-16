@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/claim_buisness_user_dialog.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart'; // Import for localization
 
 class ClaimBusiness extends StatefulWidget {
   const ClaimBusiness({super.key});
@@ -12,26 +13,22 @@ class ClaimBusiness extends StatefulWidget {
 }
 
 class _ClaimBusinessState extends State<ClaimBusiness> {
-  final CollectionReference barbersRef =
-      FirebaseFirestore.instance.collection('barbers');
-  final CollectionReference claimsRef =
-      FirebaseFirestore.instance.collection('claim_business');
-  String? adminUid; // Store admin UID
+  final CollectionReference barbersRef = FirebaseFirestore.instance.collection('barbers');
+  final CollectionReference claimsRef = FirebaseFirestore.instance.collection('claim_business');
+  String? adminUid;
 
   @override
   void initState() {
     super.initState();
-    fetchAdminUid(); // Fetch admin UID on initialization
+    fetchAdminUid();
   }
 
-  // Method to fetch admin UID
   Future<void> fetchAdminUid() async {
     try {
-      var adminSnapshot =
-          await FirebaseFirestore.instance.collection('admins').limit(1).get();
+      var adminSnapshot = await FirebaseFirestore.instance.collection('admins').limit(1).get();
       if (adminSnapshot.docs.isNotEmpty) {
         setState(() {
-          adminUid = adminSnapshot.docs.first.id; // Store admin UID
+          adminUid = adminSnapshot.docs.first.id;
         });
       }
     } catch (e) {
@@ -40,8 +37,7 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
   }
 
   Future<bool> isBusinessClaimed(String barberName) async {
-    final querySnapshot =
-        await claimsRef.where('barberName', isEqualTo: barberName).get();
+    final querySnapshot = await claimsRef.where('barberName', isEqualTo: barberName).get();
     return querySnapshot.docs.isNotEmpty;
   }
 
@@ -55,16 +51,16 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
             onSubmit: (String barberName, String shopName, String address,
                 String phoneNumber, String email, String nationalId) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Claim submitted for $barberName!')),
+                SnackBar(content: Text(AppLocalizations.of(context)!.claimSubmitted(barberName),)),
               );
             },
-            adminUid: adminUid!, // Pass admin UID to dialog
+            adminUid: adminUid!,
           );
         },
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error fetching admin UID.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorFetchingAdminUid)),
       );
     }
   }
@@ -75,8 +71,10 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Claim Business')),
+      appBar: AppBar(title: Text(localizations!.claimBusiness)),
       body: RefreshIndicator(
         onRefresh: _refreshBarbers,
         child: StreamBuilder<QuerySnapshot>(
@@ -86,7 +84,7 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
               return const Center(child: LoadingDots());
             }
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text("No barbers available"));
+              return Center(child: Text(localizations.noBarbersAvailable));
             }
 
             final barbers = snapshot.data!.docs;
@@ -95,15 +93,15 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
               itemCount: barbers.length,
               itemBuilder: (context, index) {
                 var barber = barbers[index];
-                var name = barber['name'] ?? 'No Name';
-                var shopName = barber['shopName'] ?? 'No Shop Name';
-                var address = barber['address'] ?? 'No Address';
+                var name = barber['name'] ?? localizations.noName;
+                var shopName = barber['shopName'] ?? localizations.noShopName;
+                var address = barber['address'] ?? localizations.noAddress;
 
                 return FutureBuilder<bool>(
                   future: isBusinessClaimed(name),
                   builder: (context, claimedSnapshot) {
                     bool isClaimed = claimedSnapshot.data ?? false;
-                    return _buildBarberCard(name, shopName, address, isClaimed);
+                    return _buildBarberCard(name, shopName, address, isClaimed, localizations);
                   },
                 );
               },
@@ -114,8 +112,7 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
     );
   }
 
-  Widget _buildBarberCard(
-      String name, String shopName, String address, bool isClaimed) {
+  Widget _buildBarberCard(String name, String shopName, String address, bool isClaimed, AppLocalizations localizations) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
       child: ListTile(
@@ -126,10 +123,10 @@ class _ClaimBusinessState extends State<ClaimBusiness> {
           onPressed: isClaimed
               ? null
               : () {
-                  showClaimDialog(name);
-                },
+            showClaimDialog(name);
+          },
           child: Text(
-            isClaimed ? 'Already Claimed' : 'Claim Business',
+            isClaimed ? localizations.alreadyClaimed : localizations.claimBusinessButton,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
         ),

@@ -10,6 +10,8 @@ import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/book_appointment.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class BarberList extends StatefulWidget {
   final List<Service> selectedServices;
@@ -53,19 +55,19 @@ class _BarberListState extends State<BarberList> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
+      return Future.error(AppLocalizations.of(context)!.locationServicesDisabled);
     }
 
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied.');
+        return Future.error(AppLocalizations.of(context)!.locationPermissionsDenied);
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied.');
+      return Future.error(AppLocalizations.of(context)!.locationPermissionsPermanentlyDenied);
     }
 
     _currentPosition = await Geolocator.getCurrentPosition(
@@ -163,6 +165,8 @@ class _BarberListState extends State<BarberList> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+
     if (_isLoading || _currentPosition == null) {
       return const Scaffold(
         body: Center(child: LoadingDots()),
@@ -170,7 +174,7 @@ class _BarberListState extends State<BarberList> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Select a Barber')),
+      appBar: AppBar(title: Text(localizations!.selectBarber)),
       body: Column(
         children: [
           Padding(
@@ -178,7 +182,7 @@ class _BarberListState extends State<BarberList> {
             child: Column(
               children: [
                 Text(
-                  'Max Distance: ${_maxDistance.toStringAsFixed(1)} km',
+                  localizations.maxDistance(_maxDistance.toStringAsFixed(1)),
                   style: const TextStyle(fontSize: 16),
                 ),
                 Slider(
@@ -245,7 +249,7 @@ class _BarberListState extends State<BarberList> {
                   );
                 }
               },
-              child: const Text('Confirm'),
+              child: Text(localizations.confirm),
             ),
           ),
         ),
@@ -292,85 +296,25 @@ class BarberListTile extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
         ),
-        color: isSelected ? Colors.orange[50] : Colors.white,
+        color: isSelected ? Colors.blue.shade100 : Colors.white,
         child: ListTile(
-          contentPadding: const EdgeInsets.all(16.0),
-          leading: Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.orange,
-                width: 2,
-              ),
-            ),
-            child: ClipOval(
-              child: barber.imageUrl.isNotEmpty
-                  ? Image.network(
-                barber.imageUrl,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-              )
-                  : const Icon(
-                Icons.person,
-                size: 40,
-                color: Colors.grey,
-              ),
-            ),
+          onTap: onSelect,
+          leading: CircleAvatar(
+            backgroundImage: NetworkImage(barber.imageUrl),
+            radius: 30,
           ),
-          title: Row(
-            children: [
-              Flexible(
-                child: Text(
-                  barber.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 2,
-                ),
-              ),
-              if (isApproved)
-                const Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                  size: 18,
-                ),
-            ],
-          ),
+          title: Text(barber.name),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Distance: ${distance.toStringAsFixed(1)} km'),
-              ...servicePriceWidgets,  // Display prices for selected services
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  RatingBarIndicator(
-                    rating: barber.rating,
-                    itemBuilder: (context, index) => const Icon(
-                      Icons.star,
-                      color: Colors.amber,
-                    ),
-                    itemCount: 5,
-                    itemSize: 20.0,
-                    direction: Axis.horizontal,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(barber.rating.toStringAsFixed(1)),
-                ],
+              ...servicePriceWidgets,
+              const SizedBox(height: 5),
+              Text(
+                '${distance.toStringAsFixed(1)} km  ',
+                style: TextStyle(color: isApproved ? Colors.green : Colors.red),
               ),
             ],
           ),
-          trailing: isSelected
-              ? const Icon(
-            Icons.check_circle,
-            color: Colors.green,
-            size: 30,
-          )
-              : null,
-          onTap: onSelect,
         ),
       ),
     );

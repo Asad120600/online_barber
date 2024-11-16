@@ -18,7 +18,8 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-enum Language {english , urdu}
+enum Language { english, urdu }
+
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Service> _hairStyles = [];
@@ -78,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Close'),
+                  child: Text(AppLocalizations.of(context)!.close),
                 ),
               ],
             ),
@@ -95,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title:  Text(
+        title: Text(
           AppLocalizations.of(context)!.online_barber,
           style: TextStyle(
             fontFamily: 'Acumin Pro',
@@ -103,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-
         actions: [
           Consumer<LanguageChangeController>(
             builder: (context, provider, child) {
@@ -116,13 +116,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-                  PopupMenuItem(value: Language.english, child: Text("English")),
-                  PopupMenuItem(value: Language.urdu, child: Text("Urdu"))
+                  PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+                  PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu))
                 ],
               );
             },
           ),
-
           Stack(
             children: [
               IconButton(
@@ -177,8 +176,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: const Text(
-              'Our Services',
+            child: Text(
+              AppLocalizations.of(context)!.services_title,
               style: TextStyle(
                 fontFamily: 'Acumin Pro',
                 fontWeight: FontWeight.bold,
@@ -191,8 +190,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               children: [
-                _buildCategorySection('Hair Styles', _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
-                _buildCategorySection('Beard Styles', _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
+                _buildCategorySection(AppLocalizations.of(context)!.hair_styles, _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
+                _buildCategorySection(AppLocalizations.of(context)!.beard_styles, _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
               ],
             ),
           ),
@@ -221,7 +220,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 },
-                child: const Text('Continue'),
+                child: Text(AppLocalizations.of(context)!.continue_button),
               ),
             ),
         ],
@@ -267,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               title: Text(service.name),
-              subtitle: Text('Price: ${service.price.toStringAsFixed(2)}'),
+              subtitle: Text('${service.price.toStringAsFixed(2)}'),
               trailing: Checkbox(
                 value: checked[index],
                 onChanged: (bool? value) {

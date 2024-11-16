@@ -8,6 +8,8 @@ import 'package:online_barber_app/views/admin/admin_panel.dart';
 import 'package:online_barber_app/views/auth/signup_screen.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -35,19 +37,18 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
   }
-
   Future<void> _showLoadingDialog() async {
     showDialog(
       context: context,
       barrierDismissible: false, // Prevent dialog from being dismissed by tapping outside
       builder: (BuildContext context) {
-        return const AlertDialog(
-          content:  Row(
+        return AlertDialog(
+          content: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               LoadingDots(),
               SizedBox(width: 20.0),
-              Text('Logging in...'),
+              Text(AppLocalizations.of(context)!.logging_in),
             ],
           ),
         );
@@ -118,8 +119,8 @@ class _LoginScreenState extends State<LoginScreen> {
         } else {
           Navigator.of(context).pop(); // Dismiss the loading dialog
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to sign in. Please try again.'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.failed_to_sign_in),
             ),
           );
         }
@@ -127,21 +128,18 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error during login: $e'),
-          ),
+            content: Text(AppLocalizations.of(context)!.error_during_login(e.toString())),          ),
         );
       }
     } else {
       Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter email and password.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.please_enter_email_and_password),
         ),
       );
     }
   }
-
-
 
   Future<void> _handleGoogleSignIn() async {
     _showLoadingDialog(); // Show the loading dialog
@@ -190,8 +188,8 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to sign in with Google. Please try again.'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.failed_to_sign_in_google),
           ),
         );
       }
@@ -202,11 +200,11 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error during Google sign-in: $e'),
-        ),
+          content: Text(AppLocalizations.of(context)!.error_during_google_sign_in(e.toString())),        ),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -231,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.05),
               Row(
                 children: [
-                  _buildRoleSelectionButton('User', isUserSelected, () {
+                  _buildRoleSelectionButton( AppLocalizations.of(context)!.user, isUserSelected, () {
                     setState(() {
                       isUserSelected = true;
                       isAdminSelected = false;
@@ -239,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }),
                   const SizedBox(width: 10.0),
-                  _buildRoleSelectionButton('Admin', isAdminSelected, () {
+                  _buildRoleSelectionButton( AppLocalizations.of(context)!.admin, isAdminSelected, () {
                     setState(() {
                       isUserSelected = false;
                       isAdminSelected = true;
@@ -247,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }),
                   const SizedBox(width: 10.0),
-                  _buildRoleSelectionButton('Barber', isBarberSelected, () {
+                  _buildRoleSelectionButton( AppLocalizations.of(context)!.barber, isBarberSelected, () {
                     setState(() {
                       isUserSelected = false;
                       isAdminSelected = false;
@@ -261,7 +259,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.03),
               Button(
                 onPressed: _handleLogin,
-                child: const Text('LOGIN'),
+                child:  Text( AppLocalizations.of(context)!.login),
               ),
               SizedBox(height: screenHeight * 0.02),
               if (!isAdminSelected) // Only show the Sign Up text if Admin is not selected
@@ -272,8 +270,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       MaterialPageRoute(builder: (context) => const SignUpScreen()),
                     );
                   },
-                  child: const Text(
-                    'Don\'t have an account? Sign Up',
+                  child:  Text(
+                    AppLocalizations.of(context)!.dont_have_account,
                     style: TextStyle(
                       color: Colors.blue,
                       fontSize: 14.0,
@@ -292,9 +290,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 25.0,
                       ),
                       const SizedBox(width: 10.0),
-                      const Text(
-                        'Sign in with Google',
-                        style: TextStyle(
+                      Text(
+                        AppLocalizations.of(context)!.sign_in_with_google,
+                        style: const TextStyle(
                           color: Colors.black87,
                           fontSize: 16.0,
                         ),
@@ -339,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 150),
           child: Text(
-            isUserSelected ? 'Login as User' : isAdminSelected ? 'Login as Admin' : 'Login as Barber',
+            isUserSelected ? AppLocalizations.of(context)!.login_user : isAdminSelected ? AppLocalizations.of(context)!.login_admin : AppLocalizations.of(context)!.login_barber,
             style: const TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -354,7 +352,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ? adminEmailController
               : barberEmailController,
           decoration: InputDecoration(
-            hintText: 'Email',
+            hintText: AppLocalizations.of(context)!.email,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),
@@ -369,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
               : barberPasswordController,
           obscureText: !isPasswordVisible,
           decoration: InputDecoration(
-            hintText: 'Password',
+            hintText: AppLocalizations.of(context)!.password,
             suffixIcon: IconButton(
               icon: Icon(
                 isPasswordVisible ? Icons.visibility : Icons.visibility_off,
