@@ -229,5 +229,11 @@
   "chat": "Chat",
   "upload_barbers": "Upload Barbers",
   "claim_requests": "Claim Requests",
-  "sign_out_confirmation": "Are you sure you want to sign out?"
+  "sign_out_confirmation": "Are you sure you want to sign out?",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "profileUpdating": "Profile is Updating!",
+  "profileUpdated": "Profile updated successfully",
+  "failedToUpdate": "Failed to update profile",
+  "saveChanges": "Save Changes"
 }

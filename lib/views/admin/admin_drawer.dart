@@ -84,7 +84,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      localization.hello_admin(_firstName as Object),
+                      localization.hello_admin(_firstName ?? ''),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,

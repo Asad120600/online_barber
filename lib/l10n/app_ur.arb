@@ -229,7 +229,12 @@
   "chat": "چیٹ",
   "upload_barbers": "حجام اپ لوڈ کریں",
   "claim_requests": "دعویٰ کی درخواستیں",
-  "sign_out_confirmation": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟"
-
-
+  "sign_out_confirmation": "کیا آپ واقعی لاگ آؤٹ کرنا چاہتے ہیں؟",
+  "firstName": "پہلا نام",
+  "lastName": "آخری نام",
+  "profileUpdating": "پروفائل اپ ڈیٹ ہو رہا ہے!",
+  "profileUpdated": "پروفائل کامیابی سے اپ ڈیٹ ہو گیا",
+  "failedToUpdate": "پروفائل اپ ڈیٹ کرنے میں ناکام",
+  "saveChanges": "تبدیلیاں محفوظ کریں",
+  "admin_panel": "ایڈمن پینل"
 }

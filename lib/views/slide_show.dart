@@ -45,7 +45,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => const AdminPanel(),
+              builder: (context) =>  AdminPanel(),
             ),
           );
           break;
