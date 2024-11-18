@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/barbers_map.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -59,10 +60,11 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
   }
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     if (widget.uid.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Appointments'),
+          title:  Text(localizations.appointments),
         ),
         body: const Center(
           child: Text('User ID is empty or user not authenticated.'),
@@ -72,7 +74,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Appointments'),
+        title: Text(localizations.appointments),
       ),
       body: StreamBuilder<List<Appointment>>(
         stream: _appointmentController.getAppointmentsByUID(widget.uid),

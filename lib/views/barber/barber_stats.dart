@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class Stats extends StatefulWidget {
   final String barberId;
@@ -47,9 +48,11 @@ class _StatsState extends State<Stats> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!; // Get localized strings
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barber Stats'),
+        title: Text(localizations.barberStats),
         elevation: 4.0,
       ),
       body: FutureBuilder<Map<String, double>>(
@@ -60,7 +63,7 @@ class _StatsState extends State<Stats> {
           }
 
           if (snapshot.hasError) {
-            return const Center(child: Text('Error loading earnings data.'));
+            return Center(child: Text(localizations.errorLoadingData));
           }
 
           Map<String, double> earnings = snapshot.data ?? {};
@@ -77,23 +80,31 @@ class _StatsState extends State<Stats> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Earnings for the Last 3 Months',
-                  style: TextStyle(
+                Text(
+                  localizations.earningsLastThreeMonths,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
                 ),
                 const SizedBox(height: 20),
-                Expanded(
-                  child: AspectRatio(
-                    aspectRatio: 1.5,
-                    child: BarberEarningsChart(earnings: earnings),
+                if (earnings.isEmpty)
+                  Center(
+                    child: Text(
+                      localizations.noEarningsData,
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                else
+                  Expanded(
+                    child: AspectRatio(
+                      aspectRatio: 1.5,
+                      child: BarberEarningsChart(earnings: earnings),
+                    ),
                   ),
-                ),
                 const SizedBox(height: 20),
-                CommissionDisplay(earnings: earnings),
+                if (earnings.isNotEmpty) CommissionDisplay(earnings: earnings),
               ],
             ),
           );
@@ -114,7 +125,7 @@ class _StatsState extends State<Stats> {
 class BarberEarningsChart extends StatelessWidget {
   final Map<String, double> earnings;
 
-  const BarberEarningsChart({required this.earnings});
+  const BarberEarningsChart({super.key, required this.earnings});
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +143,7 @@ class BarberEarningsChart extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               width: MediaQuery.of(context).size.width * 0.06,
               backDrawRodData: BackgroundBarChartRodData(
-                toY: amount,
+                toY: 0,
                 color: Colors.grey.shade300,
                 show: true,
               ),
@@ -154,7 +165,9 @@ class BarberEarningsChart extends StatelessWidget {
             sideTitles: SideTitles(
               showTitles: true,
               reservedSize: 40,
-              interval: earnings.values.isNotEmpty ? earnings.values.reduce((a, b) => a > b ? a : b) / 5 : 1,
+              interval: earnings.values.isNotEmpty
+                  ? (earnings.values.reduce((a, b) => a > b ? a : b) / 5).clamp(1, double.infinity)
+                  : 1,
               getTitlesWidget: (value, meta) {
                 return Text(
                   value.toStringAsFixed(0),
@@ -189,12 +202,14 @@ class BarberEarningsChart extends StatelessWidget {
 class CommissionDisplay extends StatelessWidget {
   final Map<String, double> earnings;
 
-  const CommissionDisplay({required this.earnings});
+  const CommissionDisplay({super.key, required this.earnings});
 
   @override
   Widget build(BuildContext context) {
     double totalEarnings = earnings.values.reduce((a, b) => a + b);
     double commission = totalEarnings * 0.10;
+
+    final localizations = AppLocalizations.of(context)!; // Get localized strings
 
     return Center(
       child: Container(
@@ -214,7 +229,7 @@ class CommissionDisplay extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              'Total Earnings: ${totalEarnings.toStringAsFixed(2)}',
+              localizations.totalEarnings(totalEarnings.toStringAsFixed(2)),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -222,7 +237,7 @@ class CommissionDisplay extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Commission (10%): ${commission.toStringAsFixed(2)}',
+              localizations.commission(commission.toStringAsFixed(2)),
               style: const TextStyle(
                 fontSize: 20,
                 color: Colors.red,

@@ -2,6 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import 'package:intl/intl.dart';
+import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class RecentOrdersPage extends StatelessWidget {
   final String userId;
@@ -10,9 +13,10 @@ class RecentOrdersPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recent Orders'),
+        title:  Text(localizations.recentOrders),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
@@ -22,7 +26,7 @@ class RecentOrdersPage extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: LoadingDots());
           }
 
           if (snapshot.hasError) {
@@ -32,7 +36,7 @@ class RecentOrdersPage extends StatelessWidget {
           final orders = snapshot.data?.docs;
 
           if (orders == null || orders.isEmpty) {
-            return const Center(child: Text('No recent orders'));
+            return  Center(child: Text(localizations.noRecentOrders));
           }
 
           return ListView.builder(
@@ -54,12 +58,12 @@ class RecentOrdersPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: ExpansionTile(
-                  title: Text('Order ID: $orderId'),
+                  title: Text(localizations.orderId(orderId)), // Pass dynamic value
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total: ${order['totalPrice']?.toStringAsFixed(2) ?? '0.00'}'),
-                      Text('Status: $orderStatus'),
+                      Text(localizations.total(order['totalPrice']?.toStringAsFixed(2) ?? '0.00')), // Pass dynamic value
+                      Text(localizations.status(orderStatus)), // Pass dynamic value
                     ],
                   ),
                   trailing: Text(
@@ -69,35 +73,35 @@ class RecentOrdersPage extends StatelessWidget {
                   childrenPadding: const EdgeInsets.all(16.0),
                   children: [
                     ListTile(
-                      title: Text('Delivery Address: ${order['address'] ?? 'N/A'}'),
-                      subtitle: Text('Phone: ${order['phone'] ?? 'N/A'}'),
+                      title: Text(localizations.deliveryAddress(order['address'] ?? 'N/A')), // Pass dynamic value
+                      subtitle: Text(localizations.phone(order['phone'] ?? 'N/A')), // Pass dynamic value
                     ),
                     const Divider(),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text('Products:', style: Theme.of(context).textTheme.titleMedium),
+                      child: Text(localizations.products, style: Theme.of(context).textTheme.titleMedium),
                     ),
                     ...order['products']?.entries.map<Widget>((entry) {
                       return FutureBuilder<DocumentSnapshot>(
                         future: FirebaseFirestore.instance.collection('products').doc(entry.key).get(),
                         builder: (context, productSnapshot) {
                           if (productSnapshot.connectionState == ConnectionState.waiting) {
-                            return const ListTile(
-                              title: Text('Loading product...'),
+                            return ListTile(
+                              title: Text(localizations.loadingProduct),
                             );
                           }
 
                           if (productSnapshot.hasError) {
                             return ListTile(
-                              title: Text('Error: ${productSnapshot.error}'),
+                              title: Text(localizations.error),
                             );
                           }
 
                           final productData = productSnapshot.data?.data() as Map<String, dynamic>?;
 
                           if (productData == null) {
-                            return const ListTile(
-                              title: Text('Product not found'),
+                            return ListTile(
+                              title: Text(localizations.productNotFound),
                             );
                           }
 

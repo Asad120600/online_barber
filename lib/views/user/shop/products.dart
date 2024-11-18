@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'cart.dart';
 
@@ -11,9 +12,9 @@ class ProductDisplayPage extends StatefulWidget {
 }
 
 class _ProductDisplayPageState extends State<ProductDisplayPage> {
-  final Map<String, int> _productQuantities = {}; // Track product quantities
-  final Map<String, double> _productPrices = {}; // Track product prices
-  double _totalPrice = 0.0; // Track total price
+  final Map<String, int> _productQuantities = {};
+  final Map<String, double> _productPrices = {};
+  double _totalPrice = 0.0;
 
   void _updateTotalPrice() {
     double total = 0.0;
@@ -27,6 +28,9 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
   }
 
   void _addToCart() {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(AppLocalizations.of(context)!.addProductToCart),
+    ));
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => CartPage(
         productQuantities: _productQuantities,
@@ -40,9 +44,9 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
       context: context,
       builder: (context) => Dialog(
         child: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),  // Close the preview when tapped
+          onTap: () => Navigator.of(context).pop(),
           child: InteractiveViewer(
-            child: Image.network(imageUrl, fit: BoxFit.contain),  // Enable pinch to zoom
+            child: Image.network(imageUrl, fit: BoxFit.contain),
           ),
         ),
       ),
@@ -51,9 +55,11 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product List'),
+        title: Text(localizations.productListTitle),
         actions: [
           IconButton(
             onPressed: _addToCart,
@@ -69,10 +75,17 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+                child: Text(localizations.errorLabel(snapshot.error.toString())));
           }
 
           final products = snapshot.data?.docs;
+
+          if (products == null || products.isEmpty) {
+            return Center(
+              child: Text(localizations.noProductsAvailable),
+            );
+          }
 
           return GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -80,9 +93,9 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
             ),
-            itemCount: products?.length ?? 0,
+            itemCount: products.length,
             itemBuilder: (context, index) {
-              final product = products![index].data() as Map<String, dynamic>;
+              final product = products[index].data() as Map<String, dynamic>;
               final productId = products[index].id;
               final quantity = _productQuantities[productId] ?? 0;
               final price = double.tryParse(product['price']) ?? 0.0;
@@ -99,14 +112,14 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                       Expanded(
                         child: Center(
                           child: CircleAvatar(
-                            radius: 80,  // Increased radius for larger CircleAvatar
+                            radius: 80,
                             backgroundImage: NetworkImage(product['imageUrl']),
                           ),
                         ),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(6.0),
-                        child: Text('Price: ${price.toStringAsFixed(2)}'),
+                        child: Text(localizations.priceLabel(price.toStringAsFixed(2))),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -126,7 +139,7 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                               }
                             },
                           ),
-                          Text('$quantity'),
+                          Text('${localizations.quantityLabel(quantity.toString())}'),
                           IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: () {
@@ -153,24 +166,23 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
           color: Colors.grey[200],
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Adjust the font size based on the available width
-              double fontSize = constraints.maxWidth * 0.04; // Adjust the multiplier as needed
+              double fontSize = constraints.maxWidth * 0.04;
 
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total: ${_totalPrice.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: fontSize), // Adjust font size as needed
+                    localizations.totalPriceLabel(_totalPrice.toStringAsFixed(2)),
+                    style: TextStyle(fontSize: fontSize),
                   ),
                   SizedBox(
-                    width: 106, // Button width
+                    width: 106,
                     child: Button(
                       onPressed: _addToCart,
                       child: FittedBox(
                         fit: BoxFit.fitWidth,
                         child: Text(
-                          'Add to Cart',
+                          localizations.addToCart,
                           style: TextStyle(fontSize: fontSize),
                         ),
                       ),

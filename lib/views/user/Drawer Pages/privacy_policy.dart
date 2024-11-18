@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class PrivacyPolicy extends StatelessWidget {
   const PrivacyPolicy({super.key});
@@ -9,7 +11,7 @@ class PrivacyPolicy extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: const Text('Privacy Policy'),
+        title:  Text(AppLocalizations.of(context)!.privacy_policy),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
