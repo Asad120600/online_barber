@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,11 +6,10 @@ import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/views/admin/admin_panel.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import '../../utils/button.dart';
 
 class AdminProfile extends StatefulWidget {
-  const AdminProfile({Key? key}) : super(key: key);
+  const AdminProfile({super.key});
 
   @override
   State<AdminProfile> createState() => _AdminProfileState();
@@ -45,7 +45,9 @@ class _AdminProfileState extends State<AdminProfile> {
         });
       }
     } catch (e) {
-      print('Error fetching admin data: $e');
+      if (kDebugMode) {
+        print('Error fetching admin data: $e');
+      }
     }
   }
 
@@ -90,7 +92,9 @@ class _AdminProfileState extends State<AdminProfile> {
         },
       );
     } catch (e) {
-      print('Error updating admin profile: $e');
+      if (kDebugMode) {
+        print('Error updating admin profile: $e');
+      }
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(localizations.failedToUpdate)),

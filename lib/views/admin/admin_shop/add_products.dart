@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/views/admin/admin_panel.dart';
@@ -21,7 +22,7 @@ class _AddProductsState extends State<AddProducts> {
   String _imageUrl = '';
   String _price = '';
   String _description = '';
-  String _productName = ''; // Variable for product name
+  String _productName = '';
 
   Future<void> _pickImage() async {
     final pickedFile = await _imagePicker.pickImage(source: ImageSource.gallery);
@@ -34,7 +35,10 @@ class _AddProductsState extends State<AddProducts> {
 
   Future<void> _uploadImage() async {
     if (_imageFile != null) {
-      final storageRef = FirebaseStorage.instance.ref().child('product_images').child(_imageFile!.name);
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('product_images')
+          .child(_imageFile!.name);
       await storageRef.putFile(File(_imageFile!.path));
       final url = await storageRef.getDownloadURL();
       setState(() {
@@ -45,12 +49,11 @@ class _AddProductsState extends State<AddProducts> {
 
   Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
-      // Show the loading dialog
       showDialog(
         context: context,
         barrierDismissible: false,
-        builder: (BuildContext context) => const LoadingDialog(
-          message: 'Product is adding....',
+        builder: (BuildContext context) => LoadingDialog(
+          message: AppLocalizations.of(context)!.addingProduct,
         ),
       );
 
@@ -63,39 +66,42 @@ class _AddProductsState extends State<AddProducts> {
           'imageUrl': _imageUrl,
           'price': _price,
           'description': _description,
-          'productName': _productName, // Save product name
+          'productName': _productName,
         });
 
-        // Hide the loading dialog after successful upload
         Navigator.of(context).pop();
 
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Product added')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.productAdded)),
+        );
 
-        // Show success dialog and redirect
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Success'),
-            content: Text('Product added successfully!'),
+            title: Text(AppLocalizations.of(context)!.success),
+            content: Text(AppLocalizations.of(context)!.productAddedSuccessfully),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
+                  Navigator.of(context).pop();
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => AdminPanel(), // Navigate to AdminPanel
+                    builder: (context) => const AdminPanel(),
                   ));
                 },
-                child: Text('OK'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           ),
         );
       } catch (e) {
-        // Hide the loading dialog in case of an error
         Navigator.of(context).pop();
-
-        // Show error message
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to add product: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              AppLocalizations.of(context)!.failedToAddProduct(e.toString()),
+            ),
+          ),
+        );
       }
     }
   }
@@ -103,7 +109,7 @@ class _AddProductsState extends State<AddProducts> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Admin Product Management')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.adminProductManagement)),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -119,35 +125,44 @@ class _AddProductsState extends State<AddProducts> {
                       height: 200,
                       color: Colors.grey[200],
                       child: _imageFile == null
-                          ? Center(child: Text('Pick Image'))
+                          ? Center(child: Text(AppLocalizations.of(context)!.pickImage))
                           : Image.file(File(_imageFile!.path), fit: BoxFit.cover),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Product Name'), // Add product name field
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.productName,
+                    ),
                     onChanged: (value) => _productName = value,
-                    validator: (value) => value!.isEmpty ? 'Please enter a product name' : null,
+                    validator: (value) =>
+                    value!.isEmpty ? AppLocalizations.of(context)!.enterProductName : null,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Price'),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.price,
+                    ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) => _price = value,
-                    validator: (value) => value!.isEmpty ? 'Please enter a price' : null,
+                    validator: (value) =>
+                    value!.isEmpty ? AppLocalizations.of(context)!.enterPrice : null,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Description'),
+                    decoration: InputDecoration(
+                      labelText: AppLocalizations.of(context)!.description,
+                    ),
                     onChanged: (value) => _description = value,
-                    validator: (value) => value!.isEmpty ? 'Please enter a description' : null,
+                    validator: (value) =>
+                    value!.isEmpty ? AppLocalizations.of(context)!.enterDescription : null,
                   ),
-                  SizedBox(height: 85),
+                  const SizedBox(height: 85),
                   Center(
                     child: Button(
-                      width: 150,
+                      width: 165,
                       onPressed: _saveProduct,
-                      child: Text('Save Product'),
+                      child: Text(AppLocalizations.of(context)!.saveProduct),
                     ),
                   ),
                 ],

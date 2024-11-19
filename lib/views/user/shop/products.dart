@@ -119,7 +119,7 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(6.0),
-                        child: Text(localizations.priceLabel(price.toStringAsFixed(2))),
+                        child: Text(localizations.priceLabel(price)),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
