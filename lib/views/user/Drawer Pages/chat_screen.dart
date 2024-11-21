@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:online_barber_app/push_notification_service.dart'; // Import your push notification service
+import 'package:online_barber_app/push_notification_service.dart';
+// Import your push notification service
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class ChatScreen extends StatefulWidget {
   final String threadId;
@@ -28,7 +31,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Admin'),
+        title: Text(AppLocalizations.of(context)!.admin),
       ),
       body: Column(
         children: [

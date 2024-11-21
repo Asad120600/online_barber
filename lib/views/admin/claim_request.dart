@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ClaimRequestsScreen extends StatefulWidget {
   const ClaimRequestsScreen({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
   Future<void> approveClaim(String claimId) async {
     await claimsRef.doc(claimId).update({'status': 'approved'});
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Claim approved successfully!')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.claim_approved)),
     );
   }
 
@@ -36,33 +37,34 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
   Future<void> disapproveClaim(String claimId) async {
     await claimsRef.doc(claimId).update({'status': 'disapproved'});
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Claim disapproved successfully!')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.claim_disapproved)),
     );
   }
 
   // View barber details dialog
   void showClaimDetails(Map<String, dynamic> claimData) {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Claim Details: ${claimData['barberName']}'),
+          title: Text('${localizations.claim_details}: ${claimData['barberName']}'),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Shop Name: ${claimData['shopName']}'),
-                Text('Address: ${claimData['address']}'),
-                Text('Phone: ${claimData['phoneNumber']}'),
-                Text('Email: ${claimData['email']}'),
-                Text('National ID: ${claimData['nationalId']}'),
+                Text('${localizations.shop_name}: ${claimData['shopName']}'),
+                Text('${localizations.address}: ${claimData['address']}'),
+                Text('${localizations.phone}: ${claimData['phoneNumber']}'),
+                Text('${localizations.email}: ${claimData['email']}'),
+                Text('${localizations.national_id}: ${claimData['nationalId']}'),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+              child: Text(localizations.close),
             ),
           ],
         );
@@ -72,16 +74,17 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Claim Requests'),
+          title: Text(localizations.claim_requests),
           bottom: TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(text: 'Pending Requests'),
-              Tab(text: 'Approved Requests'),
+            tabs: [
+              Tab(text: localizations.pending_requests),
+              Tab(text: localizations.approved_requests),
             ],
           ),
         ),
@@ -96,7 +99,7 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No pending claims available"));
+                  return Center(child: Text(localizations.no_pending_claims));
                 }
 
                 final claims = snapshot.data!.docs;
@@ -110,15 +113,15 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       child: ListTile(
-                        title: Text(claimData['barberName'] ?? 'No Name'),
+                        title: Text(claimData['barberName'] ?? localizations.no_name),
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Shop Name: ${claimData['shopName']}'),
-                            Text('Address: ${claimData['address']}'),
-                            Text('Phone: ${claimData['phoneNumber']}'),
-                            Text('Email: ${claimData['email']}'),
-                            Text('National ID: ${claimData['nationalId']}'),
+                            Text('${localizations.shop_name}: ${claimData['shopName']}'),
+                            Text('${localizations.address}: ${claimData['address']}'),
+                            Text('${localizations.phone}: ${claimData['phoneNumber']}'),
+                            Text('${localizations.email}: ${claimData['email']}'),
+                            Text('${localizations.national_id}: ${claimData['nationalId']}'),
                           ],
                         ),
                         trailing: Row(
@@ -148,7 +151,7 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(child: Text("No approved claims available"));
+                  return Center(child: Text(localizations.no_approved_claims));
                 }
 
                 final claims = snapshot.data!.docs;
@@ -162,8 +165,8 @@ class _ClaimRequestsScreenState extends State<ClaimRequestsScreen> with SingleTi
                     return Card(
                       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
                       child: ListTile(
-                        title: Text(claimData['barberName'] ?? 'No Name'),
-                        subtitle: Text('Shop Name: ${claimData['shopName']}'),
+                        title: Text(claimData['barberName'] ?? localizations.no_name),
+                        subtitle: Text('${localizations.shop_name}: ${claimData['shopName']}'),
                         onTap: () => showClaimDetails(claimData),
                       ),
                     );

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/views/admin/barber%20admin/barber_panel_admin.dart';
 import '../../../controllers/barber_controller.dart';
 import '../../../models/barber_model.dart';
 import '../../../utils/barber_card.dart';
-import '../../barber/barber_panel.dart';  // Import the BarberPanel screen
 
 class BarberListScreen extends StatelessWidget {
   final BarberController _barberService = BarberController();
@@ -14,19 +14,29 @@ class BarberListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barbers'),
+        title: Text(AppLocalizations.of(context)!.barbers),
       ),
       body: StreamBuilder<List<Barber>>(
         stream: _barberService.getBarbers(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                '${AppLocalizations.of(context)!.error}: ${snapshot.error}',
+              ),
+            );
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final barbers = snapshot.data ?? [];
+
+          if (barbers.isEmpty) {
+            return Center(
+              child: Text(AppLocalizations.of(context)!.no_barbers_found),
+            );
+          }
 
           return GridView.builder(
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -40,7 +50,9 @@ class BarberListScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BarberPanelAdmin(barberId: barbers[index].id), // Navigate to BarberPanel
+                      builder: (context) => BarberPanelAdmin(
+                        barberId: barbers[index].id,
+                      ),
                     ),
                   );
                 },

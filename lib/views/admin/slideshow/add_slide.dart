@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 
@@ -20,7 +21,7 @@ class _AddSlidePageState extends State<AddSlidePage> {
   final TextEditingController _textController = TextEditingController();
   String? _imageUrl;
   File? _imageFile;
-  bool _isUploading = false; // State to track the upload status
+  bool _isUploading = false;
 
   Future<void> _uploadImage() async {
     try {
@@ -28,7 +29,7 @@ class _AddSlidePageState extends State<AddSlidePage> {
       if (image == null) {
         print('No image selected.');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No image selected')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.no_image_selected)),
         );
         return;
       }
@@ -39,13 +40,13 @@ class _AddSlidePageState extends State<AddSlidePage> {
       if (!await file.exists()) {
         print('File does not exist.');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File does not exist')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.file_does_not_exist)),
         );
         return;
       }
 
       setState(() {
-        _isUploading = true; // Start showing the loading indicator
+        _isUploading = true;
       });
 
       final fileName = DateTime.now().toIso8601String();
@@ -56,18 +57,18 @@ class _AddSlidePageState extends State<AddSlidePage> {
       setState(() {
         _imageFile = file;
         _imageUrl = imageUrl;
-        _isUploading = false; // Hide loading indicator after upload
+        _isUploading = false;
       });
 
       print('Image uploaded successfully: $imageUrl');
     } catch (e) {
       print('Error during image upload: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload image')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.upload_failed)),
       );
 
       setState(() {
-        _isUploading = false; // Hide loading indicator if upload fails
+        _isUploading = false;
       });
     }
   }
@@ -79,10 +80,12 @@ class _AddSlidePageState extends State<AddSlidePage> {
           'imageUrl': _imageUrl!,
           'text': _textController.text,
         });
-        Navigator.of(context).pop(true); // Return to previous page with success
+        Navigator.of(context).pop(true);
       } catch (e) {
         print('Error saving slide: $e');
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to save slide')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.save_failed)),
+        );
       }
     }
   }
@@ -90,7 +93,7 @@ class _AddSlidePageState extends State<AddSlidePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Add New Slide')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.add_new_slide)),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -102,21 +105,23 @@ class _AddSlidePageState extends State<AddSlidePage> {
                   children: [
                     Image.network(_imageUrl!),
                     SizedBox(height: 10),
-                    Text('Image selected'),
+                    Text(AppLocalizations.of(context)!.image_selected),
                   ],
                 ),
               SizedBox(height: 20),
               TextField(
                 controller: _textController,
-                decoration: InputDecoration(labelText: 'Image Text'),
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.image_text,
+                ),
               ),
               SizedBox(height: 20),
               _isUploading
-                  ? LoadingDots() // Show LoadingDots widget while uploading
+                  ? LoadingDots()
                   : ElevatedButton.icon(
                 onPressed: _uploadImage,
                 icon: Icon(Icons.image),
-                label: Text('Upload Image'),
+                label: Text(AppLocalizations.of(context)!.upload_image),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.orange,
@@ -125,7 +130,7 @@ class _AddSlidePageState extends State<AddSlidePage> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveSlide,
-                child: Text('Save Slide'),
+                child: Text(AppLocalizations.of(context)!.save_slide),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.orange,
