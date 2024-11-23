@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/controllers/auth_controller.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
@@ -9,6 +10,7 @@ import 'package:online_barber_app/views/auth/signup_screen.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:provider/provider.dart';
 
 
 class LoginScreen extends StatefulWidget {
@@ -17,6 +19,8 @@ class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
+
+enum Language { english, urdu , arabic , spanish , french}
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isUserSelected = true;
@@ -33,10 +37,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final AuthController _authController = AuthController();
 
+
   @override
   void initState() {
     super.initState();
   }
+
+
   Future<void> _showLoadingDialog() async {
     showDialog(
       context: context,
@@ -211,14 +218,49 @@ class _LoginScreenState extends State<LoginScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
 
+
     return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        actions: [
+          Consumer<LanguageChangeController>(
+            builder: (context, provider, child) {
+              return PopupMenuButton(
+                icon: Icon(Icons.language),
+                onSelected: (Language item) {
+                  if (Language.english.name == item.name) {
+                    provider.changeLanguage(Locale("en"));
+                  } else if(Language.urdu.name == item.name) {
+                    provider.changeLanguage(Locale("ur"));
+                  } else if(Language.arabic.name == item.name){
+                    provider.changeLanguage(Locale("ar"));
+                  }else if(Language.spanish.name == item.name){
+                    provider.changeLanguage(Locale("es"));
+                  }
+                  else if(Language.french.name == item.name){
+                    provider.changeLanguage(Locale("fr"));
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+                  PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+                  PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
+                  PopupMenuItem(value: Language.arabic, child: Text(AppLocalizations.of(context)!.arabic)),
+                  PopupMenuItem(value: Language.spanish, child: Text(AppLocalizations.of(context)!.spanish)),
+                  PopupMenuItem(value: Language.french, child: Text(AppLocalizations.of(context)!.french)),
+                ],
+              );
+            },
+          ),
+
+        ],
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SizedBox(height: screenHeight * 0.2),
+              SizedBox(height: screenHeight * 0.1),
               Container(
                 alignment: Alignment.center,
                 child: Image.asset(

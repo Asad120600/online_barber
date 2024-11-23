@@ -117,23 +117,23 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
           automaticallyImplyLeading: false,
           title:  Text(AppLocalizations.of(context)!.bookings),
           actions: [
-            Consumer<LanguageChangeController>(
-              builder: (context, provider, child) {
-                return PopupMenuButton(
-                  onSelected: (Language item) {
-                    if (Language.english.name == item.name) {
-                      provider.changeLanguage(Locale("en"));
-                    } else {
-                      provider.changeLanguage(Locale("ur"));
-                    }
-                  },
-                  itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-                    PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
-                    PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu))
-                  ],
-                );
-              },
-            ),
+            // Consumer<LanguageChangeController>(
+            //   builder: (context, provider, child) {
+            //     return PopupMenuButton(
+            //       onSelected: (Language item) {
+            //         if (Language.english.name == item.name) {
+            //           provider.changeLanguage(Locale("en"));
+            //         } else {
+            //           provider.changeLanguage(Locale("ur"));
+            //         }
+            //       },
+            //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+            //         PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+            //         PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu))
+            //       ],
+            //     );
+            //   },
+            // ),
             IconButton(
               onPressed: () {
                 _scaffoldKey.currentState?.openEndDrawer();

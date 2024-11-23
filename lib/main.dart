@@ -196,6 +196,8 @@ class _MyAppState extends State<MyApp> {
               Locale('en'),
               Locale('ur'),
               Locale('ar'),
+              Locale('es'),
+              Locale('fr'),
             ],
             theme: ThemeData(
               fontFamily: 'Acumin Pro',

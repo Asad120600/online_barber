@@ -18,7 +18,7 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-enum Language { english, urdu , arabic }
+// enum Language { english, urdu , arabic , spanish , french}
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -105,27 +105,33 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          Consumer<LanguageChangeController>(
-            builder: (context, provider, child) {
-              return PopupMenuButton(
-                onSelected: (Language item) {
-                  if (Language.english.name == item.name) {
-                    provider.changeLanguage(Locale("en"));
-                  } else if(Language.urdu.name == item.name) {
-                    provider.changeLanguage(Locale("ur"));
-                  } else if(Language.arabic.name == item.name){
-                    provider.changeLanguage(Locale("ar"));
-
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-                  PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
-                  PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
-                  PopupMenuItem(value: Language.arabic, child: Text("arabic")),
-                ],
-              );
-            },
-          ),
+          // Consumer<LanguageChangeController>(
+          //   builder: (context, provider, child) {
+          //     return PopupMenuButton(
+          //       onSelected: (Language item) {
+          //         if (Language.english.name == item.name) {
+          //           provider.changeLanguage(Locale("en"));
+          //         } else if(Language.urdu.name == item.name) {
+          //           provider.changeLanguage(Locale("ur"));
+          //         } else if(Language.arabic.name == item.name){
+          //           provider.changeLanguage(Locale("ar"));
+          //         }else if(Language.spanish.name == item.name){
+          //           provider.changeLanguage(Locale("es"));
+          //         }
+          //         else if(Language.french.name == item.name){
+          //           provider.changeLanguage(Locale("fr"));
+          //         }
+          //       },
+          //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+          //         PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+          //         PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
+          //         PopupMenuItem(value: Language.arabic, child: Text(AppLocalizations.of(context)!.arabic)),
+          //         PopupMenuItem(value: Language.spanish, child: Text(AppLocalizations.of(context)!.spanish)),
+          //         PopupMenuItem(value: Language.french, child: Text(AppLocalizations.of(context)!.french)),
+          //       ],
+          //     );
+          //   },
+          // ),
           Stack(
             children: [
               IconButton(

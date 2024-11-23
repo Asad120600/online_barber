@@ -86,20 +86,20 @@ class _AdminPanelState extends State<AdminPanel> {
         title: Text(localizations.admin_panel),
         actions: [
 
-          Consumer<LanguageChangeController>(
-            builder: (context, provider, child) {
-              return PopupMenuButton(
-                onSelected: (Language item) {
-                  provider.changeLanguage(
-                      item.name == localizations.english ? Locale("en") : Locale("ur"));
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-                  PopupMenuItem(value: Language.english, child: Text(localizations.english)),
-                  PopupMenuItem(value: Language.urdu, child: Text(localizations.urdu))
-                ],
-              );
-            },
-          ),
+          // Consumer<LanguageChangeController>(
+          //   builder: (context, provider, child) {
+          //     return PopupMenuButton(
+          //       onSelected: (Language item) {
+          //         provider.changeLanguage(
+          //             item.name == localizations.english ? Locale("en") : Locale("ur"));
+          //       },
+          //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+          //         PopupMenuItem(value: Language.english, child: Text(localizations.english)),
+          //         PopupMenuItem(value: Language.urdu, child: Text(localizations.urdu))
+          //       ],
+          //     );
+          //   },
+          // ),
 
           Stack(
             children: [

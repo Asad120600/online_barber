@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "563327464865-ot3l9aluorfbffni9ot7b5hcl0glcovu.apps.googleusercontent.com",
+          "client_id": "563327464865-2n79l64f3iaics7luj9qduq0mg4u4j1r.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.getbarberonline.app",
-            "certificate_hash": "688c4154f5eaf9a8981988965f33b35ff7e36a2d"
+            "certificate_hash": "2e8d5adac399329955696adbe643f5cfd5ca34df"
           }
         },
         {
