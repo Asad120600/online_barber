@@ -1,30 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart'; // Import intl package for date formatting
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DeletedUsers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Deleted Users'),
+        title: Text(localizations.deleted_users),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('deleted_users').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Center(
-              child: Text('Error: ${snapshot.error}'),
+              child: Text('${localizations.error}: ${snapshot.error}'),
             );
           }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           }
 
-          final users = snapshot.data!.docs;
+          final users = snapshot.data?.docs ?? [];
+
+          if (users.isEmpty) {
+            return Center(
+              child: Text(localizations.no_deleted_users),
+            );
+          }
 
           return ListView.builder(
             itemCount: users.length,
@@ -34,8 +43,8 @@ class DeletedUsers extends StatelessWidget {
               final deletedAtTimestamp = data['deleted_at'];
 
               DateTime? deletedAt;
-              String formattedDate = 'No Date';
-              String formattedTime = 'No Time';
+              String formattedDate = localizations.no_date;
+              String formattedTime = localizations.no_time;
 
               if (deletedAtTimestamp != null) {
                 deletedAt = (deletedAtTimestamp as Timestamp).toDate();
@@ -43,30 +52,30 @@ class DeletedUsers extends StatelessWidget {
                 formattedTime = DateFormat('hh:mm a').format(deletedAt);
               }
 
-              final email = data['email'] ?? 'No Email';
-              final firstName = data['firstName'] ?? 'No First Name';
-              final lastName = data['lastName'] ?? 'No Last Name';
-              final userType = data['userType'] ?? 'No User Type';
+              final email = data['email'] ?? localizations.no_email;
+              final firstName = data['firstName'] ?? localizations.no_first_name;
+              final lastName = data['lastName'] ?? localizations.no_last_name;
+              final userType = data['userType'] ?? localizations.no_user_type;
 
               return Card(
                 elevation: 3,
-                margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: ListTile(
                   title: Text(
                     '$firstName $lastName',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 5),
-                      Text('Deleted at: $formattedDate $formattedTime'),
-                      Text('Email: $email'),
-                      Text('User Type: $userType'),
+                      const SizedBox(height: 5),
+                      Text('${localizations.deleted_at}: $formattedDate $formattedTime'),
+                      Text('${localizations.email}: $email'),
+                      Text('${localizations.user_type}: $userType'),
                     ],
                   ),
                   trailing: IconButton(
-                    icon: Icon(Icons.restore),
+                    icon: const Icon(Icons.restore),
                     onPressed: () {
                       // Implement restore functionality if needed
                       // Example: Move user back to active users

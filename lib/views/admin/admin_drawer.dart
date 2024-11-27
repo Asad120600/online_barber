@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/views/admin/admin_csv_upload.dart';
 import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
@@ -22,7 +23,7 @@ import 'package:online_barber_app/views/admin/admin_profile.dart';
 import 'barber admin/barber_screen.dart';
 
 class AdminDrawer extends StatefulWidget {
-  const AdminDrawer({super.key,required this.screenWidth,});
+  const AdminDrawer({super.key, required this.screenWidth});
 
   final double screenWidth;
 
@@ -31,7 +32,6 @@ class AdminDrawer extends StatefulWidget {
 }
 
 class _AdminDrawerState extends State<AdminDrawer> {
-
   User? _currentUser;
   String? _firstName;
 
@@ -41,10 +41,14 @@ class _AdminDrawerState extends State<AdminDrawer> {
     _currentUser = FirebaseAuth.instance.currentUser;
     _fetchFirstName();
   }
+
   Future<void> _fetchFirstName() async {
     if (_currentUser != null) {
       try {
-        DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('admins').doc(_currentUser!.uid).get();
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance
+            .collection('admins')
+            .doc(_currentUser!.uid)
+            .get();
         if (snapshot.exists) {
           setState(() {
             _firstName = snapshot['firstName'];
@@ -58,6 +62,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final localization = AppLocalizations.of(context)!;
+
     return SizedBox(
       width: widget.screenWidth * 0.75,
       child: Drawer(
@@ -78,7 +84,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Hello 👋, ${_firstName ?? 'Admin'}',
+                      localization.hello_admin(_firstName ?? ''),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -91,11 +97,9 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text(
-                'Profile',
-              ),
+              title: Text(localization.profile),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -106,163 +110,147 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
             ExpansionTile(
               leading: const Icon(Icons.shopping_cart_outlined),
-              title: const Text(
-                'Shop',
-              ),
+              title: Text(localization.shop),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.production_quantity_limits_sharp),
-                  title: const Text(
-                    'All Products',
-                  ),
+                  title: Text(localization.all_products),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AllProductsPage(),
+                        builder: (context) => AllProductsPage(),
                       ),
                     );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.add),
-                  title: const Text('Add Products'),
+                  title: Text(localization.add_products),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const AddProducts()));
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AddProducts(),
+                      ),
+                    );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.history_toggle_off),
-                  title: const Text(
-                    'Orders',
-                  ),
+                  title: Text(localization.orders),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>  AdminOrdersPage(),
+                        builder: (context) => AdminOrdersPage(),
                       ),
                     );
                   },
                 ),
-                 ],
+              ],
             ),
-
             ExpansionTile(
               leading: const Icon(Icons.supervised_user_circle_sharp),
-              title: const Text(
-                'Users',
-              ),
+              title: Text(localization.users),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.group),
-                  title: const Text('Active Users'),
+                  title: Text(localization.active_users),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ActiveUsers()));
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ActiveUsers()),
+                    );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.group_off),
-                  title: const Text('Deleted Users'),
+                  title: Text(localization.deleted_users),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>DeletedUsers()));
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => DeletedUsers()),
+                    );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.content_cut),
-                  title: const Text(
-                    'Barbers',
-                  ),
+                  title: Text(localization.barbers),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>  BarberListScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => BarberListScreen()),
                     );
                   },
                 ),
-
               ],
             ),
             ExpansionTile(
               leading: const Icon(Icons.settings),
-              title: const Text(
-                'App Settings',
-              ),
+              title: Text(localization.app_settings),
               children: <Widget>[
                 ListTile(
-                  title: const Text(
-                    'Privacy Policy Settings',
-                  ),
+                  title: Text(localization.privacy_policy),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const PrivacySettings()));
-                    // Navigate to PrivacySettings screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PrivacySettings()),
+                    );
                   },
                 ),
                 ListTile(
-                  title: const Text(
-                    'Slide Show Settings',
-                  ),
+                  title: Text(localization.slide_show_settings),
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const AdminSlideshowScreen()));
-                    // Navigate to PrivacySettings screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const AdminSlideshowScreen()),
+                    );
                   },
                 ),
                 ListTile(
-                  title: const Text(
-                    'FAQs Settings',
-                  ),
+                  title: Text(localization.faqs_settings),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
-                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const FAQsSettings()));
-                    // Navigate to FAQsSettings screen
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const FAQsSettings()),
+                    );
                   },
                 ),
               ],
             ),
-
             ExpansionTile(
               leading: const Icon(Icons.miscellaneous_services_outlined),
-              title: const Text(
-                'Services',
-              ),
+              title: Text(localization.services),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.add),
-                  title: const Text(
-                    'Add services',
-                  ),
+                  title: Text(localization.add_services),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>  const ManageService(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const ManageService()),
                     );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.manage_history),
-                  title: const Text(
-                    'Manage services',
-                  ),
+                  title: Text(localization.manage_services),
                   onTap: () {
-                    Navigator.pop(context); // Close the drawer
+                    Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>  const ServiceList(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const ServiceList()),
                     );
                   },
                 ),
@@ -270,112 +258,86 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.query_stats_rounded),
-              title: const Text(
-                'Barber Stats',
-              ),
+              title: Text(localization.barberStats),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>   BarberStatsScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => BarberStatsScreen()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.chat),
-              title: const Text(
-                'Chat',
-              ),
+              title: Text(localization.chat),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>  const AdminScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const AdminScreen()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.cut),
-              title: const Text(
-                'Upload Barbers',
-              ),
+              title: Text(localization.upload_barbers),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>   AdminCsvUploadPage(),
-                  ),
+                  MaterialPageRoute(builder: (context) => AdminCsvUploadPage()),
                 );
               },
             ),
-
             ListTile(
               leading: const Icon(Icons.campaign),
-              title: const Text(
-                'Announcement',
-              ),
+              title: Text(localization.announcement),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>  const AnnouncementScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.request_page_outlined),
-              title: const Text(
-                'Claim Requests',
-              ),
+              title: Text(localization.claim_requests),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>  const ClaimRequestsScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const ClaimRequestsScreen()),
                 );
               },
             ),
-
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text(
-                'Sign Out',
-              ),
-              onTap: () async {
+              title: Text(localization.signOut),
+              onTap: () {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirm Sign Out'),
-                      content: const Text('Are you sure you want to sign out?'),
+                      title: Text(localization.confirmSignOut),
+                      content: Text(localization.signOutConfirmation),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                           },
-                          child: const Text('Cancel'),
+                          child: Text(localization.cancel),
                         ),
                         TextButton(
                           onPressed: () async {
                             await FirebaseAuth.instance.signOut();
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
+                              MaterialPageRoute(builder: (context) => const LoginScreen()),
                             );
                           },
-                          child: const Text('Sign Out'),
+                          child: Text(localization.signOut),
                         ),
                       ],
                     );

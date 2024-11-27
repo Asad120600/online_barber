@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
 import 'package:online_barber_app/utils/button.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AnnouncementScreen extends StatefulWidget {
   const AnnouncementScreen({super.key});
@@ -14,9 +15,9 @@ class AnnouncementScreen extends StatefulWidget {
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
-  List<DocumentSnapshot> allUsers = []; // Store all users
-  List<String> selectedUserTokens = []; // List of selected user tokens
-  bool selectAll = false; // Track select all state
+  List<DocumentSnapshot> allUsers = [];
+  List<String> selectedUserTokens = [];
+  bool selectAll = false;
 
   @override
   void initState() {
@@ -40,12 +41,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   void toggleSelectAll() {
     setState(() {
       if (selectAll) {
-        // Deselect all users
         selectedUserTokens.clear();
       } else {
-        // Select all users and cast tokens to List<String>
         selectedUserTokens = allUsers
-            .map((user) => user['token'] as String) // Cast each token as String
+            .map((user) => user['token'] as String)
             .toList();
       }
       selectAll = !selectAll;
@@ -56,7 +55,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Announcement'),
+        title: Text(AppLocalizations.of(context)!.createAnnouncement),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -65,21 +64,21 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.title),
             ),
             const SizedBox(height: 10),
             TextField(
               controller: _messageController,
-              decoration: const InputDecoration(labelText: 'Message'),
+              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.message),
             ),
             const SizedBox(height: 20),
-            const Text('Select Users:', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(AppLocalizations.of(context)!.selectUsers, style: const TextStyle(fontWeight: FontWeight.bold)),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextButton(
                   onPressed: toggleSelectAll,
-                  child: Text(selectAll ? 'Deselect All' : 'Select All'),
+                  child: Text(selectAll ? AppLocalizations.of(context)!.deselectAll : AppLocalizations.of(context)!.selectAll),
                 ),
               ],
             ),
@@ -89,7 +88,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 itemBuilder: (context, index) {
                   DocumentSnapshot user = allUsers[index];
                   String userName = user['firstName'];
-                  String userToken = user['token']; // Assuming user tokens are stored in Firestore
+                  String userToken = user['token'];
 
                   return CheckboxListTile(
                     title: Text(userName),
@@ -115,15 +114,13 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
               child: Button(
                 onPressed: () {
                   if (_titleController.text.isEmpty || _messageController.text.isEmpty) {
-                    // Show error message if title or message is empty
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Please enter both a title and a message.'),
+                      SnackBar(
+                        content: Text(AppLocalizations.of(context)!.pleaseEnterTitleMessage),
                         backgroundColor: Colors.red,
                       ),
                     );
                   } else {
-                    // If both title and message are filled, send the announcement
                     createAnnouncement(
                       _titleController.text,
                       _messageController.text,
@@ -131,7 +128,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                     );
                   }
                 },
-                child: const Text('Send Announcement'),
+                child: Text(AppLocalizations.of(context)!.sendAnnouncement),
               ),
             ),
           ],
@@ -142,32 +139,29 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
 
   Future<void> createAnnouncement(String title, String message, BuildContext context) async {
     try {
-      // Store the announcement in Firestore
       await FirebaseFirestore.instance.collection('announcements').add({
         'title': title,
         'message': message,
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Notify selected users
       if (selectedUserTokens.isNotEmpty) {
         sendAnnouncementNotification(title, message, selectedUserTokens, context);
       }
 
-      // Show success dialog
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: const Text('Success'),
-            content: const Text('Announcement sent successfully!'),
+            title: Text(AppLocalizations.of(context)!.success),
+            content: Text(AppLocalizations.of(context)!.announcementSent),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); // Close the dialog
-                  Navigator.of(context).pop(); // Close the AnnouncementScreen
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                 },
-                child: const Text('OK'),
+                child: Text(AppLocalizations.of(context)!.ok),
               ),
             ],
           );
@@ -175,9 +169,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       );
     } catch (e) {
       log("Failed to send announcement: $e");
-      // Show error snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send announcement: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.failedToSend( e.toString()))),
       );
     }
   }

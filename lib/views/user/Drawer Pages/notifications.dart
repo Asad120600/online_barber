@@ -5,6 +5,8 @@ import 'package:online_barber_app/models/notification_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/order_notifications.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class NotificationsScreen extends StatelessWidget {
   final String uid;
@@ -13,15 +15,16 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return DefaultTabController(
       length: 2,  // Number of tabs
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Notifications'),
-          bottom: const TabBar(
+          title:  Text(localizations.notifications),
+          bottom:  TabBar(
             tabs: [
-              Tab(text: 'General Notifications'),  // General Notifications
-              Tab(text: 'Order Notifications'),    // Order Notifications
+              Tab(text: localizations.g_notifications,),  // General Notifications
+              Tab(text: localizations.o_notifications),    // Order Notifications
             ],
           ),
         ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class UserAnnouncementScreen extends StatelessWidget {
   const UserAnnouncementScreen({super.key});
@@ -9,7 +11,7 @@ class UserAnnouncementScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Announcements'),
+        title: Text(AppLocalizations.of(context)!.announcements),
       ),
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('announcements').snapshots(),

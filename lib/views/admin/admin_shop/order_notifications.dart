@@ -1,8 +1,11 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminNotificationsPage extends StatefulWidget {
+  const AdminNotificationsPage({super.key});
+
   @override
   _AdminNotificationsPageState createState() => _AdminNotificationsPageState();
 }
@@ -29,7 +32,10 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
           'phone': data['phone'] ?? '',
           'address': data['address'] ?? '',
           'products': products,
-          'totalPrice': (data['totalPrice'] is String ? double.tryParse(data['totalPrice']) ?? 0.0 : data['totalPrice']) ?? 0.0,
+          'totalPrice': (data['totalPrice'] is String
+              ? double.tryParse(data['totalPrice']) ?? 0.0
+              : data['totalPrice']) ??
+              0.0,
           'orderDate': data['orderDate']?.toDate() ?? DateTime.now(),
         });
       }
@@ -39,7 +45,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
 
       return notifications;
     } catch (e) {
-      log('Error fetching notifications: $e');
+      log(AppLocalizations.of(context)!.error_fetching_notifications(e.toString()));
       return [];
     }
   }
@@ -48,21 +54,25 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Order Notifications'),
+        title: Text(AppLocalizations.of(context)!.order_notifications),
       ),
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchNotifications(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: const CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text(
+                AppLocalizations.of(context)!.error_fetching_notifications(snapshot.error.toString()),
+              ),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No notifications available.'));
+            return Center(child: Text(AppLocalizations.of(context)!.no_notifications_available));
           }
 
           List<Map<String, dynamic>> notifications = snapshot.data!;
@@ -74,20 +84,20 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
               var products = notification['products'] as Map<String, dynamic>;
 
               return Card(
-                margin: EdgeInsets.all(8.0),
+                margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  title: Text('Order ID: ${notification['orderId']}'),
+                  title: Text(AppLocalizations.of(context)!.order_id(notification['orderId'])),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Email: ${notification['email']}'),
-                      Text('Name: ${notification['firstName']} ${notification['lastName']}'),
-                      Text('Phone: ${notification['phone']}'),
-                      Text('Address: ${notification['address']}'),
-                      Text('Total Price: ${notification['totalPrice']}'), // Removed dollar sign
-                      Text('Order Date: ${notification['orderDate'].toLocal()}'),
-                      SizedBox(height: 8.0),
-                      Text('Products:'),
+                      Text(AppLocalizations.of(context)!.email_e(notification['email'])),
+                      Text(AppLocalizations.of(context)!.name(notification['firstName'], notification['lastName'])),
+                      Text(AppLocalizations.of(context)!.phone_e(notification['phone'])),
+                      Text(AppLocalizations.of(context)!.address_e(notification['address'])),
+                      Text(AppLocalizations.of(context)!.total_price_e(notification['totalPrice'].toStringAsFixed(2))),
+                      Text(AppLocalizations.of(context)!.order_date(notification['orderDate'].toLocal().toString())),
+                      const SizedBox(height: 8.0),
+                      Text(AppLocalizations.of(context)!.products),
                       ...products.entries.map((entry) {
                         String productId = entry.key;
                         int quantity = entry.value as int;
@@ -96,21 +106,24 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
                           future: _firestore.collection('products').doc(productId).get(),
                           builder: (context, productSnapshot) {
                             if (productSnapshot.connectionState == ConnectionState.waiting) {
-                              return Text('Loading product details...');
+                              return Text(AppLocalizations.of(context)!.loading_product_details);
                             }
 
                             if (productSnapshot.hasError || !productSnapshot.hasData) {
-                              return Text('Error fetching product details');
+                              return Text(AppLocalizations.of(context)!.error_fetching_product_details);
                             }
 
                             var productData = productSnapshot.data!.data() as Map<String, dynamic>;
-                            String description = productData['description'] ?? 'No description';
-                            double price = (productData['price'] is String ? double.tryParse(productData['price']) ?? 0.0 : productData['price']) ?? 0.0;
+                            String description = productData['description'] ?? AppLocalizations.of(context)!.no_description;
+                            double price = (productData['price'] is String
+                                ? double.tryParse(productData['price']) ?? 0.0
+                                : productData['price']) ??
+                                0.0;
 
                             return ListTile(
                               title: Text(description),
-                              subtitle: Text('Quantity: $quantity'),
-                              trailing: Text('${price * quantity}'), // Removed dollar sign
+                              subtitle: Text(AppLocalizations.of(context)!.quantity(quantity.toString())),
+                              trailing: Text(price.toStringAsFixed(2)),
                             );
                           },
                         );

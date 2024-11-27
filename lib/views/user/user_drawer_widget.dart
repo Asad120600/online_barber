@@ -11,7 +11,7 @@ import 'package:online_barber_app/views/user/Drawer%20Pages/profile.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/show_appointments.dart';
 import 'package:online_barber_app/views/user/announcements_show.dart';
 import 'package:online_barber_app/views/user/claim_buisness.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/views/user/shop/products.dart';
 import 'package:online_barber_app/views/user/shop/recent_orders.dart';
 import '../auth/login_screen.dart';
@@ -42,7 +42,8 @@ class _AppDrawerState extends State<AppDrawer> {
   Future<void> _fetchFirstName() async {
     if (_currentUser != null) {
       try {
-        DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection('users').doc(_currentUser!.uid).get();
+        DocumentSnapshot snapshot = await FirebaseFirestore.instance.collection(
+            'users').doc(_currentUser!.uid).get();
         if (snapshot.exists) {
           setState(() {
             _firstName = snapshot['firstName'];
@@ -70,13 +71,15 @@ class _AppDrawerState extends State<AppDrawer> {
       return;
     }
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth = await googleUser
+        .authentication;
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
-    await FirebaseAuth.instance.currentUser?.reauthenticateWithCredential(credential);
+    await FirebaseAuth.instance.currentUser?.reauthenticateWithCredential(
+        credential);
   }
 
   Future<void> _deleteAccount(BuildContext context) async {
@@ -91,16 +94,22 @@ class _AppDrawerState extends State<AppDrawer> {
       await _reauthenticate();
 
       // Get user data from Firestore
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection(
+          'users').doc(user.uid).get();
       if (userDoc.exists) {
         // Copy user data to the deleted_users collection
-        final Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
+        final Map<String, dynamic>? userData = userDoc.data() as Map<
+            String,
+            dynamic>?;
         if (userData != null) {
           userData['deleted_at'] = FieldValue.serverTimestamp();
-          await FirebaseFirestore.instance.collection('deleted_users').doc(user.uid).set(userData);
+          await FirebaseFirestore.instance.collection('deleted_users').doc(
+              user.uid).set(userData);
 
           // Delete user data from Firestore
-          await FirebaseFirestore.instance.collection('users').doc(user.uid).delete();
+          await FirebaseFirestore.instance.collection('users')
+              .doc(user.uid)
+              .delete();
         } else {
           log('Failed to cast user data.');
         }
@@ -121,7 +130,8 @@ class _AppDrawerState extends State<AppDrawer> {
       );
     } catch (e) {
       if (e is FirebaseAuthException && e.code == 'requires-recent-login') {
-        log('The user must reauthenticate before this operation can be executed.');
+        log(
+            'The user must reauthenticate before this operation can be executed.');
         await _reauthenticate();
         await _deleteAccount(context); // Retry account deletion
       } else {
@@ -148,11 +158,14 @@ class _AppDrawerState extends State<AppDrawer> {
                 children: [
                   CircleAvatar(
                     radius: 30,
-                    backgroundImage: _currentUser?.photoURL != null && _currentUser!.photoURL!.isNotEmpty
+                    backgroundImage: _currentUser?.photoURL != null &&
+                        _currentUser!.photoURL!.isNotEmpty
                         ? NetworkImage(_currentUser!.photoURL!)
                         : null,
-                    child: _currentUser?.photoURL == null || _currentUser!.photoURL!.isEmpty
-                        ? const Icon(Icons.person, size: 40, color: Colors.white)
+                    child: _currentUser?.photoURL == null ||
+                        _currentUser!.photoURL!.isEmpty
+                        ? const Icon(
+                        Icons.person, size: 40, color: Colors.white)
                         : null,
                   ),
                   const SizedBox(width: 10),
@@ -171,7 +184,9 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text('Profile'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.profile ?? 'Profile'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -184,7 +199,9 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.calendar_today),
-              title: const Text('My Appointments'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.my_appointments ?? 'My Appointments'),
               onTap: () {
                 Navigator.pop(context);
                 final userId = LocalStorage.getUserID();
@@ -204,7 +221,9 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.notifications),
-              title: const Text('Notifications'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.notifications ?? 'Notifications'),
               onTap: () {
                 Navigator.pop(context);
                 final userId = LocalStorage.getUserID();
@@ -224,57 +243,64 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ExpansionTile(
               leading: const Icon(Icons.shopping_cart),
-              title: const Text(
-                'Shop',
-              ),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.shop ?? 'Shop'),
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.card_travel),
-                  title: const Text('Products'),
+                  title: Text(AppLocalizations
+                      .of(context)
+                      ?.products ?? 'Products'),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>   const ProductDisplayPage(),
+                        builder: (context) => const ProductDisplayPage(),
                       ),
                     );
                   },
                 ),
                 ListTile(
                   leading: const Icon(Icons.history),
-                  title: const Text(
-                    'Recent Orders',
-                  ),
+                  title: Text(AppLocalizations
+                      .of(context)
+                      ?.recent_orders ?? 'Recent Orders'),
                   onTap: () {
                     Navigator.pop(context); // Close the drawer
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) =>   RecentOrdersPage(userId: LocalStorage.getUserID().toString(),),
+                        builder: (context) =>
+                            RecentOrdersPage(userId: LocalStorage.getUserID()
+                                .toString()),
                       ),
                     );
                   },
                 ),
               ],
             ),
-
             ListTile(
               leading: const Icon(Icons.contact_mail),
-              title: const Text('Contact Admin'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.contact_admin ?? 'Contact Admin'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>   const ChatListScreen(),
+                    builder: (context) => const ChatListScreen(),
                   ),
                 );
               },
             ),
             ListTile(
               leading: const Icon(Icons.shopping_bag_rounded),
-              title: const Text('Find Your Shop'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.find_your_shop ?? 'Find Your Shop'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -287,21 +313,24 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.campaign),
-              title: const Text('Announcements'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.announcements ?? 'Announcements'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>   const UserAnnouncementScreen(),
+                    builder: (context) => const UserAnnouncementScreen(),
                   ),
                 );
               },
             ),
-
             ListTile(
               leading: const Icon(Icons.question_answer),
-              title: const Text('FAQs'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.faqs ?? 'FAQs'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -312,11 +341,11 @@ class _AppDrawerState extends State<AppDrawer> {
                 );
               },
             ),
-
-
             ListTile(
               leading: const Icon(Icons.privacy_tip),
-              title: const Text('Privacy Policy'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.privacy_policy ?? 'Privacy Policy'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -328,29 +357,43 @@ class _AppDrawerState extends State<AppDrawer> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.do_disturb_alt_sharp,color: Colors.red,),
-              title: const Text('Delete Account'),
+              leading: const Icon(
+                  Icons.do_disturb_alt_sharp, color: Colors.red),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.delete_account ?? 'Delete Account'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirm Delete Account'),
-                      content: const Text('Are you sure you want to delete your account? This action cannot be undone.'),
+                      title: Text(AppLocalizations
+                          .of(context)
+                          ?.confirm_delete_account ?? 'Confirm Delete Account'),
+                      content: Text(AppLocalizations
+                          .of(context)
+                          ?.are_you_sure_delete_account ??
+                          'Are you sure you want to delete your account? This action cannot be undone.'),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop(); // Close the dialog
                           },
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations
+                              .of(context)
+                              ?.cancel ?? 'Cancel'),
                         ),
                         TextButton(
                           onPressed: () async {
-                            Navigator.of(context).pop(); // Close the dialog before deletion
-                            await _deleteAccount(context); // Proceed with account deletion
+                            Navigator.of(context)
+                                .pop(); // Close the dialog before deletion
+                            await _deleteAccount(
+                                context); // Proceed with account deletion
                           },
-                          child: const Text('Delete'),
+                          child: Text(AppLocalizations
+                              .of(context)
+                              ?.delete ?? 'Delete'),
                         ),
                       ],
                     );
@@ -360,32 +403,45 @@ class _AppDrawerState extends State<AppDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text('Sign Out'),
+              title: Text(AppLocalizations
+                  .of(context)
+                  ?.sign_out ?? 'Sign Out'),
               onTap: () {
                 Navigator.pop(context); // Close the drawer
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirm Sign Out'),
-                      content: const Text('Are you sure you want to sign out?'),
+                      title: Text(AppLocalizations
+                          .of(context)
+                          ?.confirm_sign_out ?? 'Confirm Sign Out'),
+                      content: Text(AppLocalizations
+                          .of(context)
+                          ?.are_you_sure_sign_out ??
+                          'Are you sure you want to sign out?'),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
                             Navigator.of(context).pop(); // Close the dialog
                           },
-                          child: const Text('Cancel'),
+                          child: Text(AppLocalizations
+                              .of(context)
+                              ?.cancel ?? 'Cancel'),
                         ),
                         TextButton(
                           onPressed: () async {
-                            Navigator.of(context).pop(); // Close the dialog before sign-out
+                            Navigator.of(context)
+                                .pop(); // Close the dialog before sign-out
                             await _signOut(context); // Proceed with sign-out
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()),
                             ); // Navigate to login screen
                           },
-                          child: const Text('Sign Out'),
+                          child: Text(AppLocalizations
+                              .of(context)
+                              ?.sign_out ?? 'Sign Out'),
                         ),
                       ],
                     );

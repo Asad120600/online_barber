@@ -1,13 +1,16 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/admin/admin_drawer.dart';
 import 'package:online_barber_app/views/admin/admin_shop/order_notifications.dart';
+import 'package:online_barber_app/views/user/home_screen.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({super.key});
@@ -19,6 +22,7 @@ class AdminPanel extends StatefulWidget {
 class _AdminPanelState extends State<AdminPanel> {
   late final AppointmentController _appointmentController;
   int _notificationCount = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -28,7 +32,6 @@ class _AdminPanelState extends State<AdminPanel> {
     _updateNotificationCount();
   }
 
-  // Load the notification count from local storage
   Future<void> _loadNotificationCount() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -36,7 +39,6 @@ class _AdminPanelState extends State<AdminPanel> {
     });
   }
 
-  // Save the notification count to local storage
   Future<void> _saveNotificationCount() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setInt('notificationCount', _notificationCount);
@@ -46,26 +48,26 @@ class _AdminPanelState extends State<AdminPanel> {
     setState(() {
       _notificationCount++;
     });
-    _saveNotificationCount();  // Save the updated count
+    _saveNotificationCount();
   }
 
   void _resetNotificationCount() {
     setState(() {
       _notificationCount = 0;
     });
-    _saveNotificationCount();  // Save the reset count
+    _saveNotificationCount();
   }
 
   Future<String> _getUserName(String uid) async {
     try {
       final userDoc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
       if (userDoc.exists) {
-        return userDoc.data()?['name'] ?? 'Unknown User';
+        return userDoc.data()?['name'] ?? AppLocalizations.of(context)!.name_e("Unknown");
       }
     } catch (e) {
-      log('Error fetching user name: $e');
+      return AppLocalizations.of(context)!.name_e("Unknown");
     }
-    return 'Unknown User';
+    return AppLocalizations.of(context)!.name_e("Unknown");
   }
 
   Future<void> _refreshAppointments() async {
@@ -75,11 +77,30 @@ class _AdminPanelState extends State<AdminPanel> {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Admin Panel'),
+        title: Text(localizations.admin_panel),
         actions: [
+
+          // Consumer<LanguageChangeController>(
+          //   builder: (context, provider, child) {
+          //     return PopupMenuButton(
+          //       onSelected: (Language item) {
+          //         provider.changeLanguage(
+          //             item.name == localizations.english ? Locale("en") : Locale("ur"));
+          //       },
+          //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+          //         PopupMenuItem(value: Language.english, child: Text(localizations.english)),
+          //         PopupMenuItem(value: Language.urdu, child: Text(localizations.urdu))
+          //       ],
+          //     );
+          //   },
+          // ),
+
           Stack(
             children: [
               IconButton(
@@ -91,7 +112,6 @@ class _AdminPanelState extends State<AdminPanel> {
                       builder: (context) => AdminNotificationsPage(),
                     ),
                   );
-                  // Reset the notification count when the notifications screen is opened
                   _resetNotificationCount();
                 },
               ),
@@ -105,28 +125,22 @@ class _AdminPanelState extends State<AdminPanel> {
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    constraints: const BoxConstraints(
-                      minWidth: 20,
-                      minHeight: 20,
-                    ),
+                    constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
                     child: Center(
                       child: Text(
                         '$_notificationCount',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
                   ),
                 ),
             ],
           ),
-          Builder(
-            builder: (context) => IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () => Scaffold.of(context).openEndDrawer(),
-            ),
+          IconButton(
+            onPressed: () {
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+            icon: const Icon(Icons.menu),
           ),
         ],
       ),
@@ -137,13 +151,13 @@ class _AdminPanelState extends State<AdminPanel> {
           stream: _appointmentController.getAllAppointments(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: LoadingDots(),
-              );
+              return const Center(child: LoadingDots());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(
+                child: Text(localizations.loading_error(snapshot.error.toString())),
+              );
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No Appointments found.'));
+              return Center(child: Text(localizations.no_appointments_found));
             } else {
               List<Appointment> appointments = snapshot.data!;
 
@@ -163,9 +177,10 @@ class _AdminPanelState extends State<AdminPanel> {
                     future: _getUserName(appointment.uid),
                     builder: (context, userNameSnapshot) {
                       if (userNameSnapshot.hasError) {
-                        return Center(child: Text('Error: ${userNameSnapshot.error}'));
+                        return Center(
+                          child: Text(localizations.loading_error(userNameSnapshot.error.toString())),
+                        );
                       } else {
-
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: Stack(
@@ -192,13 +207,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.person, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Name: ${appointment.clientName}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
+                                          Text(localizations.name_e(appointment.clientName)),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -206,13 +215,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.calendar_today, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Date: ${appointment.date != null ? DateFormat.yMd().format(appointment.date.toDate()) : 'N/A'}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
+                                          Text(localizations.date(DateFormat.yMd().format(appointment.date.toDate()))),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -220,13 +223,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.cut, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Barber: ${appointment.barberName}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16,
-                                            ),
-                                          ),
+                                          Text(localizations.barber_e(appointment.barberName)),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -234,16 +231,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.location_on, size: 16),
                                           const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              'Address: ${appointment.address}',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                              ),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
+                                          Text(localizations.address_e(appointment.address)),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -251,12 +239,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.phone, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Phone Number: ${appointment.phoneNumber}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                          ),
+                                          Text(localizations.phone_number_e(appointment.phoneNumber)),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -264,12 +247,7 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.access_time, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Time: ${appointment.time}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                          ),
+                                          Text(localizations.time(appointment.time)),
                                         ],
                                       ),
                                       const SizedBox(height: 8),
@@ -277,26 +255,9 @@ class _AdminPanelState extends State<AdminPanel> {
                                         children: [
                                           const Icon(Icons.query_stats, size: 16),
                                           const SizedBox(width: 8),
-                                          Text(
-                                            'Status: ${appointment.status}',
-                                            style: const TextStyle(
-                                              fontSize: 14,
-                                            ),
-                                          ),
+                                          Text(localizations.status(appointment.status ?? 'Unknown')),
                                         ],
                                       ),
-                                      const SizedBox(height: 8),
-                                      Wrap(
-                                        spacing: 8,
-                                        children: appointment.services.isNotEmpty
-                                            ? appointment.services.map((service) {
-                                          return Chip(
-                                            label: Text(service.name),
-                                          );
-                                        }).toList()
-                                            : [const Chip(label: Text('No services'))],
-                                      ),
-                                      const SizedBox(height: 8),
                                     ],
                                   ),
                                 ),

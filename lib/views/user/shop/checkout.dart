@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -97,15 +98,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
           message,
         );
       } else {
-        log('Admin document not found');
+        log(AppLocalizations.of(context)!.adminDocNotFound as String);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Admin document not found')),
+           SnackBar(content: Text(AppLocalizations.of(context)!.adminDocNotFound as String)),
         );
       }
     } catch (e) {
-      log('Error sending notification to admin: $e');
+      log('AppLocalizations.of(context)!.sendingNotificationError : $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending notification: ${e.toString()}')),
+        SnackBar(content: Text('AppLocalizations.of(context)!.sendingNotificationError ${e.toString()}')),
       );
     }
   }
@@ -124,7 +125,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
         if (deviceToken == null) {
           // Handle the case where deviceToken is null
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Device token is not available')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.deviceTokenError)),
           );
           setState(() {
             _isLoading = false; // Hide loading indicator
@@ -180,11 +181,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     final cartItems = widget.productQuantities.entries.where((entry) => entry.value > 0).toList();
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Checkout'),
+        title: Text(localizations.checkoutTitle),
       ),
       resizeToAvoidBottomInset: true,
       body: Stack(
@@ -195,7 +196,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Order Summary',
+                  localizations.orderSummary,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 16),
@@ -216,14 +217,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
                         if (snapshot.hasError || !snapshot.hasData) {
                           return ListTile(
-                            title: Text('Product not found'),
+                            title: Text(localizations.productNotFound),
                           );
                         }
 
                         var productData = snapshot.data!.data() as Map<String, dynamic>;
 
                         return ListTile(
-                          title: Text(productData['description'] ?? 'No Description'),
+                          title: Text(productData['description'] ?? localizations.noDescription),
                           subtitle: Text('Quantity: $quantity'),
                           trailing: Text('\$${(productData['price'] ?? 0) * quantity}'),
                         );
@@ -244,62 +245,62 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       TextFormField(
                         controller: _emailController,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: localizations.emailLabel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0), // Circular border
                           ),
                         ),
-                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your email' : null,
+                        validator: (value) => value?.isEmpty ?? true ? localizations.emailValidation : null,
                       ),
                       const SizedBox(height: 16), // Spacing between fields
                       TextFormField(
                         controller: _firstNameController,
                         decoration: InputDecoration(
-                          labelText: 'First Name',
+                          labelText: localizations.firstNameLabel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0), // Circular border
                           ),
                         ),
-                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your first name' : null,
+                        validator: (value) => value?.isEmpty ?? true ?localizations.firstNameValidation : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _lastNameController,
                         decoration: InputDecoration(
-                          labelText: 'Last Name',
+                          labelText: localizations.lastNameLabel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0), // Circular border
                           ),
                         ),
-                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your last name' : null,
+                        validator: (value) => value?.isEmpty ?? true ? localizations.lastNameValidation : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _phoneController,
                         decoration: InputDecoration(
-                          labelText: 'Phone',
+                          labelText: localizations.phoneLabel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0), // Circular border
                           ),
                         ),
-                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your phone number' : null,
+                        validator: (value) => value?.isEmpty ?? true ? localizations.phoneValidation: null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _addressController,
                         decoration: InputDecoration(
-                          labelText: 'Address',
+                          labelText: localizations.address,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12.0), // Circular border
                           ),
                         ),
-                        validator: (value) => value?.isEmpty ?? true ? 'Please enter your address' : null,
+                        validator: (value) => value?.isEmpty ?? true ? localizations.addressValidation : null,
                       ),
 
                       const SizedBox(height: 16),
                       Button(
                         onPressed: _confirmOrder,
-                         child: Text("Confirm Order"),
+                         child: Text(localizations.confirmOrderButton),
                       ),
                     ],
                   ),

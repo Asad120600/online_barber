@@ -1,12 +1,15 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/notifications.dart';
 import 'package:online_barber_app/views/user/barber_list.dart';
+import 'package:provider/provider.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
 import 'user_drawer_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,6 +17,8 @@ class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
+
+// enum Language { english, urdu , arabic , spanish , french}
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -74,7 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Close'),
+                  child: Text(AppLocalizations.of(context)!.close),
                 ),
               ],
             ),
@@ -91,8 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          "Online Barber",
+        title: Text(
+          AppLocalizations.of(context)!.online_barber,
           style: TextStyle(
             fontFamily: 'Acumin Pro',
             fontSize: 24,
@@ -100,6 +105,33 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
+          // Consumer<LanguageChangeController>(
+          //   builder: (context, provider, child) {
+          //     return PopupMenuButton(
+          //       onSelected: (Language item) {
+          //         if (Language.english.name == item.name) {
+          //           provider.changeLanguage(Locale("en"));
+          //         } else if(Language.urdu.name == item.name) {
+          //           provider.changeLanguage(Locale("ur"));
+          //         } else if(Language.arabic.name == item.name){
+          //           provider.changeLanguage(Locale("ar"));
+          //         }else if(Language.spanish.name == item.name){
+          //           provider.changeLanguage(Locale("es"));
+          //         }
+          //         else if(Language.french.name == item.name){
+          //           provider.changeLanguage(Locale("fr"));
+          //         }
+          //       },
+          //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+          //         PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+          //         PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
+          //         PopupMenuItem(value: Language.arabic, child: Text(AppLocalizations.of(context)!.arabic)),
+          //         PopupMenuItem(value: Language.spanish, child: Text(AppLocalizations.of(context)!.spanish)),
+          //         PopupMenuItem(value: Language.french, child: Text(AppLocalizations.of(context)!.french)),
+          //       ],
+          //     );
+          //   },
+          // ),
           Stack(
             children: [
               IconButton(
@@ -154,8 +186,8 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(16.0),
-            child: const Text(
-              'Our Services',
+            child: Text(
+              AppLocalizations.of(context)!.services_title,
               style: TextStyle(
                 fontFamily: 'Acumin Pro',
                 fontWeight: FontWeight.bold,
@@ -168,8 +200,8 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               children: [
-                _buildCategorySection('Hair Styles', _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
-                _buildCategorySection('Beard Styles', _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
+                _buildCategorySection(AppLocalizations.of(context)!.hair_styles, _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
+                _buildCategorySection(AppLocalizations.of(context)!.beard_styles, _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
               ],
             ),
           ),
@@ -198,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 },
-                child: const Text('Continue'),
+                child: Text(AppLocalizations.of(context)!.continue_button),
               ),
             ),
         ],
@@ -244,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               title: Text(service.name),
-              subtitle: Text('Price: ${service.price.toStringAsFixed(2)}'),
+              subtitle: Text('${service.price.toStringAsFixed(2)}'),
               trailing: Checkbox(
                 value: checked[index],
                 onChanged: (bool? value) {

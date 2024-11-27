@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/controllers/auth_controller.dart';
 import 'package:online_barber_app/utils/button.dart'; // Adjust this import as per your project structure
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -45,18 +45,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   height: 100,
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  "Congratulations!",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.loading_congratulations,
+                  style: const TextStyle(
                     fontFamily: 'Acumin Pro',
                     fontSize: 20,
                     color: Colors.orange,
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  "Your account is ready to use. You will be redirected shortly...",
-                  style: TextStyle(
+                Text(
+                  AppLocalizations.of(context)!.loading_message,
+                  style: const TextStyle(
                     fontFamily: 'Acumin Pro',
                     fontSize: 14,
                     color: Colors.black,
@@ -85,44 +85,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
     });
   }
 
-  // Future<void> _handleSignUp() async {
-  //   String firstName = firstNameController.text.trim();
-  //   String lastName = lastNameController.text.trim();
-  //   String email = emailController.text.trim();
-  //   String password = passwordController.text.trim();
-  //   String confirmPassword = confirmPasswordController.text.trim();
-  //   String phoneNumber = phoneNumberController.text.trim();
-  //   String userType = isUserSelected ? '3' : '2'; // 3 for user, 2 for barber
-  //
-  //   if (password != confirmPassword) {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Passwords do not match. Please try again.'),
-  //       ),
-  //     );
-  //     return;
-  //   }
-  //
-  //   bool signUpSuccess = await _authController.signUpWithEmail(
-  //     email,
-  //     password,
-  //     firstName,
-  //     lastName,
-  //     phoneNumber,
-  //     userType,
-  //     context,
-  //   );
-  //
-  //   if (signUpSuccess) {
-  //     _showLoadingDialog(context);
-  //   } else {
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(
-  //         content: Text('Sign up failed. Please try again.'),
-  //       ),
-  //     );
-  //   }
-  // }
   Future<void> _handleSignUp() async {
     String firstName = firstNameController.text.trim();
     String lastName = lastNameController.text.trim();
@@ -135,8 +97,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
     // Validation
     if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('All fields are required. Please fill out every field.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.required_fields_error),
         ),
       );
       return;
@@ -145,26 +107,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
     final phoneRegex = RegExp(r'^\+?[0-9]{10,13}$'); // Validate phone number
     if (!phoneRegex.hasMatch(phoneNumber)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a valid phone number.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.invalid_phone_number),
         ),
       );
       return;
     }
 
-    // if (password.length < 8 || !RegExp(r'[A-Z]').hasMatch(password) || !RegExp(r'[0-9]').hasMatch(password)) {
-    //   ScaffoldMessenger.of(context).showSnackBar(
-    //     const SnackBar(
-    //       content: Text('Password must be at least 8 characters long and include a number and an uppercase letter.'),
-    //     ),
-    //   );
-    //   return;
-    // }
-
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwords do not match. Please try again.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.password_mismatch),
         ),
       );
       return;
@@ -185,8 +138,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _showLoadingDialog(context);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Sign up failed. Phone number already registered.'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.sign_up_failed),
         ),
       );
     }
@@ -227,7 +180,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isUserSelected ? Colors.orange : Colors.grey,
                     ),
-                    child: const Text("User"),
+                    child: Text(AppLocalizations.of(context)!.user),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
@@ -240,37 +193,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isBarberSelected ? Colors.orange : Colors.grey,
                     ),
-                    child: const Text("Barber"),
+                    child: Text(AppLocalizations.of(context)!.barber),
                   ),
                 ],
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: firstNameController,
-                decoration: const InputDecoration(
-                  labelText: 'First Name',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.first_name,
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: lastNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Last Name',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.last_name,
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.email,
                 ),
               ),
               const SizedBox(height: 20),
               TextField(
                 controller: phoneNumberController,
                 keyboardType: TextInputType.phone, // Ensures only numerical input
-                decoration: const InputDecoration(
-                  labelText: 'Phone Number',
+                decoration: InputDecoration(
+                  labelText: AppLocalizations.of(context)!.phone_number,
                 ),
               ),
               const SizedBox(height: 20),
@@ -278,7 +231,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: passwordController,
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: AppLocalizations.of(context)!.password,
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -296,7 +249,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 controller: confirmPasswordController,
                 obscureText: !isPasswordVisible,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Password',
+                  labelText: AppLocalizations.of(context)!.confirm_password,
                   suffixIcon: IconButton(
                     icon: Icon(
                       isPasswordVisible ? Icons.visibility : Icons.visibility_off,
@@ -312,13 +265,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
               const SizedBox(height: 20),
               Button(
                 onPressed: _handleSignUp,
-                child: const Text('Sign Up'),
+                child: Text(AppLocalizations.of(context)!.sign_up),
               ),
               const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("Already have an account?"),
+                  Text(AppLocalizations.of(context)!.already_have_account),
                   TextButton(
                     onPressed: () {
                       Navigator.pushReplacement(
@@ -328,7 +281,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         ),
                       );
                     },
-                    child: const Text("Login"),
+                    child: Text(AppLocalizations.of(context)!.login),
                   ),
                 ],
               ),
@@ -340,4 +293,3 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 }
-

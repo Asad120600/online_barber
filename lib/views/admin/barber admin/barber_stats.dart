@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 
 class BarberStatsScreen extends StatefulWidget {
@@ -14,7 +15,7 @@ class BarberStatsScreen extends StatefulWidget {
 
 class _BarberStatsScreenState extends State<BarberStatsScreen> {
   Future<void> _refreshBarbers() async {
-    await Future.delayed(Duration(seconds: 1));
+    await Future.delayed(const Duration(seconds: 1));
     setState(() {});
   }
 
@@ -22,7 +23,7 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barber Stats'),
+        title: Text(AppLocalizations.of(context)!.barber_stats),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: widget._firestore.collection('barbers').snapshots(),
@@ -32,7 +33,9 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
           }
 
           if (!barberSnapshot.hasData || barberSnapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No barbers found.'));
+            return Center(
+              child: Text(AppLocalizations.of(context)!.no_barbers_found),
+            );
           }
 
           List<Barber> barbers = barberSnapshot.data!.docs
@@ -56,17 +59,24 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                       child: FutureBuilder<int>(
                         future: _getDoneAppointmentsCount(barber.id),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const ListTile(
-                              title: Text('Loading...'),
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return ListTile(
+                              title: Text(AppLocalizations.of(context)!.loading),
                             );
                           }
 
                           if (snapshot.hasError) {
                             return ListTile(
                               title: Text(barber.name),
-                              subtitle: const Text('Error loading done appointments'),
-                              trailing: const Icon(Icons.error, color: Colors.red),
+                              subtitle: Text(
+                                AppLocalizations.of(context)!
+                                    .error_loading_appointments,
+                              ),
+                              trailing: const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                              ),
                             );
                           }
 
@@ -101,7 +111,7 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                               ),
                             ),
                             subtitle: Text(
-                              'Done appointments: $doneAppointmentsCount',
+                              '${AppLocalizations.of(context)!.done_appointments}: $doneAppointmentsCount',
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14.0,
@@ -150,13 +160,13 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Total Prices'),
+              title: Text(AppLocalizations.of(context)!.total_prices),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Select Month:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    AppLocalizations.of(context)!.select_month,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   DropdownButton<String>(
                     value: currentMonth,
@@ -169,28 +179,37 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                     onChanged: (String? newMonth) {
                       setState(() {
                         currentMonth = newMonth!;
-                        currentMonthEarnings = monthlyTotals[currentMonth] ?? 0.0;
+                        currentMonthEarnings =
+                            monthlyTotals[currentMonth] ?? 0.0;
                         currentMonthCommission = currentMonthEarnings * 0.1;
                       });
                     },
                   ),
-                  SizedBox(height: 20),
-                  Text('Earnings for $currentMonth:'),
+                  const SizedBox(height: 20),
+                  Text(
+                      '${AppLocalizations.of(context)!.earnings_for} $currentMonth:'),
                   Text(
                     '${currentMonthEarnings.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  SizedBox(height: 20),
-                  Text('Commission for $currentMonth:'),
+                  const SizedBox(height: 20),
+                  Text(
+                      '${AppLocalizations.of(context)!.commission_for} $currentMonth:'),
                   Text(
                     '${currentMonthCommission.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
               actions: <Widget>[
                 TextButton(
-                  child: const Text('Close'),
+                  child: Text(AppLocalizations.of(context)!.close),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

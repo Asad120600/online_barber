@@ -9,6 +9,8 @@ import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
 import '../../models/service_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class SetServicePrices extends StatefulWidget {
   final String barberId;
@@ -172,9 +174,10 @@ class _SetServicePricesState extends State<SetServicePrices> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Set Service Prices'),
+        title:  Text(localizations.setPrices),
       ),
       body: _isLoading
           ? const Center(child: LoadingDots()) // Loading dots while prices are updating
@@ -224,7 +227,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
                       _savePrices();
                     }
                   },
-                  child: const Text('Save Prices'),
+                  child:  Text(localizations.save),
                 ),
               ),
             ],

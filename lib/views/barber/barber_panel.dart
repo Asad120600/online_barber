@@ -3,13 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
+import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/notification_model.dart';
 import 'package:online_barber_app/push_notification_service.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/barber/barber_drawer.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BarberPanel extends StatefulWidget {
   final String barberId;
@@ -18,9 +21,10 @@ class BarberPanel extends StatefulWidget {
   @override
   State<BarberPanel> createState() => _BarberPanelState();
 }
-
+enum Language { english, urdu }
 class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStateMixin {
   late final AppointmentController _appointmentController;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
   bool _showSnackBar = false;
 
@@ -111,27 +115,79 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
       return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          title: const Text('Bookings'),
+          title:  Text(AppLocalizations.of(context)!.bookings),
+          actions: [
+            // Consumer<LanguageChangeController>(
+            //   builder: (context, provider, child) {
+            //     return PopupMenuButton(
+            //       onSelected: (Language item) {
+            //         if (Language.english.name == item.name) {
+            //           provider.changeLanguage(Locale("en"));
+            //         } else {
+            //           provider.changeLanguage(Locale("ur"));
+            //         }
+            //       },
+            //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+            //         PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+            //         PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu))
+            //       ],
+            //     );
+            //   },
+            // ),
+            IconButton(
+              onPressed: () {
+                _scaffoldKey.currentState?.openEndDrawer();
+              },
+              icon: const Icon(Icons.menu),
+            ),
+          ],
         ),
+
         body: const Center(
           child: Text('Barber ID is empty or user not authenticated.'),
         ),
       );
     }
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Bookings'),
+        title:  Text(AppLocalizations.of(context)!.bookings),
         bottom: _tabController != null
             ? TabBar(
           controller: _tabController,
-          tabs: const [
-            Tab(text: 'Today Bookings'),
-            Tab(text: 'Upcoming'),
-            Tab(text: 'History'),
+          tabs:  [
+            Tab(text:AppLocalizations.of(context)!.today_bookings),
+            Tab(text: AppLocalizations.of(context)!.upcoming),
+            Tab(text: AppLocalizations.of(context)!.history),
           ],
         )
             : null,
+        actions: [Consumer<LanguageChangeController>(
+          builder: (context, provider, child) {
+            return PopupMenuButton(
+              onSelected: (Language item) {
+                if (Language.english.name == item.name) {
+                  provider.changeLanguage(Locale("en"));
+                } else {
+                  provider.changeLanguage(Locale("ur"));
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
+                PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
+                PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu))
+              ],
+            );
+          },
+        ),
+          IconButton(
+            onPressed: () {
+              _scaffoldKey.currentState?.openEndDrawer();
+            },
+            icon: const Icon(Icons.menu),
+          ),
+        ],
+
       ),
       endDrawer: BarberDrawer(screenWidth: screenWidth),
       body: _tabController != null

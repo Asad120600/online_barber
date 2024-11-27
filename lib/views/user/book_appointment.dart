@@ -9,10 +9,12 @@ import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/push_notification_service.dart';
+import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../utils/cutom_google_map.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BookAppointment extends StatefulWidget {
   final List<Service> selectedServices;
@@ -181,24 +183,26 @@ class BookAppointment extends StatefulWidget {
 
 
     Future<void> _bookAppointment() async {
+      final localization = AppLocalizations.of(context);
+
       // Check for necessary inputs
       if (_timeController.text.isEmpty) {
-        _showErrorDialog('Please select a time slot');
+        _showErrorDialog(localization!.pleaseSelectTimeSlot);
         return;
       }
       if (_isHomeService && _addressController.text.isEmpty) {
-        _showErrorDialog('Address cannot be empty for home service');
+        _showErrorDialog(localization!.addressCannotBeEmpty);
         return;
       }
       if (_phoneNumberController.text.isEmpty) {
-        _showErrorDialog('Phone number cannot be empty');
+        _showErrorDialog(localization!.phoneNumberCannotBeEmpty);
         return;
       }
       if (_isHomeService) {
         try {
           double.parse(_homeServicePriceController.text);
         } catch (e) {
-          _showErrorDialog('Invalid home service price');
+          _showErrorDialog(localization!.invalidHomeServicePrice);
           return;
         }
       }
@@ -220,9 +224,8 @@ class BookAppointment extends StatefulWidget {
           // If no IAP is needed, proceed with appointment booking
           await _completeAppointment(); // Proceed to complete booking
         }
-
       } catch (e) {
-        _showErrorDialog(e.toString());
+        _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
       } finally {
         setState(() {
           isBooking = false;
@@ -399,7 +402,7 @@ class BookAppointment extends StatefulWidget {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Error'),
+          title:  Text(AppLocalizations.of(context)!.error),
           content: Text(message),
           actions: [
             TextButton(
@@ -440,283 +443,178 @@ class BookAppointment extends StatefulWidget {
       }
     }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Book Appointment'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Select Date',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                TableCalendar(
-                  firstDay: DateTime.utc(2010, 10, 16),
-                  lastDay: DateTime.utc(2030, 3, 14),
-                  focusedDay: selectedDay,
-                  calendarFormat: CalendarFormat.month,
-                  selectedDayPredicate: (day) => isSameDay(selectedDay, day),
-                  onDaySelected: (selectedDay, focusedDay) {
-                    setState(() {
-                      this.selectedDay = selectedDay;
-                      this.focusedDay = focusedDay;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Select Time Slot',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _timeController,
-                  readOnly: true,
-                  onTap: _selectTime,
-                  decoration: InputDecoration(
-                    suffixIcon: const Icon(Icons.access_time),
-                    hintText: 'Select time',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.orange),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.grey),
+    @override
+    Widget build(BuildContext context) {
+      final localizations = AppLocalizations.of(context)!;
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(localizations.bookAppointmentTitle),
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    localizations.selectDate,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TableCalendar(
+                    firstDay: DateTime.utc(2010, 10, 16),
+                    lastDay: DateTime.utc(2030, 3, 14),
+                    focusedDay: focusedDay,
+                    calendarFormat: CalendarFormat.month,
+                    selectedDayPredicate: (day) => isSameDay(selectedDay, day),
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        this.selectedDay = selectedDay;
+                        this.focusedDay = focusedDay;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    localizations.selectTimeSlot,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _timeController,
+                    readOnly: true,
+                    onTap: _selectTime,
+                    decoration: InputDecoration(
+                      suffixIcon: const Icon(Icons.access_time),
+                      hintText: localizations.selectTime,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Phone Number',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _phoneNumberController,
-                  keyboardType: TextInputType.phone,
-                  decoration: InputDecoration(
-                    hintText: 'Enter phone number',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.orange),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                      borderSide: const BorderSide(color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    localizations.phoneNumber,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _phoneNumberController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      hintText: localizations.enterPhoneNumber,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Home Service',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                    Switch(
-                      value: _isHomeService,
-                      onChanged: (bool value) {
-                        setState(() {
-                          _isHomeService = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                if (_isHomeService)
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Home Service Price',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
+                      Text(
+                        localizations.homeService,
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        readOnly: true,
-                        controller: _homeServicePriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          hintText: 'Home Service Price',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.orange),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.grey),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'Address',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _addressController,
-                        decoration: InputDecoration(
-                          hintText: 'Enter address',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.orange),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12.0),
-                            borderSide: const BorderSide(color: Colors.grey),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.location_on),
-                            onPressed: _openGoogleMap,
-                          ),
-                        ),
+                      Switch(
+                        value: _isHomeService,
+                        onChanged: (bool value) {
+                          setState(() {
+                            _isHomeService = value;
+                          });
+                        },
                       ),
                     ],
                   ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  'Barber: ${widget.barberName}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                      color: Colors.orange),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Selected Services',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: widget.selectedServices.length,
-                  itemBuilder: (context, index) {
-                    final service = widget.selectedServices[index];
-                    final barberPrice = _getBarberPrice(service);
-                    return ListTile(
-                      title: Text(service.name),
-                      subtitle:
-                          Text('Price: ${barberPrice.toStringAsFixed(2)}'),
-                    );
-                  },
-                ),
-                const SizedBox(height: 16),
-                if (_isHomeService)
-                  Text(
-                    'Home Service Price: ${double.tryParse(_homeServicePriceController.text)?.toStringAsFixed(2) ?? '0.00'}',
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                const SizedBox(height: 16),
-                Text(
-                  'Total Price: ${_calculateTotalPrice().toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                // Payment Options Section
-                const SizedBox(height: 16),
-                const Text(
-                  'Select Payment Method',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: ListTile(
-                        title: const Text('Cash'),
-                        leading: Radio<String>(
-                          value: 'Cash',
-                          groupValue: _selectedPaymentMethod,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPaymentMethod = value!;
-                            });
-                          },
+                  if (_isHomeService)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          localizations.homeServicePrice,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
-                      ),
-                    ),
-                    Expanded(
-                      child: ListTile(
-                        title: const Text('Online Payment'),
-                        leading: Radio<String>(
-                          value: 'Online',
-                          groupValue: _selectedPaymentMethod,
-                          onChanged: (String? value) {
-                            setState(() {
-                              _selectedPaymentMethod = value!;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 16),
-                Center(
-                  child: isBooking
-                      ? const LoadingDots()
-                      : ElevatedButton(
-                          onPressed: () async {
-                            if (_selectedPaymentMethod == 'Cash') {
-                              await _bookAppointment();
-                            } else if (_selectedPaymentMethod == 'Online') {
-                              if (_products.isNotEmpty) {
-                                await _purchaseService(_products.first);
-                              } else {
-                                _showErrorDialog(
-                                    'No products available for purchase.');
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.orange,
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          readOnly: true,
+                          controller: _homeServicePriceController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: localizations.homeServicePriceHint,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
                           ),
-                          child: const Text('Book Appointment'),
                         ),
-                ),
-              ],
-            ),
-          ],
+                        const SizedBox(height: 16),
+                        Text(
+                          localizations.address,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _addressController,
+                          decoration: InputDecoration(
+                            hintText: localizations.enterAddress,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.location_on),
+                              onPressed: _openGoogleMap,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '${localizations.barber}: ${widget.barberName}',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.orange),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    localizations.selectedServices,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: widget.selectedServices.length,
+                    itemBuilder: (context, index) {
+                      final service = widget.selectedServices[index];
+                      final barberPrice = _getBarberPrice(service);
+                      return ListTile(
+                        title: Text(service.name),
+                        subtitle: Text('${localizations.price}: ${barberPrice.toStringAsFixed(2)}'),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    '${localizations.totalPrice}: ${_calculateTotalPrice().toStringAsFixed(2)}',
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Center(
+                    child: isBooking
+                        ? const CircularProgressIndicator()
+                        : Button(
+                      onPressed: () async {
+                        if (_selectedPaymentMethod == 'Cash') {
+                          await _bookAppointment();
+                        }
+                      },
+                      child: Text(localizations.bookAppointment),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
-}

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
 import 'package:online_barber_app/utils/barbers_map.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -53,16 +54,18 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     } catch (e) {
       log('Error fetching barber location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error loading barber location')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.errorLoadingBarberLocation)),
       );
     }
   }
+
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
     if (widget.uid.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Appointments'),
+          title: Text(localizations.appointments),
         ),
         body: const Center(
           child: Text('User ID is empty or user not authenticated.'),
@@ -72,7 +75,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Appointments'),
+        title: Text(localizations.appointments),
       ),
       body: StreamBuilder<List<Appointment>>(
         stream: _appointmentController.getAppointmentsByUID(widget.uid),
@@ -83,7 +86,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
             log('Error: ${snapshot.error}');
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No Appointments found.'));
+            return Center(child: Text(localizations.noAppointmentsFound));
           } else {
             List<Appointment> appointments = snapshot.data!;
 
@@ -127,13 +130,12 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                             children: [
                               Row(
                                 children: [
-                                  const Icon(Icons.calendar_today, size: 16),
+                                  const Icon(Icons.access_time, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Date: ${DateFormat.yMd().format(appointment.date.toDate())}',
+                                    localizations.date_e(appointment.date.toDate()),
                                     style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],
@@ -144,7 +146,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.access_time, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Time: ${appointment.time}',
+                                    localizations.time(appointment.time),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -157,7 +159,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.cut, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Barber Name: ${appointment.barberName}',
+                                    localizations.barberName(appointment.barberName),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -171,7 +173,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const SizedBox(width: 8),
                                   Expanded(
                                     child: Text(
-                                      'Address: ${appointment.address}',
+                                      '${localizations.address}: ${appointment.address}',
                                       style: const TextStyle(
                                         fontSize: 14,
                                       ),
@@ -190,7 +192,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.phone, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Phone Number: ${appointment.phoneNumber}',
+                                    '${localizations.phoneNumber}: ${appointment.phoneNumber}',
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -203,7 +205,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.attach_money, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Total Price: ${appointment.totalPrice.toStringAsFixed(2)}',
+                                    '${localizations.totalPrice}: ${appointment.totalPrice.toStringAsFixed(2)}',
                                     style: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -221,7 +223,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                       size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Home Service: ${appointment.isHomeService ? 'Yes' : 'No'}',
+                                    '${localizations.homeService}: ${appointment.isHomeService ? localizations.yes : localizations.no}',
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -234,7 +236,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.query_stats, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Status: ${appointment.status}',
+                                    localizations.status_e (appointment.status ?? 'Unknown'),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -247,15 +249,15 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                 children: appointment.services.isNotEmpty
                                     ? appointment.services.map((service) {
                                   return Chip(
-                                    label: Text(service.name ?? 'Unknown'),
+                                    label: Text(service.name ?? localizations.noServices),
                                   );
                                 }).toList()
-                                    : [const Chip(label: Text('No services'))],
+                                    : [Chip(label: Text(localizations.noServices))],
                               ),
                               const SizedBox(height: 16),
                               if (appointment.status == 'Done')
                                 Button(
-                                  width: 125,
+                                  width: 155,
                                   onPressed: appointment.hasBeenRated
                                       ? null
                                       : () {
@@ -277,8 +279,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   },
                                   child: Text(
                                     appointment.hasBeenRated
-                                        ? 'Already Rated'
-                                        : 'Rate Barber',
+                                        ? localizations.alreadyRated
+                                        : localizations.rateBarber,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 14,
@@ -302,7 +304,7 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                             child: const Icon(
                               Icons.check,
                               color: Colors.orange,
-                              size: 34,
+                              size: 20,
                             ),
                           ),
                         ),

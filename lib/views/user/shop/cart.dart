@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/shop/checkout.dart';
@@ -8,18 +9,23 @@ class CartPage extends StatelessWidget {
   final Map<String, int> productQuantities;
   final double totalPrice;
 
-  CartPage({
+  const CartPage({
+    super.key,
     required this.productQuantities,
     required this.totalPrice,
   });
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     // Filter the productQuantities map to show only products with quantity > 0
     final cartItems = productQuantities.entries.where((entry) => entry.value > 0).toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
+      appBar: AppBar(
+        title: Text(localizations.cartTitle),
+      ),
       body: ListView.builder(
         itemCount: cartItems.length,
         itemBuilder: (context, index) {
@@ -30,32 +36,34 @@ class CartPage extends StatelessWidget {
             future: FirebaseFirestore.instance.collection('products').doc(productId).get(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const ListTile(
-                  title: Text('Loading...'),
+                return ListTile(
+                  title: Text(localizations.loadingText),
                 );
               }
 
               if (snapshot.hasError) {
                 return ListTile(
-                  title: Text('Error: ${snapshot.error}'),
+                  title: Text(localizations.errorLabel(snapshot.error.toString())),
                 );
               }
 
               final productData = snapshot.data?.data() as Map<String, dynamic>?;
 
               if (productData == null) {
-                return const ListTile(
-                  title: Text('Product not found'),
+                return ListTile(
+                  title: Text(localizations.productNotFound),
                 );
               }
+
+              final price = (double.tryParse(productData['price']) ?? 0.0) * quantity;
 
               return ListTile(
                 leading: CircleAvatar(
                   backgroundImage: NetworkImage(productData['imageUrl']),
                 ),
                 title: Text(productData['description']),
-                subtitle: Text('Quantity: $quantity'),
-                trailing: Text('${(double.tryParse(productData['price']) ?? 0.0) * quantity}'),
+                subtitle: Text(localizations.quantityLabel(quantity.toString())),
+                trailing: Text(price.toStringAsFixed(2)),
               );
             },
           );
@@ -72,7 +80,7 @@ class CartPage extends StatelessWidget {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Total: ${totalPrice.toStringAsFixed(2)}'),
+                Text(localizations.totalPriceLabel(totalPrice.toStringAsFixed(2))),
                 SizedBox(
                   width: 118, // Ensure this width fits the button content without wrapping
                   child: Button(
@@ -86,7 +94,7 @@ class CartPage extends StatelessWidget {
                       ));
                     },
                     child: Text(
-                      'Checkout',
+                      localizations.checkoutButton,
                       style: TextStyle(fontSize: fontSize),
                     ),
                   ),

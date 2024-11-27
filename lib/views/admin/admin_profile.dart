@@ -1,14 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/views/admin/admin_panel.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../utils/button.dart';
 
 class AdminProfile extends StatefulWidget {
-  const AdminProfile({Key? key}) : super(key: key);
+  const AdminProfile({super.key});
 
   @override
   State<AdminProfile> createState() => _AdminProfileState();
@@ -20,6 +21,7 @@ class _AdminProfileState extends State<AdminProfile> {
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
 
   @override
   void initState() {
@@ -43,18 +45,22 @@ class _AdminProfileState extends State<AdminProfile> {
         });
       }
     } catch (e) {
-      print('Error fetching admin data: $e');
+      if (kDebugMode) {
+        print('Error fetching admin data: $e');
+      }
     }
   }
 
   void _updateAdminProfile() async {
+    final localizations = AppLocalizations.of(context)!;
+
     // Show loading dialog
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
-        return const Center(
-          child: LoadingDialog(message: "Profile is Updating!"),
+        return Center(
+          child: LoadingDialog(message: localizations.profileUpdating),
         );
       },
     );
@@ -73,23 +79,25 @@ class _AdminProfileState extends State<AdminProfile> {
         context: context,
         builder: (BuildContext context) {
           return CustomAlertDialog(
-            title: 'Success',
-            content: 'Profile updated successfully',
+            title: localizations.success,
+            content: localizations.profileUpdated,
             confirmButtonText: 'OK',
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => AdminPanel()),
+                MaterialPageRoute(builder: (context) => const AdminPanel()),
               );
             },
           );
         },
       );
     } catch (e) {
-      print('Error updating admin profile: $e');
+      if (kDebugMode) {
+        print('Error updating admin profile: $e');
+      }
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to update profile')),
+        SnackBar(content: Text(localizations.failedToUpdate)),
       );
     }
   }
@@ -104,9 +112,11 @@ class _AdminProfileState extends State<AdminProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(localizations.profile),
         backgroundColor: Colors.white,
       ),
       body: Padding(
@@ -125,7 +135,7 @@ class _AdminProfileState extends State<AdminProfile> {
             ),
             const SizedBox(height: 16),
             Text(
-              _firstNameController.text.isNotEmpty ? _firstNameController.text : 'Admin',
+              _firstNameController.text.isNotEmpty ? _firstNameController.text : localizations.admin,
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -143,64 +153,31 @@ class _AdminProfileState extends State<AdminProfile> {
             TextField(
               controller: _firstNameController,
               decoration: InputDecoration(
-                labelText: 'First Name',
-                icon: Icon(Icons.person, color: Colors.orange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
-                ),
+                labelText: localizations.firstName,
+                icon: const Icon(Icons.person, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _lastNameController,
               decoration: InputDecoration(
-                labelText: 'Last Name',
-                icon: Icon(Icons.person, color: Colors.orange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
-                ),
+                labelText: localizations.lastName,
+                icon: const Icon(Icons.person, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _phoneController,
-              keyboardType: TextInputType.phone, // Ensures only numerical input
+              keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                labelText: 'Phone Number',
-                icon: Icon(Icons.phone, color: Colors.orange),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0), // Adjust the radius as needed
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.orange), // Adjust the color as needed
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.0),
-                  borderSide: const BorderSide(color: Colors.grey), // Adjust the color as needed
-                ),
+                labelText: localizations.phoneNumber,
+                icon: const Icon(Icons.phone, color: Colors.orange),
               ),
             ),
             const SizedBox(height: 16),
             Button(
               onPressed: _updateAdminProfile,
-              child: const Text('Save Changes'),
+              child: Text(localizations.saveChanges),
             ),
             const Spacer(),
           ],

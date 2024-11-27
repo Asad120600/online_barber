@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/chat_screen.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/contact_us_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ChatListScreen extends StatelessWidget {
   const ChatListScreen({super.key});
@@ -37,7 +38,7 @@ class ChatListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('My Chats'),
+        title: Text(AppLocalizations.of(context)!.my_chats),
         actions: [
           IconButton(
             icon: Icon(Icons.add),

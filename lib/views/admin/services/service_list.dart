@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/views/admin/services/manage_services.dart';
 import '../../../models/service_model.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ServiceList extends StatelessWidget {
   const ServiceList({super.key});
@@ -14,7 +15,7 @@ class ServiceList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Manage Services'),
+        title: Text(AppLocalizations.of(context)!.manage_services),
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -31,10 +32,10 @@ class ServiceList extends StatelessWidget {
         stream: FirebaseFirestore.instance.collection('services').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
+            return Center(child: Text(AppLocalizations.of(context)!.something_went_wrong));
           }
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: Text(AppLocalizations.of(context)!.loading));
           }
 
           final services = snapshot.data!.docs.map((doc) {

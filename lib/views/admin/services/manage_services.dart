@@ -5,9 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'dart:io';
-
 import 'package:online_barber_app/utils/loading_dialog.dart';
 import 'package:online_barber_app/utils/loading_dots.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ManageService extends StatefulWidget {
   final Service? service;
@@ -78,7 +78,7 @@ class _ManageServiceState extends State<ManageService> {
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return const LoadingDialog(message: 'Service is Adding ');
+          return LoadingDialog(message: AppLocalizations.of(context)!.service_added);
         },
       );
 
@@ -123,7 +123,6 @@ class _ManageServiceState extends State<ManageService> {
     }
   }
 
-// This method generates a productId based on the service name
   String _generateProductId(String serviceName) {
     return serviceName.toLowerCase().replaceAll(' ', '_'); // Basic example of productId generation
   }
@@ -132,7 +131,9 @@ class _ManageServiceState extends State<ManageService> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.service == null ? 'Add Service' : 'Edit Service'),
+        title: Text(widget.service == null
+            ? AppLocalizations.of(context)!.add_service
+            : AppLocalizations.of(context)!.edit_service),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -145,32 +146,32 @@ class _ManageServiceState extends State<ManageService> {
                   const SizedBox(height: 20),
                   TextFormField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'Service Name'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.service_name),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a service name';
+                        return AppLocalizations.of(context)!.service_name_required;
                       }
                       return null;
                     },
                   ),
                   TextFormField(
                     controller: _priceController,
-                    decoration: const InputDecoration(labelText: 'Price'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.price),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a price';
+                        return AppLocalizations.of(context)!.price_required;
                       }
                       return null;
                     },
                   ),
                   TextFormField(
                     controller: _homeServicePriceController,
-                    decoration: const InputDecoration(labelText: 'Home Service Price'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.home_service_price),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a home service price';
+                        return AppLocalizations.of(context)!.home_service_price_required;
                       }
                       return null;
                     },
@@ -188,11 +189,11 @@ class _ManageServiceState extends State<ManageService> {
                         _category = newValue!;
                       });
                     },
-                    decoration: const InputDecoration(labelText: 'Category'),
+                    decoration: InputDecoration(labelText: AppLocalizations.of(context)!.category),
                   ),
                   const SizedBox(height: 20),
                   CheckboxListTile(
-                    title: const Text('Is Home Service?'),
+                    title: Text(AppLocalizations.of(context)!.is_home_service),
                     value: _isHomeService,
                     onChanged: (bool? value) {
                       setState(() {
@@ -213,7 +214,7 @@ class _ManageServiceState extends State<ManageService> {
                     ),
                   TextButton(
                     onPressed: _pickImage,
-                    child: const Text('Pick Image'),
+                    child: Text(AppLocalizations.of(context)!.pick_image),
                   ),
                   const SizedBox(height: 20),
                   if (_isUploading)
@@ -221,7 +222,9 @@ class _ManageServiceState extends State<ManageService> {
                   const SizedBox(height: 20),
                   Button(
                     onPressed: _saveService,
-                    child: Text(widget.service == null ? 'Add Service' : 'Save Changes'),
+                    child: Text(widget.service == null
+                        ? AppLocalizations.of(context)!.add_service_button
+                        : AppLocalizations.of(context)!.save_changes_button),
                   ),
                 ],
               ),

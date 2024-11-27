@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/push_notification_service.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/chat_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContactUsPage extends StatefulWidget {
   @override
@@ -33,7 +34,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Contact Us'),
+        title: Text(AppLocalizations.of(context)!.contact_us),
         backgroundColor: Colors.orange,
       ),
       body: SafeArea(

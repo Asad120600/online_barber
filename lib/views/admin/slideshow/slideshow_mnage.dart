@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/views/admin/slideshow/add_slide.dart';
 import 'package:online_barber_app/views/admin/slideshow/edit_slide.dart';
 
@@ -38,7 +39,9 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
       });
     } catch (e) {
       print('Error fetching slides: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load slides')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.failed_to_load_slides)),
+      );
     }
   }
 
@@ -47,14 +50,14 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Delete'),
-          content: Text('Are you sure you want to delete this slide?'),
+          title: Text(AppLocalizations.of(context)!.confirm_delete),
+          content: Text(AppLocalizations.of(context)!.delete_confirmation_message),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -67,14 +70,18 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                   await _firestore.collection('slideshow_images').doc(documentId).delete();
 
                   _fetchSlides(); // Refresh the list
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Slide deleted successfully')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.slide_deleted_successfully)),
+                  );
                 } catch (e) {
                   print('Error deleting slide: $e');
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to delete slide')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(AppLocalizations.of(context)!.failed_to_delete_slide)),
+                  );
                 }
                 Navigator.of(context).pop();
               },
-              child: Text('Delete'),
+              child: Text(AppLocalizations.of(context)!.delete),
             ),
           ],
         );
@@ -85,7 +92,7 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Manage Slideshow Images')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.manage_slideshow_images)),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -95,14 +102,15 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => AddSlidePage(), // Navigate to AddSlidePage
+                      builder: (context) => AddSlidePage(),
                     )).then((_) {
                       _fetchSlides(); // Refresh the list after returning
                     });
                   },
-                  child: Text('Add New Slide'),
+                  child: Text(AppLocalizations.of(context)!.add_new_slide),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Colors.orange, // Text color
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.orange,
                   ),
                 ),
                 SizedBox(height: 20),
@@ -137,7 +145,7 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                     );
                   }).toList(),
                 ] else
-                  Text('No slides available'),
+                  Text(AppLocalizations.of(context)!.no_slides_available),
               ],
             ),
           ),

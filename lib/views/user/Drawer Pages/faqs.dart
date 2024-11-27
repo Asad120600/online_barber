@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 
 class FAQ extends StatefulWidget {
   const FAQ({super.key});
@@ -14,7 +16,7 @@ class _FAQState extends State<FAQ> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: const Text('FAQs'),
+        title:  Text(AppLocalizations.of(context)!.faqs),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

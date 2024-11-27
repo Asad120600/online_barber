@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/edit_product.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AllProductsPage extends StatefulWidget {
   const AllProductsPage({super.key});
@@ -15,11 +16,11 @@ class _AllProductsPageState extends State<AllProductsPage> {
     try {
       await FirebaseFirestore.instance.collection('products').doc(productId).delete();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product deleted successfully')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.productDeletedSuccess)),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete product: $e')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.productDeletedError(e.toString()))),
       );
     }
   }
@@ -29,9 +30,9 @@ class _AllProductsPageState extends State<AllProductsPage> {
       context: context,
       builder: (context) => Dialog(
         child: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),  // Close the preview when tapped
+          onTap: () => Navigator.of(context).pop(), // Close the preview when tapped
           child: InteractiveViewer(
-            child: Image.network(imageUrl, fit: BoxFit.contain),  // Enable pinch to zoom
+            child: Image.network(imageUrl, fit: BoxFit.contain), // Enable pinch to zoom
           ),
         ),
       ),
@@ -40,9 +41,11 @@ class _AllProductsPageState extends State<AllProductsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Products'),
+        title: Text(localizations.allProductsTitle),
         actions: [
           IconButton(
             onPressed: () {
@@ -77,13 +80,17 @@ class _AllProductsPageState extends State<AllProductsPage> {
               final productId = products[index].id;
               return ListTile(
                 leading: GestureDetector(
-                  onTap: () => _showImagePreview(context, product['imageUrl']),  // Tap to preview image
+                  onTap: () => _showImagePreview(context, product['imageUrl']), // Tap to preview image
                   child: CircleAvatar(
                     radius: 25,
                     backgroundImage: NetworkImage(product['imageUrl']),
                   ),
                 ),
-                title: Text('Price: ${product['price']}'),
+                title: Text(
+                  AppLocalizations.of(context)!.priceLabel(
+                      (product['price'] is num) ? product['price'].toDouble() : double.parse(product['price'])
+                  ),
+                ),
                 subtitle: Text(product['description']),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -104,16 +111,16 @@ class _AllProductsPageState extends State<AllProductsPage> {
                         final confirmDelete = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Delete Product'),
-                            content: const Text('Are you sure you want to delete this product?'),
+                            title: Text(localizations.deleteProductTitle),
+                            content: Text(localizations.deleteProductConfirmation),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(false),
-                                child: const Text('Cancel'),
+                                child: Text(localizations.cancelButton),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.of(context).pop(true),
-                                child: const Text('Delete'),
+                                child: Text(localizations.deleteButton),
                               ),
                             ],
                           ),

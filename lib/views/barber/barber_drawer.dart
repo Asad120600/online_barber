@@ -8,7 +8,7 @@ import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/barber/barber_profile.dart';
 import 'package:online_barber_app/views/barber/barber_stats.dart';
 import 'package:online_barber_app/views/barber/set_price.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BarberDrawer extends StatefulWidget {
   const BarberDrawer({Key? key, required this.screenWidth}) : super(key: key);
@@ -39,7 +39,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
         if (snapshot.exists) {
           setState(() {
             _firstName = snapshot['name'];
-            _imageUrl = snapshot['imageUrl']; 
+            _imageUrl = snapshot['imageUrl'];
           });
         }
       } catch (e) {
@@ -50,6 +50,8 @@ class _BarberDrawerState extends State<BarberDrawer> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!; // Get localized strings
+
     return SizedBox(
       width: widget.screenWidth * 0.75,
       child: Drawer(
@@ -76,26 +78,23 @@ class _BarberDrawerState extends State<BarberDrawer> {
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
-                      'Hello 👋, ${_firstName ?? 'Barber'}',
+                      localizations.hello( _firstName?? localizations.defaultName),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                       ),
-                      maxLines: 2, // Allow up to two lines
-                      overflow: TextOverflow.ellipsis, // Use ellipsis if it exceeds two lines
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
                 ],
               ),
             ),
             ListTile(
               leading: const Icon(Icons.person),
-              title: const Text(
-                'Profile',
-              ),
+              title: Text(localizations.profile),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -106,11 +105,9 @@ class _BarberDrawerState extends State<BarberDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.price_change),
-              title: const Text(
-                'Set prices',
-              ),
+              title: Text(localizations.setPrices),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -128,11 +125,9 @@ class _BarberDrawerState extends State<BarberDrawer> {
             ),
             ListTile(
               leading: const Icon(Icons.query_stats_sharp),
-              title: const Text(
-                'stats',
-              ),
+              title: Text(localizations.stats),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -141,13 +136,11 @@ class _BarberDrawerState extends State<BarberDrawer> {
                 );
               },
             ),
-             ListTile(
+            ListTile(
               leading: const Icon(Icons.campaign),
-              title: const Text(
-                'Make Announcement',
-              ),
+              title: Text(localizations.makeAnnouncement),
               onTap: () {
-                Navigator.pop(context); // Close the drawer
+                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -156,31 +149,27 @@ class _BarberDrawerState extends State<BarberDrawer> {
                 );
               },
             ),
-
-
             ListTile(
               leading: const Icon(Icons.logout),
-              title: const Text(
-                'Sign Out',
-              ),
+              title: Text(localizations.signOut),
               onTap: () async {
                 showDialog(
                   context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
-                      title: const Text('Confirm Sign Out'),
-                      content: const Text('Are you sure you want to sign out?'),
+                      title: Text(localizations.confirmSignOut),
+                      content: Text(localizations.signOutConfirmation),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                           },
-                          child: const Text('Cancel'),
+                          child: Text(localizations.cancel),
                         ),
                         TextButton(
                           onPressed: () async {
                             await FirebaseAuth.instance.signOut();
-                            Navigator.of(context).pop(); // Close the dialog
+                            Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
@@ -188,7 +177,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
                               ),
                             );
                           },
-                          child: const Text('Sign Out'),
+                          child: Text(localizations.signOutButton),
                         ),
                       ],
                     );

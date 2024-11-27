@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../utils/button.dart'; // Replace with your custom button implementation
 
 class PrivacySettings extends StatefulWidget {
@@ -35,18 +36,18 @@ class _PrivacySettingsState extends State<PrivacySettings> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit Privacy Policy'),
+          title: Text(AppLocalizations.of(context)!.edit_privacy_policy),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   controller: _titleController,
-                  decoration: const InputDecoration(labelText: 'Title'),
+                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.title),
                 ),
                 TextField(
                   controller: _contentController,
-                  decoration: const InputDecoration(labelText: 'Content'),
+                  decoration: InputDecoration(labelText: AppLocalizations.of(context)!.content),
                   maxLines: 5,
                 ),
               ],
@@ -57,7 +58,7 @@ class _PrivacySettingsState extends State<PrivacySettings> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -69,7 +70,7 @@ class _PrivacySettingsState extends State<PrivacySettings> {
                 _contentController.clear();
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: Text(AppLocalizations.of(context)!.save),
             ),
           ],
         );
@@ -93,9 +94,9 @@ class _PrivacySettingsState extends State<PrivacySettings> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
-          title: const Text('Privacy Policy Settings'),
+          title: Text(AppLocalizations.of(context)!.privacy_policy_settings),
         ),
-        resizeToAvoidBottomInset: true, // Ensure the UI resizes when the keyboard opens
+        resizeToAvoidBottomInset: true,
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -121,18 +122,18 @@ class _PrivacySettingsState extends State<PrivacySettings> {
                           children: [
                             TextField(
                               controller: _titleController,
-                              decoration: const InputDecoration(labelText: 'Title'),
+                              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.title),
                             ),
                             const SizedBox(height: 8.0),
                             TextField(
                               controller: _contentController,
-                              decoration: const InputDecoration(labelText: 'Content'),
+                              decoration: InputDecoration(labelText: AppLocalizations.of(context)!.content),
                               maxLines: 5,
                             ),
                             const SizedBox(height: 16.0),
                             Button(
                               onPressed: _addPolicy,
-                              child: const Text('Add Policy'),
+                              child: Text(AppLocalizations.of(context)!.add_policy),
                             ),
                           ],
                         ),
@@ -142,22 +143,22 @@ class _PrivacySettingsState extends State<PrivacySettings> {
                         stream: _firestore.collection('privacyPolicies').snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                            return Center(child: const CircularProgressIndicator());
                           }
 
                           if (snapshot.hasError) {
-                            return const Center(child: Text('Error loading privacy policies.'));
+                            return Center(child: Text(AppLocalizations.of(context)!.error_loading_policies));
                           }
 
                           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                            return const Center(child: Text('No privacy policies available.'));
+                            return Center(child: Text(AppLocalizations.of(context)!.no_policies_available));
                           }
 
                           final policyDocs = snapshot.data!.docs;
 
                           return ListView.builder(
                             shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                             itemCount: policyDocs.length,
                             itemBuilder: (context, index) {
                               final policy = policyDocs[index];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 
 class FAQsSettings extends StatefulWidget {
@@ -32,17 +33,17 @@ class _FAQsSettingsState extends State<FAQsSettings> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Edit FAQ'),
+          title: Text(AppLocalizations.of(context)!.edit_faq),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: _questionController,
-                decoration: const InputDecoration(labelText: 'Question'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.question),
               ),
               TextField(
                 controller: _answerController,
-                decoration: const InputDecoration(labelText: 'Answer'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context)!.answer),
               ),
             ],
           ),
@@ -51,7 +52,7 @@ class _FAQsSettingsState extends State<FAQsSettings> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('Cancel'),
+              child: Text(AppLocalizations.of(context)!.cancel),
             ),
             TextButton(
               onPressed: () async {
@@ -63,7 +64,7 @@ class _FAQsSettingsState extends State<FAQsSettings> {
                 _answerController.clear();
                 Navigator.pop(context);
               },
-              child: const Text('Save'),
+              child: Text(AppLocalizations.of(context)!.save),
             ),
           ],
         );
@@ -86,7 +87,7 @@ class _FAQsSettingsState extends State<FAQsSettings> {
       onWillPop: _onWillPop,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Manage FAQs'),
+          title: Text(AppLocalizations.of(context)!.manage_faqs),
           automaticallyImplyLeading: true,
         ),
         body: Padding(
@@ -110,17 +111,17 @@ class _FAQsSettingsState extends State<FAQsSettings> {
                   children: [
                     TextField(
                       controller: _questionController,
-                      decoration: const InputDecoration(labelText: 'Question'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.question),
                     ),
                     const SizedBox(height: 8.0),
                     TextField(
                       controller: _answerController,
-                      decoration: const InputDecoration(labelText: 'Answer'),
+                      decoration: InputDecoration(labelText: AppLocalizations.of(context)!.answer),
                     ),
                     const SizedBox(height: 16.0),
                     Button(
                       onPressed: _addFAQ,
-                      child: const Text('Add FAQ'),
+                      child: Text(AppLocalizations.of(context)!.add_faq),
                     ),
                   ],
                 ),
@@ -131,15 +132,15 @@ class _FAQsSettingsState extends State<FAQsSettings> {
                   stream: FirebaseFirestore.instance.collection('faqs').orderBy('question').snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return Center(child: CircularProgressIndicator());
                     }
 
                     if (snapshot.hasError) {
-                      return const Center(child: Text('Error loading FAQs.'));
+                      return Center(child: Text(AppLocalizations.of(context)!.error_loading_faqs));
                     }
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                      return const Center(child: Text('No FAQs available.'));
+                      return Center(child: Text(AppLocalizations.of(context)!.no_faqs_available));
                     }
 
                     final faqDocs = snapshot.data!.docs;

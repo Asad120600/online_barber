@@ -1,82 +1,3 @@
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:flutter/material.dart';
-// import 'package:intl/intl.dart';
-// import 'package:online_barber_app/models/order_notification_model.dart';
-// import 'package:online_barber_app/utils/shared_pref.dart';
-// import 'package:online_barber_app/views/user/shop/recent_orders.dart'; // Updated to OrderNotificationModel
-//
-// class OrderNotificationsTab extends StatelessWidget {
-//   final String uid;  // User ID passed in constructor
-//
-//   const OrderNotificationsTab({super.key, required this.uid});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return StreamBuilder<List<OrderNotificationModel>>(
-//       stream: _getOrderNotificationsStream(),
-//       builder: (context, snapshot) {
-//         if (snapshot.connectionState == ConnectionState.waiting) {
-//           return const Center(child: CircularProgressIndicator());
-//         } else if (snapshot.hasError) {
-//           return Center(child: Text('Error: ${snapshot.error}'));
-//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-//           return const Center(child: Text('No order notifications found.'));
-//         } else {
-//           List<OrderNotificationModel> notifications = snapshot.data!;
-//
-//           return ListView.builder(
-//             itemCount: notifications.length,
-//             itemBuilder: (context, index) {
-//               OrderNotificationModel notification = notifications[index];
-//               return Card(
-//                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-//                 child: ListTile(
-//                   contentPadding: const EdgeInsets.all(16),
-//                   title: Text(
-//                     notification.message,  // Updated to match field in Firestore
-//                     style: const TextStyle(fontWeight: FontWeight.bold),
-//                   ),
-//                   subtitle: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Text(notification.body),
-//                       const SizedBox(height: 4),
-//                     ],
-//                   ),
-//                   trailing: Text(DateFormat('dd/MM/yyyy').format(notification.timestamp)),
-//                   onTap: () {
-//                     Navigator.push(context, MaterialPageRoute(builder: (context)=>RecentOrdersPage(userId: LocalStorage().getCurrentUserId())));
-//                   },
-//                 ),
-//               );
-//             },
-//           );
-//         }
-//       },
-//     );
-//   }
-//
-//   // Stream to get only the current user's order notifications
-//   Stream<List<OrderNotificationModel>> _getOrderNotificationsStream() {
-//     return FirebaseFirestore.instance
-//         .collection('notifications')  // Query from 'notifications' collection
-//         .where('userId', isEqualTo: uid)  // Filter by current user's ID
-//         .where('message', isEqualTo: 'Order Confirmed')  // Filter by 'order' notifications
-//         .snapshots()
-//         .asyncMap((notificationSnapshot) async {
-//       // Convert Firestore documents to OrderNotificationModel
-//       List<OrderNotificationModel> notifications = notificationSnapshot.docs
-//           .map((doc) => OrderNotificationModel.fromFirestore(doc))  // Updated to use OrderNotificationModel
-//           .toList();
-//
-//       // Sort notifications by date
-//       notifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
-//
-//       return notifications;
-//     });
-//   }
-// }
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -225,3 +146,83 @@ class OrderNotificationsTab extends StatelessWidget {
     return null;
   }
 }
+
+
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:flutter/material.dart';
+// import 'package:intl/intl.dart';
+// import 'package:online_barber_app/models/order_notification_model.dart';
+// import 'package:online_barber_app/utils/shared_pref.dart';
+// import 'package:online_barber_app/views/user/shop/recent_orders.dart'; // Updated to OrderNotificationModel
+//
+// class OrderNotificationsTab extends StatelessWidget {
+//   final String uid;  // User ID passed in constructor
+//
+//   const OrderNotificationsTab({super.key, required this.uid});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return StreamBuilder<List<OrderNotificationModel>>(
+//       stream: _getOrderNotificationsStream(),
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//           return const Center(child: CircularProgressIndicator());
+//         } else if (snapshot.hasError) {
+//           return Center(child: Text('Error: ${snapshot.error}'));
+//         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+//           return const Center(child: Text('No order notifications found.'));
+//         } else {
+//           List<OrderNotificationModel> notifications = snapshot.data!;
+//
+//           return ListView.builder(
+//             itemCount: notifications.length,
+//             itemBuilder: (context, index) {
+//               OrderNotificationModel notification = notifications[index];
+//               return Card(
+//                 margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+//                 child: ListTile(
+//                   contentPadding: const EdgeInsets.all(16),
+//                   title: Text(
+//                     notification.message,  // Updated to match field in Firestore
+//                     style: const TextStyle(fontWeight: FontWeight.bold),
+//                   ),
+//                   subtitle: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       Text(notification.body),
+//                       const SizedBox(height: 4),
+//                     ],
+//                   ),
+//                   trailing: Text(DateFormat('dd/MM/yyyy').format(notification.timestamp)),
+//                   onTap: () {
+//                     Navigator.push(context, MaterialPageRoute(builder: (context)=>RecentOrdersPage(userId: LocalStorage().getCurrentUserId())));
+//                   },
+//                 ),
+//               );
+//             },
+//           );
+//         }
+//       },
+//     );
+//   }
+//
+//   // Stream to get only the current user's order notifications
+//   Stream<List<OrderNotificationModel>> _getOrderNotificationsStream() {
+//     return FirebaseFirestore.instance
+//         .collection('notifications')  // Query from 'notifications' collection
+//         .where('userId', isEqualTo: uid)  // Filter by current user's ID
+//         .where('message', isEqualTo: 'Order Confirmed')  // Filter by 'order' notifications
+//         .snapshots()
+//         .asyncMap((notificationSnapshot) async {
+//       // Convert Firestore documents to OrderNotificationModel
+//       List<OrderNotificationModel> notifications = notificationSnapshot.docs
+//           .map((doc) => OrderNotificationModel.fromFirestore(doc))  // Updated to use OrderNotificationModel
+//           .toList();
+//
+//       // Sort notifications by date
+//       notifications.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+//
+//       return notifications;
+//     });
+//   }
+// }
