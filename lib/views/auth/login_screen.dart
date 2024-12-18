@@ -12,7 +12,6 @@ import 'package:online_barber_app/views/user/home_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,7 +19,7 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-enum Language { english, urdu , arabic , spanish , french}
+enum Language { english, urdu, arabic, spanish, french }
 
 class _LoginScreenState extends State<LoginScreen> {
   bool isUserSelected = true;
@@ -33,21 +32,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController adminEmailController = TextEditingController();
   final TextEditingController adminPasswordController = TextEditingController();
   final TextEditingController barberEmailController = TextEditingController();
-  final TextEditingController barberPasswordController = TextEditingController();
+  final TextEditingController barberPasswordController =
+      TextEditingController();
 
   final AuthController _authController = AuthController();
-
 
   @override
   void initState() {
     super.initState();
   }
 
-
   Future<void> _showLoadingDialog() async {
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dialog from being dismissed by tapping outside
+      barrierDismissible:
+          false, // Prevent dialog from being dismissed by tapping outside
       builder: (BuildContext context) {
         return AlertDialog(
           content: Row(
@@ -69,22 +68,23 @@ class _LoginScreenState extends State<LoginScreen> {
     String email = isUserSelected
         ? userEmailController.text.trim()
         : isAdminSelected
-        ? adminEmailController.text.trim()
-        : barberEmailController.text.trim();
+            ? adminEmailController.text.trim()
+            : barberEmailController.text.trim();
     String password = isUserSelected
         ? userPasswordController.text.trim()
         : isAdminSelected
-        ? adminPasswordController.text.trim()
-        : barberPasswordController.text.trim();
+            ? adminPasswordController.text.trim()
+            : barberPasswordController.text.trim();
     String userType = isUserSelected
         ? '3'
         : isAdminSelected
-        ? '1'
-        : '2';
+            ? '1'
+            : '2';
 
     if (email.isNotEmpty && password.isNotEmpty) {
       try {
-        User? user = await _authController.signInWithEmail(email, password, userType);
+        User? user =
+            await _authController.signInWithEmail(email, password, userType);
 
         if (user != null) {
           LocalStorage.setUserID(userID: user.uid);
@@ -135,14 +135,17 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.error_during_login(e.toString())),          ),
+            content: Text(
+                AppLocalizations.of(context)!.error_during_login(e.toString())),
+          ),
         );
       }
     } else {
       Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.please_enter_email_and_password),
+          content: Text(
+              AppLocalizations.of(context)!.please_enter_email_and_password),
         ),
       );
     }
@@ -156,7 +159,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (user != null) {
         LocalStorage.setUserID(userID: user.uid);
-        String userType = isAdminSelected ? '1' : isBarberSelected ? '2' : '3';
+        String userType = isAdminSelected
+            ? '1'
+            : isBarberSelected
+                ? '2'
+                : '3';
 
         if (isBarberSelected) {
           LocalStorage.setBarberId(user.uid);
@@ -196,7 +203,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.failed_to_sign_in_google),
+            content:
+                Text(AppLocalizations.of(context)!.failed_to_sign_in_google),
           ),
         );
       }
@@ -207,17 +215,17 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.of(context).pop(); // Dismiss the loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(AppLocalizations.of(context)!.error_during_google_sign_in(e.toString())),        ),
+          content: Text(AppLocalizations.of(context)!
+              .error_during_google_sign_in(e.toString())),
+        ),
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     final double screenHeight = MediaQuery.of(context).size.height;
-
 
     return Scaffold(
       appBar: AppBar(
@@ -230,28 +238,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 onSelected: (Language item) {
                   if (Language.english.name == item.name) {
                     provider.changeLanguage(Locale("en"));
-                  } else if(Language.urdu.name == item.name) {
+                  } else if (Language.urdu.name == item.name) {
                     provider.changeLanguage(Locale("ur"));
-                  } else if(Language.arabic.name == item.name){
+                  } else if (Language.arabic.name == item.name) {
                     provider.changeLanguage(Locale("ar"));
-                  }else if(Language.spanish.name == item.name){
+                  } else if (Language.spanish.name == item.name) {
                     provider.changeLanguage(Locale("es"));
-                  }
-                  else if(Language.french.name == item.name){
+                  } else if (Language.french.name == item.name) {
                     provider.changeLanguage(Locale("fr"));
                   }
                 },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-                  PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
-                  PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
-                  PopupMenuItem(value: Language.arabic, child: Text(AppLocalizations.of(context)!.arabic)),
-                  PopupMenuItem(value: Language.spanish, child: Text(AppLocalizations.of(context)!.spanish)),
-                  PopupMenuItem(value: Language.french, child: Text(AppLocalizations.of(context)!.french)),
+                itemBuilder: (BuildContext context) =>
+                    <PopupMenuEntry<Language>>[
+                  PopupMenuItem(
+                      value: Language.english,
+                      child: Text(AppLocalizations.of(context)!.english)),
+                  PopupMenuItem(
+                      value: Language.urdu,
+                      child: Text(AppLocalizations.of(context)!.urdu)),
+                  PopupMenuItem(
+                      value: Language.arabic,
+                      child: Text(AppLocalizations.of(context)!.arabic)),
+                  PopupMenuItem(
+                      value: Language.spanish,
+                      child: Text(AppLocalizations.of(context)!.spanish)),
+                  PopupMenuItem(
+                      value: Language.french,
+                      child: Text(AppLocalizations.of(context)!.french)),
                 ],
               );
             },
           ),
-
         ],
       ),
       body: SingleChildScrollView(
@@ -271,7 +288,8 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.05),
               Row(
                 children: [
-                  _buildRoleSelectionButton( AppLocalizations.of(context)!.user, isUserSelected, () {
+                  _buildRoleSelectionButton(
+                      AppLocalizations.of(context)!.user, isUserSelected, () {
                     setState(() {
                       isUserSelected = true;
                       isAdminSelected = false;
@@ -279,7 +297,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }),
                   const SizedBox(width: 10.0),
-                  _buildRoleSelectionButton( AppLocalizations.of(context)!.admin, isAdminSelected, () {
+                  _buildRoleSelectionButton(
+                      AppLocalizations.of(context)!.admin, isAdminSelected, () {
                     setState(() {
                       isUserSelected = false;
                       isAdminSelected = true;
@@ -287,7 +306,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     });
                   }),
                   const SizedBox(width: 10.0),
-                  _buildRoleSelectionButton( AppLocalizations.of(context)!.barber, isBarberSelected, () {
+                  _buildRoleSelectionButton(
+                      AppLocalizations.of(context)!.barber, isBarberSelected,
+                      () {
                     setState(() {
                       isUserSelected = false;
                       isAdminSelected = false;
@@ -301,7 +322,7 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: screenHeight * 0.03),
               Button(
                 onPressed: _handleLogin,
-                child:  Text( AppLocalizations.of(context)!.login),
+                child: Text(AppLocalizations.of(context)!.login),
               ),
               SizedBox(height: screenHeight * 0.02),
               if (!isAdminSelected) // Only show the Sign Up text if Admin is not selected
@@ -309,10 +330,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const SignUpScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const SignUpScreen()),
                     );
                   },
-                  child:  Text(
+                  child: Text(
                     AppLocalizations.of(context)!.dont_have_account,
                     style: TextStyle(
                       color: Colors.blue,
@@ -321,7 +343,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               SizedBox(height: screenHeight * 0.02),
-              if (!isAdminSelected && !isBarberSelected) // Only show Google sign-in button if Admin or Barber is not selected
+              if (!isAdminSelected &&
+                  !isBarberSelected) // Only show Google sign-in button if Admin or Barber is not selected
                 TextButton(
                   onPressed: _handleGoogleSignIn,
                   child: Row(
@@ -349,7 +372,8 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildRoleSelectionButton(String role, bool isSelected, VoidCallback onTap) {
+  Widget _buildRoleSelectionButton(
+      String role, bool isSelected, VoidCallback onTap) {
     return Expanded(
       child: InkWell(
         onTap: onTap,
@@ -379,7 +403,11 @@ class _LoginScreenState extends State<LoginScreen> {
         Padding(
           padding: const EdgeInsets.only(right: 150),
           child: Text(
-            isUserSelected ? AppLocalizations.of(context)!.login_user : isAdminSelected ? AppLocalizations.of(context)!.login_admin : AppLocalizations.of(context)!.login_barber,
+            isUserSelected
+                ? AppLocalizations.of(context)!.login_user
+                : isAdminSelected
+                    ? AppLocalizations.of(context)!.login_admin
+                    : AppLocalizations.of(context)!.login_barber,
             style: const TextStyle(
               fontSize: 18.0,
               fontWeight: FontWeight.bold,
@@ -391,8 +419,8 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: isUserSelected
               ? userEmailController
               : isAdminSelected
-              ? adminEmailController
-              : barberEmailController,
+                  ? adminEmailController
+                  : barberEmailController,
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)!.email,
             border: OutlineInputBorder(
@@ -405,8 +433,8 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: isUserSelected
               ? userPasswordController
               : isAdminSelected
-              ? adminPasswordController
-              : barberPasswordController,
+                  ? adminPasswordController
+                  : barberPasswordController,
           obscureText: !isPasswordVisible,
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context)!.password,
@@ -429,4 +457,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

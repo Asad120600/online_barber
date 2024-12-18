@@ -1,4 +1,4 @@
-package com.getbarberonline.app
+package com.getbarber.online
 
 import io.flutter.embedding.android.FlutterActivity
 

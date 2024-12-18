@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,20 +47,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyD18hzcdH9C7wkJs9o2bcYIxXCOUCbQg38',
-    appId: '1:563327464865:android:ce8f4ba47ba93f4c6f47e0',
-    messagingSenderId: '563327464865',
-    projectId: 'online-barber-85e57',
-    storageBucket: 'online-barber-85e57.appspot.com',
+    apiKey: 'AIzaSyB_rsTnxlW9w6GZBhdQRCV0fEa3W622xZs',
+    appId: '1:394723530137:android:9eaaac953c7b02d3516f08',
+    messagingSenderId: '394723530137',
+    projectId: 'get-barber-online',
+    storageBucket: 'get-barber-online.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDHwN7uxeGjrZdTrnz2aRBx51vrG7ggWZw',
-    appId: '1:868392948570:ios:461fe1f6eacd0331b15963',
-    messagingSenderId: '868392948570',
-    projectId: 'online-barber-def19',
-    storageBucket: 'online-barber-def19.appspot.com',
+    apiKey: 'AIzaSyC0tuTDiPtCPIruu92Lyisg4JxIo9kjBis',
+    appId: '1:394723530137:ios:6921520174773c71516f08',
+    messagingSenderId: '394723530137',
+    projectId: 'get-barber-online',
+    storageBucket: 'get-barber-online.firebasestorage.app',
     iosBundleId: 'com.example.onlineBarberApp',
+  );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyDWkJxBAhOtf7gB_0520gjHTgS9jxf5jek',
+    appId: '1:394723530137:web:93d9e17f2cf7e164516f08',
+    messagingSenderId: '394723530137',
+    projectId: 'get-barber-online',
+    authDomain: 'get-barber-online.firebaseapp.com',
+    storageBucket: 'get-barber-online.firebasestorage.app',
+    measurementId: 'G-5KRTHGNCT8',
   );
 
 }

@@ -8,6 +8,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -204,7 +205,7 @@ class _MyAppState extends State<MyApp> {
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
               useMaterial3: true,
             ),
-            home: const SplashScreen(),
+            home: const LoginScreen(),
           );
         },
       ),
