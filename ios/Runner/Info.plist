@@ -62,8 +62,6 @@
             </array>
         </dict>
     </array>
-
-    <!-- Permissions -->
     <key>NSCameraUsageDescription</key>
     <string>We need access to your camera to capture photos.</string>
     <key>NSPhotoLibraryUsageDescription</key>
@@ -74,9 +72,5 @@
     <string>We need your location for enhanced functionality.</string>
     <key>NSLocationAlwaysUsageDescription</key>
     <string>We need access to your location even in the background.</string>
-    <key>NSMicrophoneUsageDescription</key>
-    <string>We need access to your microphone for audio features.</string>
-    <key>NSContactsUsageDescription</key>
-    <string>We need access to your contacts for sharing and connectivity features.</string>
 </dict>
 </plist>

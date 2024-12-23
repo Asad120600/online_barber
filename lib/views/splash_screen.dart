@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:online_barber_app/views/slide_show.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -10,15 +10,15 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-
   @override
   void initState() {
     super.initState();
     Timer(
         const Duration(seconds: 2),
-            () => Navigator.of(context).pushReplacement(MaterialPageRoute(
+        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (BuildContext context) => const SlideshowScreen())));
   }
+
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -24,7 +24,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
   @override
   void initState() {
     super.initState();
-    _loadUploadedCsvs();  // Load previously uploaded CSVs from SharedPreferences
+    _loadUploadedCsvs(); // Load previously uploaded CSVs from SharedPreferences
   }
 
   Future<void> _loadUploadedCsvs() async {
@@ -35,7 +35,8 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
       var storedCsv = prefs.get(key);
 
       if (storedCsv is String) {
-        final List<List<dynamic>> rows = const CsvToListConverter().convert(storedCsv);
+        final List<List<dynamic>> rows =
+            const CsvToListConverter().convert(storedCsv);
 
         _uploadedCsvs.add({
           'fileName': key,
@@ -69,7 +70,8 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
 
     try {
       final input = await file.readAsString();
-      final List<List<dynamic>> rows = const CsvToListConverter().convert(input);
+      final List<List<dynamic>> rows =
+          const CsvToListConverter().convert(input);
 
       setState(() {
         _previewData = rows;
@@ -79,7 +81,8 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
         List<dynamic> row = rows[i];
 
         try {
-          UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          UserCredential userCredential =
+              await FirebaseAuth.instance.createUserWithEmailAndPassword(
             email: row[2].toString(),
             password: '12345678',
           );
@@ -107,7 +110,9 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
         } catch (authError) {
           print("Auth error for ${row[2]}: $authError");
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to add ${row[6]}: ${authError.toString()}")),
+            SnackBar(
+                content:
+                    Text("Failed to add ${row[6]}: ${authError.toString()}")),
           );
         }
 
@@ -155,10 +160,14 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           content: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              columns: data[0].map((col) => DataColumn(label: Text(col.toString()))).toList(),
+              columns: data[0]
+                  .map((col) => DataColumn(label: Text(col.toString())))
+                  .toList(),
               rows: data.skip(1).map((row) {
                 return DataRow(
-                  cells: row.map((cell) => DataCell(Text(cell.toString()))).toList(),
+                  cells: row
+                      .map((cell) => DataCell(Text(cell.toString())))
+                      .toList(),
                 );
               }).toList(),
             ),
@@ -184,7 +193,8 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
         final fileInfo = _uploadedCsvs[index];
         return ListTile(
           title: Text(fileInfo['fileName']),
-          subtitle: Text("Uploaded on: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())}"),
+          subtitle: Text(
+              "Uploaded on: ${DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now())}"),
           onTap: () {
             _showPreviewDialog(fileInfo['fileName'], fileInfo['data']);
           },
@@ -205,7 +215,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(value: _progress),
-            const SizedBox(height: 20),
+            SizedBox(height: 20),
             Text("${(_progress * 100).toStringAsFixed(1)}%"),
           ],
         )
@@ -214,10 +224,10 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           children: [
             ElevatedButton(
               onPressed: _pickAndUploadCSV,
-              child: const Text("Upload CSV"),
+              child: Text("Upload CSV"),
             ),
-            const SizedBox(height: 20),
-            const Text("Recently Uploaded CSVs"),
+            SizedBox(height: 20),
+            Text("Recently Uploaded CSVs"),
             Expanded(child: _buildUploadedCsvList()),
           ],
         ),

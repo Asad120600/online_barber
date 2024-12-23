@@ -194,9 +194,8 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Online Barber App',
-            locale: provider.appLocale ??
-                Locale(widget.locale.isEmpty ? 'en' : widget.locale),
-            localizationsDelegates: const [
+            locale: provider.appLocale ?? Locale(widget.locale.isEmpty ? 'en' : widget.locale),
+            localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,

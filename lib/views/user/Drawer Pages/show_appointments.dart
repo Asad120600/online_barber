@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
 import 'package:online_barber_app/models/appointment_model.dart';
+import 'package:online_barber_app/utils/barbers_map.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'barber_rating_screen.dart';
@@ -41,7 +42,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
         String barberName = barberSnapshot['name'];
 
         // Construct Google Maps URL
-        String googleMapsUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+        String googleMapsUrl =
+            'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
 
         // Launch Google Maps
         if (await canLaunch(googleMapsUrl)) {
@@ -53,7 +55,9 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
     } catch (e) {
       log('Error fetching barber location: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.errorLoadingBarberLocation)),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.errorLoadingBarberLocation)),
       );
     }
   }
@@ -132,7 +136,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.access_time, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    localizations.date_e(appointment.date.toDate()),
+                                    localizations
+                                        .date_e(appointment.date.toDate()),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -158,7 +163,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.cut, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    localizations.barberName(appointment.barberName),
+                                    localizations
+                                        .barberName(appointment.barberName),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -166,7 +172,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                 ],
                               ),
                               Row(
-                                crossAxisAlignment: CrossAxisAlignment.center, // Align items in the center vertically
+                                crossAxisAlignment: CrossAxisAlignment
+                                    .center, // Align items in the center vertically
                                 children: [
                                   const Icon(Icons.location_on, size: 16),
                                   const SizedBox(width: 8),
@@ -181,8 +188,10 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.pin_drop_outlined, color: Colors.orange),
-                                    onPressed: () => _openBarberLocation(appointment.barberId),
+                                    icon: const Icon(Icons.pin_drop_outlined,
+                                        color: Colors.orange),
+                                    onPressed: () => _openBarberLocation(
+                                        appointment.barberId),
                                   ),
                                 ],
                               ),
@@ -235,7 +244,8 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   const Icon(Icons.query_stats, size: 16),
                                   const SizedBox(width: 8),
                                   Text(
-                                    localizations.status_e (appointment.status ?? 'Unknown'),
+                                    localizations.status_e(
+                                        appointment.status ?? 'Unknown'),
                                     style: const TextStyle(
                                       fontSize: 14,
                                     ),
@@ -247,11 +257,16 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                 spacing: 8,
                                 children: appointment.services.isNotEmpty
                                     ? appointment.services.map((service) {
-                                  return Chip(
-                                    label: Text(service.name ?? localizations.noServices),
-                                  );
-                                }).toList()
-                                    : [Chip(label: Text(localizations.noServices))],
+                                        return Chip(
+                                          label: Text(service.name ??
+                                              localizations.noServices),
+                                        );
+                                      }).toList()
+                                    : [
+                                        Chip(
+                                            label:
+                                                Text(localizations.noServices))
+                                      ],
                               ),
                               const SizedBox(height: 16),
                               if (appointment.status == 'Done')
@@ -260,22 +275,22 @@ class _AppointmentsShowState extends State<AppointmentsShow> {
                                   onPressed: appointment.hasBeenRated
                                       ? null
                                       : () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            BarberRatingScreen(
-                                                barberId:
-                                                appointment.barberId,
-                                                barberName:
-                                                appointment.barberName,
-                                                appointmentId:
-                                                appointment.id),
-                                      ),
-                                    ).then((_) {
-                                      setState(() {});
-                                    });
-                                  },
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  BarberRatingScreen(
+                                                      barberId:
+                                                          appointment.barberId,
+                                                      barberName: appointment
+                                                          .barberName,
+                                                      appointmentId:
+                                                          appointment.id),
+                                            ),
+                                          ).then((_) {
+                                            setState(() {});
+                                          });
+                                        },
                                   child: Text(
                                     appointment.hasBeenRated
                                         ? localizations.alreadyRated
