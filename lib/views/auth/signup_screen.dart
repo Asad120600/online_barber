@@ -95,20 +95,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
     String userType = isUserSelected ? '3' : '2'; // 3 for user, 2 for barber
 
     // Validation
-    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || phoneNumber.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.required_fields_error),
-        ),
-      );
-      return;
-    }
-
-    final phoneRegex = RegExp(r'^\+?[0-9]{10,13}$'); // Validate phone number
-    if (!phoneRegex.hasMatch(phoneNumber)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.invalid_phone_number),
         ),
       );
       return;

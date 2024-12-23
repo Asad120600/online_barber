@@ -14,19 +14,18 @@ class PushNotificationService{
   static Future<String>getAccessToken() async
   {
     final serviceAccountJson = {
-  "type": "service_account",
-  "project_id": "get-barber-online",
-  "private_key_id": "947a99bb5d1e61d735395f702433fd6374cc8816",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzHxTeJGTUUgDL\nWe6jrTob6ZcMumDXIDhV2FWtZOa1O+AvLI/aWo5dpbWYcT0VoZXy88Ci97h3cfqD\neeZON1PypZxxaYYy9wlzpQgbhlYoFuWq40GJ0OWexeu/uJd2EI7wdc2u7g7oxZmn\n/9HrQJk8IGRQI2VwO3YQ/Nb48CJDZPwy1l9DbV2PFNnFhQ6H9BNeti3hkVgcGTUH\n76jz5zdLtBEWAhTa0xo+16v4lBofE8QYXARFjE8W4Z/yD8/fT/YVDqKPbzRHAdBn\nytptU0TTD+vxALCOXKeyG91br1/YWDG8INq82Guj6jrJyNO4Yay5VnvpNKyZ5pon\ndZCo8CM1AgMBAAECggEAAUZc6ai639/7wswWnoB/IEUQrQsui+7BqarASHffKAuB\nRhSuAInZWRqdfkK1ZiVY8BbYCiY6iv1QdneJo9408THWx24V84royvqVfqH9d+Fa\nunG/oI3su5DIKsOaPM/FW8hTv/5QbUux2kZAEHRazYNq1unXzW1bW8QJzzUZ4jeR\nLbBmkT/bO1WVeS21NMNPmhyn+xJwmkheMOzIZznMNf+JuhvGyHVDAjjuK9c4F3G2\nYyUfb9aCWlryncv1q8RSMOfj5+t5KkNJmmgYofohc+gJot0zg76X7qYu5MDQPrx2\nSXteZ872gztBjwDu+pQcuD1vjlD3qDna0w3ckKRmSQKBgQDaTFSFcQ+jspZbBZDx\nFzNOm4OHBLdJLz0Uyzd/4aaJzDlcv+r5z4FdrkB1mHx8gPKk5s6JNfem6BjucJJ5\nIegSLERbtob+K4Pq7GwdxAjhayNjWjHVNziSQt+WFxT3eQcRbBGXxvPp6LBN+CHQ\nOnUlIVGTe7LxyfTWJCYs0d30DwKBgQDSDp68viGzO0yoKiUODwVa+LhFr36kiwA1\n+AHzZyaFXLxZbI9cCyw4hKv5Vi6U9c5mzZFuF+ddbtUWkgEbX0FASytmyKkrw24d\nYwVBcEflZeLn1cTkVZ45V2Ot70SbmZfKe00olIwHijPCWvTV5tKxWxMLsGvKgBUr\nD37rrJYgewKBgH+gmNnbnDUsuFNHEdKiqdCPg3pw+2fCQofht/UATInL6M2dNxgO\nhafrtKwMFtwD19kpSB9Yeg4PLGRbVIeVl0TotJ6aPJplfp7e0uckMbz5EpuHpBLw\nUhbRGj96BzwYelVpRW/jVb+v10P+imZfhxXKQRNlAt3yIT8Bq4AQwx9pAoGBAM/w\nQRs+bEXs8dmWvs/H9tkzVddF/uwL3c2PEP9OoUdrodg0K0ZGmSPp0gQlWD+FhSkn\nXkvJxfMsAC0zo3zhMsrenrxE75KvB5Z3q4A4EjP4REKTzzDpwJOq+rX4IcaWqTh8\nDsmZI3VjThGb0LreoLuJGLV9k3cGi+3wjQfn9UV5AoGBAJrQe36uzteYu+ow64ao\nZsFEJ4zsNMHj5MHTU2nifu8Rzo+cflxRiKkpsCw6JVkJ6ouVxxlhZMjXeqyz+vCl\nvUCllIag5TGqxlzeZ5j3Nl46x0Cws9dhmsTNT1hRbyD7yGOh79Vo8gb7jNZveDXq\nTT7aOyMhvxSB/IMaxISCsOqb\n-----END PRIVATE KEY-----\n",
-  "client_email": "getonlinebarber@get-barber-online.iam.gserviceaccount.com",
-  "client_id": "108047588287389014774",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/getonlinebarber%40get-barber-online.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
-}
-;
+      "type": "service_account",
+      "project_id": "online-barber-85e57",
+      "private_key_id": "caed0b68b949d6ea0563e548d0fe86763f1fb487",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDRNQVxT5j8KR4U\nIxaiIRm7bkOnf2nIhVsRI1GJFjlsb5Z8edplFrWG9STFV45Smm2l2DO+yX9bVHzn\nf8VfnNyXp5G0MBXOn4wjeX5GqCliKuAm5Z8e9MwOpIkfupkqeIuWUcG/MXG8O/rY\nLfiaCvURcAK1bFWQSSEc5gB0+TlGIZz74tuUEL6rgrUPSWxIDv/K2uhMSh0wNx8S\nkWTEXOMYW+8YVEDgq48EH4gRr48lF9vh6MohNnuutNHsOMhPLo3N1cHlLsc2D7WV\nag3J8yLmNe8nOTNlczx6zY3tQFvZI0dWder1kHmEp13vQCCzJ7Cx1m9nAycr82nx\n41i0SOsFAgMBAAECggEAJdrMtdCb04DTJvykY0jPAam1hzDYYMa0kDjOT5pcYKEe\nXz6jRGhkB1wDP8wUfiDgV0J0NoD6UPnMMg1eFutoxO42wJ50y7L15hNdRIa4GkG8\n1nz1GmJcLAgcocefYF54j4YSozhcpp1JyeUjlygFaRbV/qLwJo/89GAv0/qmoOgv\nYgDMtfmlJKo7G9r8RsVw9moqo9ovB3qhsQxKQk3JdiShI2ibX6GhHGUxlYGHcvHk\nD2Ae+goW3mC8czvgmImfBVtCFtDgOgRfo9B4pYj2zKtVXPzu+5ctxyp5qZraREPs\nHxVGfFUChEiESXGsuTGbH8qd5iGVQ8z2QCxTzFM6/wKBgQDnko9s59Tr1FiOo7/S\nN+C0BvUrPltc6dElUgi3LEtn41VS9LZI4IFosQgU9t5f9H3Rs1n4lgFvdV6zdSYQ\nh0XaNEUC5A22ccyvdp22wdn9+sMwwrHS4afWg+dWV0jOG88For8Te8nWFpiiw1It\nozS6O4zhuFT/Fd7Ag6rwe1qBjwKBgQDnRoAt7L3NPhZvNmsgrgQY7ckyuARBUup0\n8INs9TVPuwqeg1JZ3/+mEgTlMUQehkmaamVGnIey7+np1aG9yL8JIa6Mo2UyKllJ\n1mPYOWcO+QYtcdTS/rDen12fmvba1pJ0LKQaF/YXgzD9Vt5exGJkf2yxxZ4phjxW\n2pyISbRYKwKBgAU6whJridtpiDZwbDyLFn/6SD8ZwWZvwVFecOPyFCHceGjPLe6n\nY0TB+rS+fnccRlsd+cIrYQzrUaAr3RgyddlfpM9T5xtfpoev3g/qgMnDh/Tp8Koa\nfnfRsr+4aOR+rEYsTrRZ70zuZbQHRSvSq7Yo8h2G1CSOkeE3F/0mS/zxAoGAX19x\naH7iXosmEUKtttJMGkOk3ueHybB5wzOT3xDXpUOKw4eAJFP9RuzTW/iPEM9r9uO9\nU/sk8qOBIM7aXjs0nH1pT9Hp32AbZhmlHvu9Bi2nYII6s7AYHBY4M6Nh/SjTSFlI\nawJKl7OgNjjmhsoRkUQC/ORzrsgOhfqs5n8OgfUCgYBbnJLWYXzSZDkdqdrkPDIw\nA86MZDXlK9gH/JCT+0SPNQNDboYFgyrUj+naT6zDJbTNhTqLyMTjapXSneoX7dJr\nRj7eALbY6VdYf73FOLjlmDlfMZwzq0C2h3w0ugpcUwrLn7YNLsbcQtLz9iV+98aQ\newciFQPOzsicnM2QRxRLfQ==\n-----END PRIVATE KEY-----\n",
+      "client_email": "barber-80@online-barber-85e57.iam.gserviceaccount.com",
+      "client_id": "103132873409992062945",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token",
+      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/barber-80%40online-barber-85e57.iam.gserviceaccount.com",
+      "universe_domain": "googleapis.com"
+    };
     List<String> scopes = [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/firebase.database",
@@ -52,7 +51,7 @@ class PushNotificationService{
   static sendNotification(String token, BuildContext context, String message, String notificationBody) async {
 
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/get-barber-online/messages:send';
+    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
@@ -84,7 +83,7 @@ class PushNotificationService{
 
   static Future<void> sendNotificationToUser(String token, BuildContext context, String message, String notificationBody) async {
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/get-barber-online/messages:send';
+    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {

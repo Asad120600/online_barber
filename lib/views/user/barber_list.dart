@@ -185,6 +185,7 @@ class _BarberListState extends State<BarberList> {
                   localizations.maxDistance(_maxDistance.toStringAsFixed(1)),
                   style: const TextStyle(fontSize: 16),
                 ),
+              
                 Slider(
                   value: _maxDistance,
                   min: 1.0,
@@ -197,6 +198,7 @@ class _BarberListState extends State<BarberList> {
                     });
                   },
                 ),
+              
               ],
             ),
           ),
