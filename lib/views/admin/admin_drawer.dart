@@ -79,7 +79,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   const CircleAvatar(
                     backgroundColor: Colors.orange,
                     radius: 30,
-                    child: Icon(Icons.supervisor_account, size: 50, color: Colors.black),
+                    child: Icon(Icons.supervisor_account,
+                        size: 50, color: Colors.black),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -186,7 +187,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => BarberListScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => BarberListScreen()),
                     );
                   },
                 ),
@@ -202,7 +204,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const PrivacySettings()),
+                      MaterialPageRoute(
+                          builder: (context) => const PrivacySettings()),
                     );
                   },
                 ),
@@ -212,7 +215,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AdminSlideshowScreen()),
+                      MaterialPageRoute(
+                          builder: (context) => const AdminSlideshowScreen()),
                     );
                   },
                 ),
@@ -222,7 +226,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const FAQsSettings()),
+                      MaterialPageRoute(
+                          builder: (context) => const FAQsSettings()),
                     );
                   },
                 ),
@@ -239,7 +244,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ManageService()),
+                      MaterialPageRoute(
+                          builder: (context) => const ManageService()),
                     );
                   },
                 ),
@@ -250,7 +256,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.pop(context);
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const ServiceList()),
+                      MaterialPageRoute(
+                          builder: (context) => const ServiceList()),
                     );
                   },
                 ),
@@ -278,17 +285,17 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 );
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.cut),
-              title: Text(localization.upload_barbers),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AdminCsvUploadPage()),
-                );
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.cut),
+            //   title: Text(localization.upload_barbers),
+            //   onTap: () {
+            //     Navigator.pop(context);
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(builder: (context) => AdminCsvUploadPage()),
+            //     );
+            //   },
+            // ),
             ListTile(
               leading: const Icon(Icons.campaign),
               title: Text(localization.announcement),
@@ -296,7 +303,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AnnouncementScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const AnnouncementScreen()),
                 );
               },
             ),
@@ -307,7 +315,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ClaimRequestsScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const ClaimRequestsScreen()),
                 );
               },
             ),
@@ -334,7 +343,8 @@ class _AdminDrawerState extends State<AdminDrawer> {
                             Navigator.of(context).pop();
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(builder: (context) => const LoginScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()),
                             );
                           },
                           child: Text(localization.signOut),

@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
+// import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -49,8 +49,8 @@ class _BookAppointmentState extends State<BookAppointment> {
   String _userName = '';
   bool _isHomeService = false;
   String _selectedPaymentMethod = 'Cash'; // Default payment method
-  List<ProductDetails> _products = [];
-  final InAppPurchase _iap = InAppPurchase.instance;
+  // List<ProductDetails> _products = [];
+  // final InAppPurchase _iap = InAppPurchase.instance;
   bool _available = true;
 
   @override
@@ -60,7 +60,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     _getPhoneNumber();
     _getUserName();
     _initializeHomeServicePrice();
-    _initializeInAppPurchase();
+    // _initializeInAppPurchase();
   }
 
   @override
@@ -73,16 +73,16 @@ class _BookAppointmentState extends State<BookAppointment> {
     super.dispose();
   }
 
-  Future<void> _initializeInAppPurchase() async {
-    final bool available = await _iap.isAvailable();
-    setState(() {
-      _available = available;
-    });
-    if (_available) {
-      await _loadProducts();
-      _handlePurchaseUpdates();
-    }
-  }
+  // Future<void> _initializeInAppPurchase() async {
+  //   final bool available = await _iap.isAvailable();
+  //   setState(() {
+  //     _available = available;
+  //   });
+  //   if (_available) {
+  //     await _loadProducts();
+  //     _handlePurchaseUpdates();
+  //   }
+  // }
 
   Future<void> _loadProducts() async {
     // Create a set to store product IDs dynamically from selected services
@@ -92,36 +92,36 @@ class _BookAppointmentState extends State<BookAppointment> {
           .productId; // Ensure your Service model has a 'productId' field
     }).toSet();
 
-    // Query the product details using the service product IDs
-    final ProductDetailsResponse response =
-        await _iap.queryProductDetails(_serviceProductIds);
+    // // Query the product details using the service product IDs
+    // final ProductDetailsResponse response =
+    //     await _iap.queryProductDetails(_serviceProductIds);
 
-    if (response.notFoundIDs.isNotEmpty) {
-      log('Error: Some product IDs not found - ${response.notFoundIDs}');
-    }
+    // if (response.notFoundIDs.isNotEmpty) {
+    //   log('Error: Some product IDs not found - ${response.notFoundIDs}');
+    // }
 
-    setState(() {
-      _products = response.productDetails;
-    });
+    // setState(() {
+    //   _products = response.productDetails;
+    // });
   }
 
-  void _handlePurchaseUpdates() {
-    final Stream<List<PurchaseDetails>> purchaseUpdated = _iap.purchaseStream;
-    purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
-      for (var purchase in purchaseDetailsList) {
-        if (purchase.status == PurchaseStatus.purchased) {
-          _completeAppointment(); // Call method to complete the appointment after purchase
-        } else if (purchase.status == PurchaseStatus.error) {
-          _showErrorDialog(purchase.error?.message ?? "Purchase error");
-        }
-      }
-    });
-  }
+  // void _handlePurchaseUpdates() {
+  //   final Stream<List<PurchaseDetails>> purchaseUpdated = _iap.purchaseStream;
+  //   purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
+  //     for (var purchase in purchaseDetailsList) {
+  //       if (purchase.status == PurchaseStatus.purchased) {
+  //         _completeAppointment(); // Call method to complete the appointment after purchase
+  //       } else if (purchase.status == PurchaseStatus.error) {
+  //         _showErrorDialog(purchase.error?.message ?? "Purchase error");
+  //       }
+  //     }
+  //   });
+  // }
 
-  Future<void> _purchaseService(ProductDetails product) async {
-    final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
-    _iap.buyConsumable(purchaseParam: purchaseParam); // Initiating the purchase
-  }
+  // Future<void> _purchaseService(ProductDetails product) async {
+  //   final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
+  //   _iap.buyConsumable(purchaseParam: purchaseParam); // Initiating the purchase
+  // }
 
   void _onPhoneNumberChanged() {
     setState(() {});
@@ -211,26 +211,26 @@ class _BookAppointmentState extends State<BookAppointment> {
       isBooking = true;
     });
 
-    try {
-      // Check if any service requires in-app purchase
-      if (_products.isNotEmpty) {
-        // Assuming the first product matches the selected service
-        final ProductDetails product = _products.first; // Adjust this as needed
+    // try {
+    //   // Check if any service requires in-app purchase
+    //   if (_products.isNotEmpty) {
+    //     // Assuming the first product matches the selected service
+    //     final ProductDetails product = _products.first; // Adjust this as needed
 
-        // Initiate in-app purchase
-        await _purchaseService(product);
-        // The rest of the booking process will continue after successful payment
-      } else {
-        // If no IAP is needed, proceed with appointment booking
-        await _completeAppointment(); // Proceed to complete booking
-      }
-    } catch (e) {
-      _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
-    } finally {
-      setState(() {
-        isBooking = false;
-      });
-    }
+    //     // Initiate in-app purchase
+    //     await _purchaseService(product);
+    //     // The rest of the booking process will continue after successful payment
+    //   } else {
+    //     // If no IAP is needed, proceed with appointment booking
+    //     await _completeAppointment(); // Proceed to complete booking
+    //   }
+    // } catch (e) {
+    //   _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
+    // } finally {
+    //   setState(() {
+    //     isBooking = false;
+    //   });
+    // }
   }
 
   Future<void> _completeAppointment() async {
@@ -315,16 +315,16 @@ class _BookAppointmentState extends State<BookAppointment> {
     final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
 
     final message = Message()
-      ..from = Address('ios.cypersol@gmail.com', 'Online Barber')
+      ..from = const Address('ios.cypersol@gmail.com', 'Online Barber')
       ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
       ..subject = 'New Appointment Booked!'
       ..text = notificationBody;
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('Email sent: ' + sendReport.toString());
+      print('Email sent: $sendReport');
     } on MailerException catch (e) {
-      print('Email not sent. \n' + e.toString());
+      print('Email not sent. \n$e');
     }
   }
 
