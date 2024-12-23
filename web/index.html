@@ -1,20 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
+  <base href="./">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -24,15 +11,42 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="online_barber_app">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" href="./icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>online_barber_app</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase App (Core) SDK -->
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgb7mZTL0v0FTFEmqtaTRCpLsydRJSeyY",
+      authDomain: "online-barber-85e57.firebaseapp.com",
+      projectId: "online-barber-85e57",
+      storageBucket: "online-barber-85e57.appspot.com",
+      messagingSenderId: "563327464865",
+      appId: "1:563327464865:web:40382d9ca64a3b3a6f47e0",
+      measurementId: "G-H4002P9VQB"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+
+    
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="./flutter.js?version=3.0.0" defer></script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+  <script src="./flutter_bootstrap.js" async></script>
 </body>
 </html>

@@ -30,10 +30,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -56,23 +53,33 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAJVkUySiBmeH7sK-Ovy98uscB4eZNHEvs',
-    appId: '1:563327464865:ios:80d63451b450ac066f47e0',
+    appId: '1:563327464865:ios:add8831f98881e766f47e0',
     messagingSenderId: '563327464865',
     projectId: 'online-barber-85e57',
     storageBucket: 'online-barber-85e57.appspot.com',
     androidClientId: '563327464865-2n79l64f3iaics7luj9qduq0mg4u4j1r.apps.googleusercontent.com',
-    iosClientId: '563327464865-v4593itln3oe3e7h7o891uad3jgd17c6.apps.googleusercontent.com',
-    iosBundleId: 'com.example.onlineBarberApp',
+    iosClientId: '563327464865-bibe40nigtp8c7p0d1b65t5tj086da8d.apps.googleusercontent.com',
+    iosBundleId: 'com.getbarber.online',
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDWkJxBAhOtf7gB_0520gjHTgS9jxf5jek',
-    appId: '1:394723530137:web:93d9e17f2cf7e164516f08',
-    messagingSenderId: '394723530137',
-    projectId: 'get-barber-online',
-    authDomain: 'get-barber-online.firebaseapp.com',
-    storageBucket: 'get-barber-online.firebasestorage.app',
-    measurementId: 'G-5KRTHGNCT8',
+    apiKey: 'AIzaSyCgb7mZTL0v0FTFEmqtaTRCpLsydRJSeyY',
+    appId: '1:563327464865:web:40382d9ca64a3b3a6f47e0',
+    messagingSenderId: '563327464865',
+    projectId: 'online-barber-85e57',
+    authDomain: 'online-barber-85e57.firebaseapp.com',
+    storageBucket: 'online-barber-85e57.appspot.com',
+    measurementId: 'G-H4002P9VQB',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyCgb7mZTL0v0FTFEmqtaTRCpLsydRJSeyY',
+    appId: '1:563327464865:web:bbdbe147339cc9746f47e0',
+    messagingSenderId: '563327464865',
+    projectId: 'online-barber-85e57',
+    authDomain: 'online-barber-85e57.firebaseapp.com',
+    storageBucket: 'online-barber-85e57.appspot.com',
+    measurementId: 'G-CZ7RDDLW6X',
   );
 
 }

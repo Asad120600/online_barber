@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "563327464865-kn0b347hddutbh87fbu2a4gjqmh23m0l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.getbarber.online",
+            "certificate_hash": "f3206bd29cce086d13ee5d8a0e99b69e70d1c88f"
+          }
+        },
+        {
           "client_id": "563327464865-vd0i3sc1o019blvkhdu8p79t90taipfn.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,6 +37,13 @@
             {
               "client_id": "563327464865-vd0i3sc1o019blvkhdu8p79t90taipfn.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "563327464865-v4593itln3oe3e7h7o891uad3jgd17c6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onlineBarberApp"
+              }
             }
           ]
         }
@@ -66,6 +81,13 @@
             {
               "client_id": "563327464865-vd0i3sc1o019blvkhdu8p79t90taipfn.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "563327464865-v4593itln3oe3e7h7o891uad3jgd17c6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.onlineBarberApp"
+              }
             }
           ]
         }
