@@ -7,7 +7,7 @@ import 'package:online_barber_app/models/barber_model.dart';
 class BarberStatsScreen extends StatefulWidget {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  BarberStatsScreen({Key? key}) : super(key: key);
+  BarberStatsScreen({super.key});
 
   @override
   _BarberStatsScreenState createState() => _BarberStatsScreenState();
@@ -91,6 +91,9 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                                 backgroundImage: barber.imageUrl.isNotEmpty
                                     ? NetworkImage(barber.imageUrl)
                                     : null,
+                                backgroundColor: barber.imageUrl.isEmpty
+                                    ? Colors.orange
+                                    : Colors.transparent,
                                 child: barber.imageUrl.isEmpty
                                     ? const Icon(
                                   Icons.person,
@@ -98,9 +101,6 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                                   color: Colors.white,
                                 )
                                     : null,
-                                backgroundColor: barber.imageUrl.isEmpty
-                                    ? Colors.orange
-                                    : Colors.transparent,
                               ),
                             ),
                             title: Text(
@@ -189,7 +189,7 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                   Text(
                       '${AppLocalizations.of(context)!.earnings_for} $currentMonth:'),
                   Text(
-                    '${currentMonthEarnings.toStringAsFixed(2)}',
+                    currentMonthEarnings.toStringAsFixed(2),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -199,7 +199,7 @@ class _BarberStatsScreenState extends State<BarberStatsScreen> {
                   Text(
                       '${AppLocalizations.of(context)!.commission_for} $currentMonth:'),
                   Text(
-                    '${currentMonthCommission.toStringAsFixed(2)}',
+                    currentMonthCommission.toStringAsFixed(2),
                     style: const TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,

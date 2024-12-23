@@ -53,8 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
           content: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              LoadingDots(),
-              SizedBox(width: 20.0),
+              const LoadingDots(),
+              const SizedBox(width: 20.0),
               Text(AppLocalizations.of(context)!.logging_in),
             ],
           ),
@@ -235,18 +235,18 @@ class _LoginScreenState extends State<LoginScreen> {
           Consumer<LanguageChangeController>(
             builder: (context, provider, child) {
               return PopupMenuButton(
-                icon: Icon(Icons.language),
+                icon: const Icon(Icons.language),
                 onSelected: (Language item) {
                   if (Language.english.name == item.name) {
-                    provider.changeLanguage(Locale("en"));
+                    provider.changeLanguage(const Locale("en"));
                   } else if (Language.urdu.name == item.name) {
-                    provider.changeLanguage(Locale("ur"));
+                    provider.changeLanguage(const Locale("ur"));
                   } else if (Language.arabic.name == item.name) {
-                    provider.changeLanguage(Locale("ar"));
+                    provider.changeLanguage(const Locale("ar"));
                   } else if (Language.spanish.name == item.name) {
-                    provider.changeLanguage(Locale("es"));
+                    provider.changeLanguage(const Locale("es"));
                   } else if (Language.french.name == item.name) {
-                    provider.changeLanguage(Locale("fr"));
+                    provider.changeLanguage(const Locale("fr"));
                   }
                 },
                 itemBuilder: (BuildContext context) =>
@@ -337,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: Text(
                     AppLocalizations.of(context)!.dont_have_account,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.blue,
                       fontSize: 14.0,
                     ),

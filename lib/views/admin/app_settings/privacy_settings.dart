@@ -143,7 +143,7 @@ class _PrivacySettingsState extends State<PrivacySettings> {
                         stream: _firestore.collection('privacyPolicies').snapshots(),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Center(child: const CircularProgressIndicator());
+                            return const Center(child: CircularProgressIndicator());
                           }
 
                           if (snapshot.hasError) {

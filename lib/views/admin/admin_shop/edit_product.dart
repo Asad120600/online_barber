@@ -72,7 +72,7 @@ class _EditProductPageState extends State<EditProductPage> {
           future: FirebaseFirestore.instance.collection('products').doc(widget.productId).get(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
 
             if (snapshot.hasError) {

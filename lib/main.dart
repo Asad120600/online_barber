@@ -8,7 +8,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
-import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -54,11 +53,15 @@ class _MyAppState extends State<MyApp> {
       String userId = currentUser.uid;
 
       // Get the current position
-      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       log("Position fetched: ${position.latitude}, ${position.longitude}");
 
       // Check if the user exists in the 'admins' collection
-      DocumentSnapshot adminDoc = await FirebaseFirestore.instance.collection('admins').doc(userId).get();
+      DocumentSnapshot adminDoc = await FirebaseFirestore.instance
+          .collection('admins')
+          .doc(userId)
+          .get();
       if (adminDoc.exists) {
         // Update location for admins
         await FirebaseFirestore.instance.collection('admins').doc(userId).set({
@@ -73,7 +76,10 @@ class _MyAppState extends State<MyApp> {
       }
 
       // Check if the user exists in the 'barbers' collection
-      DocumentSnapshot barberDoc = await FirebaseFirestore.instance.collection('barbers').doc(userId).get();
+      DocumentSnapshot barberDoc = await FirebaseFirestore.instance
+          .collection('barbers')
+          .doc(userId)
+          .get();
       if (barberDoc.exists) {
         // Update location for barbers
         await FirebaseFirestore.instance.collection('barbers').doc(userId).set({
@@ -88,7 +94,10 @@ class _MyAppState extends State<MyApp> {
       }
 
       // Check if the user exists in the 'users' collection
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
       if (userDoc.exists) {
         // Update location for regular users
         await FirebaseFirestore.instance.collection('users').doc(userId).set({
@@ -104,11 +113,11 @@ class _MyAppState extends State<MyApp> {
 
       // If the user does not exist in any collection
       log("User document does not exist in any collection.");
-
     } catch (e) {
       log("Failed to update user location: $e");
     }
   }
+
   void requestPermission() async {
     FirebaseMessaging message = FirebaseMessaging.instance;
 
@@ -130,13 +139,12 @@ class _MyAppState extends State<MyApp> {
       log("User Premission Declined");
     }
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-
       if (message.notification != null) {
-        log(
-            'Message also contained a notification: ${message.notification?.title}');
+        log('Message also contained a notification: ${message.notification?.title}');
       }
     });
   }
+
   // Function to request location permission
   Future<void> requestLocationPermission() async {
     var status = await Permission.location.status;
@@ -177,7 +185,7 @@ class _MyAppState extends State<MyApp> {
           // Set initial language based on the stored locale
           if (provider.appLocale == null) {
             if (widget.locale.isEmpty) {
-              provider.changeLanguage(Locale('en'));
+              provider.changeLanguage(const Locale('en'));
             } else {
               provider.changeLanguage(Locale(widget.locale));
             }
@@ -186,14 +194,15 @@ class _MyAppState extends State<MyApp> {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Online Barber App',
-            locale: provider.appLocale ?? Locale(widget.locale.isEmpty ? 'en' : widget.locale),
-            localizationsDelegates: [
+            locale: provider.appLocale ??
+                Locale(widget.locale.isEmpty ? 'en' : widget.locale),
+            localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: [
+            supportedLocales: const [
               Locale('en'),
               Locale('ur'),
               Locale('ar'),

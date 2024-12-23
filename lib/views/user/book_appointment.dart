@@ -48,7 +48,7 @@ class _BookAppointmentState extends State<BookAppointment> {
   bool isBooking = false;
   String _userName = '';
   bool _isHomeService = false;
-  String _selectedPaymentMethod = 'Cash'; // Default payment method
+  final String _selectedPaymentMethod = 'Cash'; // Default payment method
   List<ProductDetails> _products = [];
   final InAppPurchase _iap = InAppPurchase.instance;
   bool _available = true;
@@ -86,7 +86,7 @@ class _BookAppointmentState extends State<BookAppointment> {
 
   Future<void> _loadProducts() async {
     // Create a set to store product IDs dynamically from selected services
-    Set<String> _serviceProductIds = widget.selectedServices.map((service) {
+    Set<String> serviceProductIds = widget.selectedServices.map((service) {
       // Assuming each service has a corresponding product ID in the app store
       return service
           .productId; // Ensure your Service model has a 'productId' field
@@ -94,7 +94,7 @@ class _BookAppointmentState extends State<BookAppointment> {
 
     // Query the product details using the service product IDs
     final ProductDetailsResponse response =
-        await _iap.queryProductDetails(_serviceProductIds);
+        await _iap.queryProductDetails(serviceProductIds);
 
     if (response.notFoundIDs.isNotEmpty) {
       log('Error: Some product IDs not found - ${response.notFoundIDs}');
@@ -315,16 +315,16 @@ class _BookAppointmentState extends State<BookAppointment> {
     final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
 
     final message = Message()
-      ..from = Address('ios.cypersol@gmail.com', 'Online Barber')
+      ..from = const Address('ios.cypersol@gmail.com', 'Online Barber')
       ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
       ..subject = 'New Appointment Booked!'
       ..text = notificationBody;
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('Email sent: ' + sendReport.toString());
+      print('Email sent: $sendReport');
     } on MailerException catch (e) {
-      print('Email not sent. \n' + e.toString());
+      print('Email not sent. \n$e');
     }
   }
 

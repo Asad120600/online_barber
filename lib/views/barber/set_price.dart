@@ -206,7 +206,7 @@ class _SetServicePricesState extends State<SetServicePrices> {
                     ),
                   ],
                 );
-              }).toList(),
+              }),
               TextFormField(
                 controller: _homeServicePriceController,
                 decoration: const InputDecoration(labelText: 'Home Service Price'),

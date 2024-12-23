@@ -4,7 +4,7 @@ import '../../models/barber_model.dart';
 class BarberCard extends StatelessWidget {
   final Barber barber;
 
-  const BarberCard({Key? key, required this.barber}) : super(key: key);
+  const BarberCard({super.key, required this.barber});
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +26,10 @@ class BarberCard extends StatelessWidget {
                 CircleAvatar(
                   radius: constraints.maxWidth * 0.15,
                   backgroundColor: Colors.grey[300],
-                  backgroundImage: barber.imageUrl != null && barber.imageUrl!.isNotEmpty
-                      ? NetworkImage(barber.imageUrl!)
+                  backgroundImage: barber.imageUrl.isNotEmpty
+                      ? NetworkImage(barber.imageUrl)
                       : null,
-                  child: barber.imageUrl == null || barber.imageUrl!.isEmpty
+                  child: barber.imageUrl.isEmpty
                       ? Icon(
                     Icons.person,
                     size: constraints.maxWidth * 0.15,

@@ -132,7 +132,7 @@ class _FAQsSettingsState extends State<FAQsSettings> {
                   stream: FirebaseFirestore.instance.collection('faqs').orderBy('question').snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     }
 
                     if (snapshot.hasError) {

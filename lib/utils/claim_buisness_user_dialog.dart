@@ -12,11 +12,11 @@ class ClaimBusinessDialog extends StatefulWidget {
   final String adminUid; // Pass the admin UID to fetch FCM token
 
   const ClaimBusinessDialog({
-    Key? key,
+    super.key,
     required this.barberName,
     required this.onSubmit,
     required this.adminUid,
-  }) : super(key: key);
+  });
 
   @override
   _ClaimBusinessDialogState createState() => _ClaimBusinessDialogState();

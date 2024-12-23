@@ -269,7 +269,7 @@ class BarberListTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onSelect;
 
-  const BarberListTile({
+  const BarberListTile({super.key, 
     required this.barber,
     required this.isApproved,
     required this.distance,

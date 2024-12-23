@@ -109,7 +109,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => AdminNotificationsPage(),
+                      builder: (context) => const AdminNotificationsPage(),
                     ),
                   );
                   _resetNotificationCount();

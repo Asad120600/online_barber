@@ -14,7 +14,7 @@ import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
 
 class BarberProfile extends StatefulWidget {
-  const BarberProfile({Key? key}) : super(key: key);
+  const BarberProfile({super.key});
 
   @override
   State<BarberProfile> createState() => _BarberProfileState();
@@ -61,8 +61,8 @@ class _BarberProfileState extends State<BarberProfile> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       if (pickedFile != null) {
@@ -314,7 +314,7 @@ class _BarberProfileState extends State<BarberProfile> {
                 const SizedBox(height: 20),
                 Button(
                   onPressed: _updateBarberProfile,
-                  child: Text('Update Profile'),
+                  child: const Text('Update Profile'),
                 ),
               ],
             ),

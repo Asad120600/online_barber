@@ -77,7 +77,7 @@ class FAQSection extends StatelessWidget {
           children: [
             Text(
               '$index. $question',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.orange, // Customize the title color

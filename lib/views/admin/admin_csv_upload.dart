@@ -9,6 +9,8 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminCsvUploadPage extends StatefulWidget {
+  const AdminCsvUploadPage({super.key});
+
   @override
   _AdminCsvUploadPageState createState() => _AdminCsvUploadPageState();
 }
@@ -17,7 +19,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
   bool _isUploading = false;
   double _progress = 0.0;
   List<List<dynamic>>? _previewData;
-  List<Map<String, dynamic>> _uploadedCsvs = [];
+  final List<Map<String, dynamic>> _uploadedCsvs = [];
 
   @override
   void initState() {
@@ -124,12 +126,12 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('CSV uploaded successfully!')),
+        const SnackBar(content: Text('CSV uploaded successfully!')),
       );
     } catch (e) {
       print("Error uploading CSV: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to upload CSV')),
+        const SnackBar(content: Text('Failed to upload CSV')),
       );
     } finally {
       setState(() {
@@ -163,7 +165,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           ),
           actions: [
             TextButton(
-              child: Text("Close"),
+              child: const Text("Close"),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -195,7 +197,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Upload Barber CSV"),
+        title: const Text("Upload Barber CSV"),
       ),
       body: Center(
         child: _isUploading
@@ -203,7 +205,7 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(value: _progress),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text("${(_progress * 100).toStringAsFixed(1)}%"),
           ],
         )
@@ -212,10 +214,10 @@ class _AdminCsvUploadPageState extends State<AdminCsvUploadPage> {
           children: [
             ElevatedButton(
               onPressed: _pickAndUploadCSV,
-              child: Text("Upload CSV"),
+              child: const Text("Upload CSV"),
             ),
-            SizedBox(height: 20),
-            Text("Recently Uploaded CSVs"),
+            const SizedBox(height: 20),
+            const Text("Recently Uploaded CSVs"),
             Expanded(child: _buildUploadedCsvList()),
           ],
         ),

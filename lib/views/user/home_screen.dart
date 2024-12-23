@@ -67,14 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (BuildContext context) {
         return Dialog(
           child: Container(
-            padding: EdgeInsets.all(15.0),
+            padding: const EdgeInsets.all(15.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 imageUrl != null
                     ? Image.network(imageUrl)
                     : Image.asset('assets/img/default_image.png'), // Use a default image if none is available
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
@@ -98,7 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
         automaticallyImplyLeading: false,
         title: Text(
           AppLocalizations.of(context)!.online_barber,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Acumin Pro',
             fontSize: 24,
             fontWeight: FontWeight.bold,
@@ -135,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Stack(
             children: [
               IconButton(
-                icon: Icon(Icons.notifications),
+                icon: const Icon(Icons.notifications),
                 onPressed: () {
                   _resetNotificationCount(); // Reset the counter
                   Navigator.push(
@@ -151,19 +151,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   right: 8,
                   top: 8,
                   child: Container(
-                    padding: EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(2),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    constraints: BoxConstraints(
+                    constraints: const BoxConstraints(
                       minWidth: 20,
                       minHeight: 20,
                     ),
                     child: Center(
                       child: Text(
                         '$_notificationCount',
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
                         ),
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               AppLocalizations.of(context)!.services_title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Acumin Pro',
                 fontWeight: FontWeight.bold,
                 fontSize: 22.0,
@@ -276,7 +276,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               title: Text(service.name),
-              subtitle: Text('${service.price.toStringAsFixed(2)}'),
+              subtitle: Text(service.price.toStringAsFixed(2)),
               trailing: Checkbox(
                 value: checked[index],
                 onChanged: (bool? value) {
@@ -292,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

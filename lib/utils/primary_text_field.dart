@@ -8,13 +8,13 @@ class PrimaryTextField extends StatelessWidget {
   final Widget? suffixIcon;
 
   const PrimaryTextField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.text,
     this.prefixIcon,
     this.obsecure = false,
     this.suffixIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

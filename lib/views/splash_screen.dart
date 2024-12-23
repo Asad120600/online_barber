@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/slide_show.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

@@ -118,7 +118,7 @@ class RecentOrdersPage extends StatelessWidget {
                             ),
                             title: Text(productData['description'] ?? 'No description'),
                             subtitle: Text('Quantity: ${entry.value}'),
-                            trailing: Text('${(double.tryParse(productData['price']) ?? 0.0 * entry.value).toStringAsFixed(2)}'),
+                            trailing: Text((double.tryParse(productData['price']) ?? 0.0 * entry.value).toStringAsFixed(2)),
                           );
                         },
                       );

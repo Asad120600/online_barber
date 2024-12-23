@@ -104,37 +104,37 @@ class _AddSlidePageState extends State<AddSlidePage> {
                 Column(
                   children: [
                     Image.network(_imageUrl!),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(AppLocalizations.of(context)!.image_selected),
                   ],
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _textController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.image_text,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               _isUploading
-                  ? LoadingDots()
+                  ? const LoadingDots()
                   : ElevatedButton.icon(
                 onPressed: _uploadImage,
-                icon: Icon(Icons.image),
+                icon: const Icon(Icons.image),
                 label: Text(AppLocalizations.of(context)!.upload_image),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.orange,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: _saveSlide,
-                child: Text(AppLocalizations.of(context)!.save_slide),
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.orange,
                 ),
+                child: Text(AppLocalizations.of(context)!.save_slide),
               ),
             ],
           ),

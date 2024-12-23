@@ -10,7 +10,7 @@ class EditSlidePage extends StatefulWidget {
   final String? imageUrl;
   final String? initialText;
 
-  const EditSlidePage({Key? key, this.documentId, this.imageUrl, this.initialText}) : super(key: key);
+  const EditSlidePage({super.key, this.documentId, this.imageUrl, this.initialText});
 
   @override
   _EditSlidePageState createState() => _EditSlidePageState();
@@ -110,18 +110,18 @@ class _EditSlidePageState extends State<EditSlidePage> {
                       Text('${AppLocalizations.of(context)!.image_name}: $_imageName'),
                   ],
                 ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               TextField(
                 controller: _textController,
                 decoration: InputDecoration(
                   labelText: AppLocalizations.of(context)!.image_text,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: ElevatedButton.icon(
                   onPressed: _uploadImage,
-                  icon: Icon(Icons.image),
+                  icon: const Icon(Icons.image),
                   label: Text(AppLocalizations.of(context)!.change_image),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
@@ -129,15 +129,15 @@ class _EditSlidePageState extends State<EditSlidePage> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
                   onPressed: _saveData,
-                  child: Text(AppLocalizations.of(context)!.save),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.orange,
                   ),
+                  child: Text(AppLocalizations.of(context)!.save),
                 ),
               ),
             ],

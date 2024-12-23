@@ -39,13 +39,13 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
   Future<void> _checkLoginStatus() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null && mounted) {  // Added mounted check here
-      String? userType = await LocalStorage.getUserType();
+      String? userType = LocalStorage.getUserType();
       switch (userType) {
         case '1': // Admin
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) =>  AdminPanel(),
+              builder: (context) =>  const AdminPanel(),
             ),
           );
           break;
@@ -89,7 +89,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load slides')),
+          const SnackBar(content: Text('Failed to load slides')),
         );
       }
     }
@@ -113,7 +113,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _slides.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
         children: [
           Expanded(
@@ -122,7 +122,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               itemCount: _slides.length,
               itemBuilder: (BuildContext context, int index) {
                 return Container(
-                  margin: EdgeInsets.only(left: 15, right: 15, top: 25),
+                  margin: const EdgeInsets.only(left: 15, right: 15, top: 25),
                   decoration: BoxDecoration(
                     border: Border.all(color: Colors.orange, width: 2),
                     image: DecorationImage(
@@ -140,7 +140,7 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
               autoplay: true,
               autoplayDelay: 2000,
               loop: true,
-              pagination: SwiperPagination(),
+              pagination: const SwiperPagination(),
             ),
           ),
           Expanded(

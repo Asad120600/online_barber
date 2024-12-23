@@ -45,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 var messages = snapshot.data!.docs;
@@ -65,8 +65,8 @@ class _ChatScreenState extends State<ChatScreen> {
                     return Align(
                       alignment: isAdmin ? Alignment.centerLeft : Alignment.centerRight,
                       child: Container(
-                        padding: EdgeInsets.all(10),
-                        margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                         decoration: BoxDecoration(
                           color: isAdmin ? Colors.grey[300] : Colors.orange[100],
                           borderRadius: BorderRadius.circular(15),
@@ -99,15 +99,15 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: () async {
                     await _sendMessage(context);
                   },
-                  child: Text('Send'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                   ),
+                  child: Text('Send'),
                 ),
               ],
             ),
@@ -148,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Admin token not found. Notification not sent.')),
+          const SnackBar(content: Text('Admin token not found. Notification not sent.')),
         );
       }
 
@@ -156,7 +156,7 @@ class _ChatScreenState extends State<ChatScreen> {
       _scrollToBottom(); // Scroll to the bottom after sending a message
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send message. Please try again.')),
+        const SnackBar(content: Text('Failed to send message. Please try again.')),
       );
     }
   }
@@ -185,7 +185,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (_scrollController.hasClients) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     }

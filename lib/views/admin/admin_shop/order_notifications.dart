@@ -60,7 +60,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
         future: _fetchNotifications(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
@@ -127,7 +127,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
                             );
                           },
                         );
-                      }).toList(),
+                      }),
                     ],
                   ),
                 ),

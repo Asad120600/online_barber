@@ -168,9 +168,9 @@ class _BarberPanelState extends State<BarberPanel> with SingleTickerProviderStat
             return PopupMenuButton(
               onSelected: (Language item) {
                 if (Language.english.name == item.name) {
-                  provider.changeLanguage(Locale("en"));
+                  provider.changeLanguage(const Locale("en"));
                 } else {
-                  provider.changeLanguage(Locale("ur"));
+                  provider.changeLanguage(const Locale("ur"));
                 }
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[

@@ -37,7 +37,7 @@ class AuthController {
         // If a user with the same phone number exists, show error and return
         log("Sign Up Error: Phone number already registered.");
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Phone number is already registered."))
+            const SnackBar(content: Text("Phone number is already registered."))
         );
         return false; // Stop signup if phone number is already in use
       }

@@ -102,18 +102,18 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                 ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => AddSlidePage(),
+                      builder: (context) => const AddSlidePage(),
                     )).then((_) {
                       _fetchSlides(); // Refresh the list after returning
                     });
                   },
-                  child: Text(AppLocalizations.of(context)!.add_new_slide),
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.white,
                     backgroundColor: Colors.orange,
                   ),
+                  child: Text(AppLocalizations.of(context)!.add_new_slide),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 if (_slides.isNotEmpty) ...[
                   ..._slides.map((slide) {
                     return ListTile(
@@ -123,7 +123,7 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.edit),
+                            icon: const Icon(Icons.edit),
                             onPressed: () {
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => EditSlidePage(
@@ -137,13 +137,13 @@ class _AdminSlideshowScreenState extends State<AdminSlideshowScreen> {
                             },
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete),
+                            icon: const Icon(Icons.delete),
                             onPressed: () => _deleteSlide(slide['id'], slide['imageUrl']),
                           ),
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ] else
                   Text(AppLocalizations.of(context)!.no_slides_available),
               ],

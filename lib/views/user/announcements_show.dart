@@ -16,7 +16,7 @@ class UserAnnouncementScreen extends StatelessWidget {
       body: StreamBuilder(
         stream: FirebaseFirestore.instance.collection('announcements').snapshots(),
         builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (!snapshot.hasData) return Center(child: LoadingDots());
+          if (!snapshot.hasData) return const Center(child: LoadingDots());
           var announcements = snapshot.data!.docs;
           return ListView.builder(
             itemCount: announcements.length,
@@ -26,7 +26,7 @@ class UserAnnouncementScreen extends StatelessWidget {
                 child: ListTile(
                   title: Text(announcement['title']),
                   subtitle: Text(announcement['message']),
-                  trailing: Icon( Icons.campaign),
+                  trailing: const Icon( Icons.campaign),
                 ),
               );
             },

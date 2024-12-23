@@ -6,6 +6,8 @@ import 'package:online_barber_app/views/user/Drawer%20Pages/chat_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ContactUsPage extends StatefulWidget {
+  const ContactUsPage({super.key});
+
   @override
   _ContactUsPageState createState() => _ContactUsPageState();
 }
@@ -47,7 +49,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 children: [
                   TextFormField(
                     controller: _subjectController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Subject',
                       border: OutlineInputBorder(),
                     ),
@@ -58,10 +60,10 @@ class _ContactUsPageState extends State<ContactUsPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _nameController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Name',
                       border: OutlineInputBorder(),
                     ),
@@ -72,10 +74,10 @@ class _ContactUsPageState extends State<ContactUsPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                       border: OutlineInputBorder(),
                     ),
@@ -86,10 +88,10 @@ class _ContactUsPageState extends State<ContactUsPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   TextFormField(
                     controller: _messageController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Message',
                       border: OutlineInputBorder(),
                     ),
@@ -101,17 +103,17 @@ class _ContactUsPageState extends State<ContactUsPage> {
                       return null;
                     },
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         await _submitForm(context);
                       }
                     },
-                    child: Text('Submit'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
+                    child: Text('Submit'),
                   ),
                 ],
               ),
@@ -158,7 +160,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Admin token not found. Notification not sent.')),
+          const SnackBar(content: Text('Admin token not found. Notification not sent.')),
         );
       }
 
@@ -170,7 +172,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to send your message. Please try again.')),
+        const SnackBar(content: Text('Failed to send your message. Please try again.')),
       );
     }
   }
@@ -178,7 +180,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
   Future<String> _fetchAdminToken() async {
     try {
       // Get the UID for the admin
-      final adminUid = 'OEQj3lxQnPcdcyeuJEIsm9MxDWx1'; // Replace with your admin UID if needed
+      const adminUid = 'OEQj3lxQnPcdcyeuJEIsm9MxDWx1'; // Replace with your admin UID if needed
 
       // Fetch the admin document from Firestore using the UID
       DocumentSnapshot adminSnapshot = await FirebaseFirestore.instance

@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ActiveUsers extends StatelessWidget {
+  const ActiveUsers({super.key});
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;

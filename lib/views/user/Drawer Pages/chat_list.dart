@@ -18,7 +18,7 @@ class ChatListScreen extends StatelessWidget {
     if (existingThreads.docs.isNotEmpty) {
       // Show Snackbar if an existing thread is found
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please use the existing chat thread to contact admin.')),
+        const SnackBar(content: Text('Please use the existing chat thread to contact admin.')),
       );
     } else {
       // Navigate to ContactUsPage if no existing thread is found
@@ -41,7 +41,7 @@ class ChatListScreen extends StatelessWidget {
         title: Text(AppLocalizations.of(context)!.my_chats),
         actions: [
           IconButton(
-            icon: Icon(Icons.add),
+            icon: const Icon(Icons.add),
             onPressed: () {
               _checkAndNavigateToContactUsPage(context, userEmail);
             },
@@ -55,7 +55,7 @@ class ChatListScreen extends StatelessWidget {
             .snapshots(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           var threads = snapshot.data!.docs;
@@ -81,9 +81,9 @@ class ChatListScreen extends StatelessWidget {
                         backgroundColor: Colors.grey[300],
                         child: Icon(Icons.person, color: Colors.grey[700]),
                       ),
-                      title: Text('admin'),
-                      subtitle: Text('Loading latest message...'),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                      title: const Text('admin'),
+                      subtitle: const Text('Loading latest message...'),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     );
                   }
 
@@ -100,9 +100,9 @@ class ChatListScreen extends StatelessWidget {
                       backgroundColor: Colors.grey[300],
                       child: Icon(Icons.person, color: Colors.grey[700]),
                     ),
-                    title: Text('admin'),
+                    title: const Text('admin'),
                     subtitle: Text(preview),
-                    contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     onTap: () {
                       Navigator.push(
                         context,

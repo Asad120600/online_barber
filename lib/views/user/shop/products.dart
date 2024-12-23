@@ -139,7 +139,7 @@ class _ProductDisplayPageState extends State<ProductDisplayPage> {
                               }
                             },
                           ),
-                          Text('${localizations.quantityLabel(quantity.toString())}'),
+                          Text(localizations.quantityLabel(quantity.toString())),
                           IconButton(
                             icon: const Icon(Icons.add),
                             onPressed: () {

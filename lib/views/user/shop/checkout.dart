@@ -98,9 +98,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
           message,
         );
       } else {
-        log(AppLocalizations.of(context)!.adminDocNotFound as String);
+        log(AppLocalizations.of(context)!.adminDocNotFound);
         ScaffoldMessenger.of(context).showSnackBar(
-           SnackBar(content: Text(AppLocalizations.of(context)!.adminDocNotFound as String)),
+           SnackBar(content: Text(AppLocalizations.of(context)!.adminDocNotFound)),
         );
       }
     } catch (e) {

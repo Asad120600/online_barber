@@ -11,7 +11,7 @@ class LanguageChangeController with ChangeNotifier {
   Future<void> initializeLocale() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? languageCode = sp.getString('language_code');
-    _appLocale = languageCode != null ? Locale(languageCode) : Locale("en");
+    _appLocale = languageCode != null ? Locale(languageCode) : const Locale("en");
     notifyListeners();
   }
 

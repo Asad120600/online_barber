@@ -4,6 +4,8 @@ import 'package:intl/intl.dart'; // Import intl package for date formatting
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DeletedUsers extends StatelessWidget {
+  const DeletedUsers({super.key});
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;

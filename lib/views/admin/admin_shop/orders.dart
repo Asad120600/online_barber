@@ -154,7 +154,7 @@ class AdminOrdersPage extends StatelessWidget {
                               title: Text(productData['description'] ?? AppLocalizations.of(context)!.noDescription),
                               subtitle: Text(AppLocalizations.of(context)!.quantity(entry.value.toString())),
                               trailing: Text(
-                                '${(double.tryParse(productData['price'] ?? '0') ?? 0.0 * entry.value).toStringAsFixed(2)}',
+                                (double.tryParse(productData['price'] ?? '0') ?? 0.0 * entry.value).toStringAsFixed(2),
                               ),
                             );
                           },

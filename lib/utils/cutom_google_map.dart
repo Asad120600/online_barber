@@ -5,6 +5,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class CustomGoogleMap extends StatefulWidget {
+  const CustomGoogleMap({super.key});
+
   @override
   _CustomGoogleMapState createState() => _CustomGoogleMapState();
 }

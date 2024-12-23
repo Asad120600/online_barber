@@ -11,7 +11,7 @@ import 'package:online_barber_app/views/barber/set_price.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class BarberDrawer extends StatefulWidget {
-  const BarberDrawer({Key? key, required this.screenWidth}) : super(key: key);
+  const BarberDrawer({super.key, required this.screenWidth});
 
   final double screenWidth;
 
@@ -144,7 +144,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => AnnouncementScreen(),
+                    builder: (context) => const AnnouncementScreen(),
                   ),
                 );
               },

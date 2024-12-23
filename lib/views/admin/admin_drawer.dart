@@ -120,7 +120,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AllProductsPage(),
+                        builder: (context) => const AllProductsPage(),
                       ),
                     );
                   },
@@ -146,7 +146,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AdminOrdersPage(),
+                        builder: (context) => const AdminOrdersPage(),
                       ),
                     );
                   },

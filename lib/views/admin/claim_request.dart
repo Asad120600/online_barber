@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ClaimRequestsScreen extends StatefulWidget {
-  const ClaimRequestsScreen({Key? key}) : super(key: key);
+  const ClaimRequestsScreen({super.key});
 
   @override
   State<ClaimRequestsScreen> createState() => _ClaimRequestsScreenState();

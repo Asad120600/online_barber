@@ -8,11 +8,11 @@ class BookingScreen extends StatelessWidget {
   final Function(int) toggleReadStatus;
 
   const BookingScreen({
-    Key? key,
+    super.key,
     required this.appointmentsFuture,
     required this.deleteAppointment,
     required this.toggleReadStatus,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +36,10 @@ class BookingScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               Appointment appointment = appointments[index];
               String formattedDate = appointment.date != null
-                  ? DateFormat('yyyy-MM-dd').format(appointment.date! as DateTime)
+                  ? DateFormat('yyyy-MM-dd').format(appointment.date as DateTime)
                   : 'Not provided';
               String serviceNames = appointment.services != null
-                  ? appointment.services!.map((s) => s.name).join(', ')
+                  ? appointment.services.map((s) => s.name).join(', ')
                   : 'Not provided';
 
               return Card(
