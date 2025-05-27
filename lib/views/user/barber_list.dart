@@ -1,9 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:online_barber_app/models/barber_model.dart';
 import 'package:online_barber_app/models/service_model.dart';
 import 'package:online_barber_app/utils/button.dart';
@@ -11,7 +8,6 @@ import 'package:online_barber_app/utils/loading_dots.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/book_appointment.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 
 class BarberList extends StatefulWidget {
   final List<Service> selectedServices;
@@ -26,54 +22,30 @@ class _BarberListState extends State<BarberList> {
   List<Service> _selectedServices = [];
   String? _selectedBarberId;
   Barber? _selectedBarber;
-  Position? _currentPosition;
-  double _maxDistance = 10.0; // Default distance (in km)
   bool _isLoading = false;
 
   List<Barber> barbers = [];
+  List<Barber> filteredBarbers = [];
   Map<String, bool> approvalStatus = {};
   Map<String, Map<String, double>> prices = {};
+  TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _selectedServices = widget.selectedServices;
     _loadDataInBackground();
+    searchController.addListener(_filterBarbers);
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadDataInBackground() async {
-    // Fetch current location
-    await _getCurrentLocation();
-
-    // Fetch barber list and prices in the background while showing loading indicator
-    _fetchData();
-  }
-
-  Future<void> _getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error(AppLocalizations.of(context)!.locationServicesDisabled);
-    }
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error(AppLocalizations.of(context)!.locationPermissionsDenied);
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error(AppLocalizations.of(context)!.locationPermissionsPermanentlyDenied);
-    }
-
-    _currentPosition = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    setState(() {});
+    await _fetchData();
   }
 
   Future<void> _fetchData() async {
@@ -94,6 +66,7 @@ class _BarberListState extends State<BarberList> {
 
       setState(() {
         barbers = barberList;
+        filteredBarbers = barberList;
         prices = fetchedPrices;
         approvalStatus = approvals;
         _isLoading = false;
@@ -102,6 +75,17 @@ class _BarberListState extends State<BarberList> {
       log('Error fetching data: $e');
       setState(() => _isLoading = false);
     }
+  }
+
+  void _filterBarbers() {
+    final query = searchController.text.toLowerCase();
+    setState(() {
+      filteredBarbers = barbers
+          .where((barber) =>
+              barber.shopName.toLowerCase().contains(query) ||
+              barber.name.toLowerCase().contains(query))
+          .toList();
+    });
   }
 
   Stream<List<Barber>> getBarbers() {
@@ -126,14 +110,15 @@ class _BarberListState extends State<BarberList> {
         final serviceData = Service.fromSnapshot(snapshot);
 
         final barberPrices = serviceData.barberPrices
-            ?.fold<Map<String, double>>({}, (acc, priceMap) {
-          final barberId = priceMap['barberId'] as String;
-          final price = (priceMap['price'] as num).toDouble();
-          if (!acc.containsKey(barberId)) {
-            acc[barberId] = price;
-          }
-          return acc;
-        }) ?? {};
+                ?.fold<Map<String, double>>({}, (acc, priceMap) {
+              final barberId = priceMap['barberId'] as String;
+              final price = (priceMap['price'] as num).toDouble();
+              if (!acc.containsKey(barberId)) {
+                acc[barberId] = price;
+              }
+              return acc;
+            }) ??
+            {};
 
         prices[service.id] = barberPrices;
       }
@@ -154,20 +139,11 @@ class _BarberListState extends State<BarberList> {
     return querySnapshot.docs.isNotEmpty;
   }
 
-  double _calculateDistanceTo(Barber barber) {
-    return Geolocator.distanceBetween(
-      _currentPosition!.latitude,
-      _currentPosition!.longitude,
-      barber.latitude,
-      barber.longitude,
-    ) / 1000; // convert to km
-  }
-
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
 
-    if (_isLoading || _currentPosition == null) {
+    if (_isLoading) {
       return const Scaffold(
         body: Center(child: LoadingDots()),
       );
@@ -178,49 +154,43 @@ class _BarberListState extends State<BarberList> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  localizations.maxDistance(_maxDistance.toStringAsFixed(1)),
-                  style: const TextStyle(fontSize: 16),
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: 'Search by shop name...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-              
-                Slider(
-                  value: _maxDistance,
-                  min: 1.0,
-                  max: 50.0,
-                  divisions: 49,
-                  label: '${_maxDistance.toStringAsFixed(1)} km',
-                  onChanged: (value) {
-                    setState(() {
-                      _maxDistance = value;
-                    });
-                  },
-                ),
-              
-              ],
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
             ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: barbers.length,
+              itemCount: filteredBarbers.length,
               itemBuilder: (context, index) {
-                final barber = barbers[index];
+                final barber = filteredBarbers[index];
                 final isApproved = approvalStatus[barber.name] ?? false;
-                final distance = _calculateDistanceTo(barber);
-
-                if (distance > _maxDistance) return Container(); // Skip if too far
 
                 return BarberListTile(
                   barber: barber,
                   isApproved: isApproved,
-                  distance: distance,
-                  prices: _selectedServices.map((s) => prices[s.id]?[barber.id] ?? s.price).toList(),
+                  prices: _selectedServices
+                      .map((s) => prices[s.id]?[barber.id] ?? s.price)
+                      .toList(),
                   isSelected: barber.id == _selectedBarberId,
                   onSelect: () => setState(() {
-                    _selectedBarberId = barber.id;
-                    _selectedBarber = barber;
+                    if (_selectedBarberId == barber.id) {
+                      _selectedBarberId = null;
+                      _selectedBarber = null;
+                    } else {
+                      _selectedBarberId = barber.id;
+                      _selectedBarber = barber;
+                    }
                   }),
                   selectedServices: _selectedServices,
                 );
@@ -259,20 +229,18 @@ class _BarberListState extends State<BarberList> {
     );
   }
 }
-
 class BarberListTile extends StatelessWidget {
   final Barber barber;
   final bool isApproved;
-  final double distance;
   final List<Service> selectedServices;
-  final List<double> prices;  // The list holds prices for each selected service.
+  final List<double> prices;
   final bool isSelected;
   final VoidCallback onSelect;
 
-  const BarberListTile({super.key, 
+  const BarberListTile({
+    super.key,
     required this.barber,
     required this.isApproved,
-    required this.distance,
     required this.selectedServices,
     required this.prices,
     required this.isSelected,
@@ -281,15 +249,14 @@ class BarberListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Display the price for each selected service for the barber
-    final servicePriceWidgets = List<Widget>.generate(selectedServices.length, (index) {
+    final servicePriceWidgets =
+        List<Widget>.generate(selectedServices.length, (index) {
       final price = prices[index];
       return Text(
-        '${selectedServices[index].name}: ${price.toStringAsFixed(2)}',  // Remove the dollar sign
+        '${selectedServices[index].name}: ${price.toStringAsFixed(2)}',
         style: const TextStyle(fontSize: 14, color: Colors.grey),
       );
     });
-
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
@@ -302,19 +269,30 @@ class BarberListTile extends StatelessWidget {
         child: ListTile(
           onTap: onSelect,
           leading: CircleAvatar(
-            backgroundImage: NetworkImage(barber.imageUrl),
             radius: 30,
+            backgroundImage: barber.imageUrl.isNotEmpty
+                ? NetworkImage(barber.imageUrl)
+                : null,
+            child: barber.imageUrl.isEmpty
+                ? const Icon(Icons.content_cut, size: 30, color: Colors.grey)
+                : null,
           ),
-          title: Text(barber.name),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(barber.name,
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              if (barber.shopName.isNotEmpty)
+                Text(barber.shopName,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+            ],
+          ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...servicePriceWidgets,
               const SizedBox(height: 5),
-              Text(
-                '${distance.toStringAsFixed(1)} km  ',
-                style: TextStyle(color: isApproved ? Colors.green : Colors.red),
-              ),
             ],
           ),
         ),

@@ -1,6 +1,12 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:online_barber_app/views/slide_show.dart';
+import 'package:get/get.dart';
+import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:online_barber_app/views/admin/admin_panel.dart';
+import 'package:online_barber_app/views/auth/login_screen.dart';
+import 'package:online_barber_app/views/barber/barber_panel.dart';
+import 'package:online_barber_app/views/user/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -13,10 +19,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Timer(
-        const Duration(seconds: 2),
-        () => Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (BuildContext context) => const SlideshowScreen())));
+
+    // ✅ Wait for 4 seconds, then check login status
+    Timer(const Duration(seconds: 4), () {
+      _checkLoginStatus();
+    });
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      String? userType = LocalStorage.getUserType(); // 1 = admin, 2 = barber, 3 = user
+
+      switch (userType) {
+        case '1':
+          Get.offAll(() => const AdminPanel());
+          break;
+        case '2':
+          Get.offAll(() => BarberPanel(barberId: user.uid));
+          break;
+        case '3':
+          Get.offAll(() => const HomeScreen());
+          break;
+        default:
+          Get.offAll(() => const LoginScreen());
+      }
+    } else {
+      Get.offAll(() => const LoginScreen());
+    }
   }
 
   @override

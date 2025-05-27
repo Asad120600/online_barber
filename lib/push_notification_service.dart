@@ -7,22 +7,26 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:googleapis_auth/auth_io.dart' as auth;
 
-class PushNotificationService{
+class PushNotificationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  static Future<String>getAccessToken() async
-  {
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
+  static Future<String> getAccessToken() async {
     final serviceAccountJson = {
       "type": "service_account",
       "project_id": "online-barber-85e57",
-      "private_key_id": "caed0b68b949d6ea0563e548d0fe86763f1fb487",
-      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDRNQVxT5j8KR4U\nIxaiIRm7bkOnf2nIhVsRI1GJFjlsb5Z8edplFrWG9STFV45Smm2l2DO+yX9bVHzn\nf8VfnNyXp5G0MBXOn4wjeX5GqCliKuAm5Z8e9MwOpIkfupkqeIuWUcG/MXG8O/rY\nLfiaCvURcAK1bFWQSSEc5gB0+TlGIZz74tuUEL6rgrUPSWxIDv/K2uhMSh0wNx8S\nkWTEXOMYW+8YVEDgq48EH4gRr48lF9vh6MohNnuutNHsOMhPLo3N1cHlLsc2D7WV\nag3J8yLmNe8nOTNlczx6zY3tQFvZI0dWder1kHmEp13vQCCzJ7Cx1m9nAycr82nx\n41i0SOsFAgMBAAECggEAJdrMtdCb04DTJvykY0jPAam1hzDYYMa0kDjOT5pcYKEe\nXz6jRGhkB1wDP8wUfiDgV0J0NoD6UPnMMg1eFutoxO42wJ50y7L15hNdRIa4GkG8\n1nz1GmJcLAgcocefYF54j4YSozhcpp1JyeUjlygFaRbV/qLwJo/89GAv0/qmoOgv\nYgDMtfmlJKo7G9r8RsVw9moqo9ovB3qhsQxKQk3JdiShI2ibX6GhHGUxlYGHcvHk\nD2Ae+goW3mC8czvgmImfBVtCFtDgOgRfo9B4pYj2zKtVXPzu+5ctxyp5qZraREPs\nHxVGfFUChEiESXGsuTGbH8qd5iGVQ8z2QCxTzFM6/wKBgQDnko9s59Tr1FiOo7/S\nN+C0BvUrPltc6dElUgi3LEtn41VS9LZI4IFosQgU9t5f9H3Rs1n4lgFvdV6zdSYQ\nh0XaNEUC5A22ccyvdp22wdn9+sMwwrHS4afWg+dWV0jOG88For8Te8nWFpiiw1It\nozS6O4zhuFT/Fd7Ag6rwe1qBjwKBgQDnRoAt7L3NPhZvNmsgrgQY7ckyuARBUup0\n8INs9TVPuwqeg1JZ3/+mEgTlMUQehkmaamVGnIey7+np1aG9yL8JIa6Mo2UyKllJ\n1mPYOWcO+QYtcdTS/rDen12fmvba1pJ0LKQaF/YXgzD9Vt5exGJkf2yxxZ4phjxW\n2pyISbRYKwKBgAU6whJridtpiDZwbDyLFn/6SD8ZwWZvwVFecOPyFCHceGjPLe6n\nY0TB+rS+fnccRlsd+cIrYQzrUaAr3RgyddlfpM9T5xtfpoev3g/qgMnDh/Tp8Koa\nfnfRsr+4aOR+rEYsTrRZ70zuZbQHRSvSq7Yo8h2G1CSOkeE3F/0mS/zxAoGAX19x\naH7iXosmEUKtttJMGkOk3ueHybB5wzOT3xDXpUOKw4eAJFP9RuzTW/iPEM9r9uO9\nU/sk8qOBIM7aXjs0nH1pT9Hp32AbZhmlHvu9Bi2nYII6s7AYHBY4M6Nh/SjTSFlI\nawJKl7OgNjjmhsoRkUQC/ORzrsgOhfqs5n8OgfUCgYBbnJLWYXzSZDkdqdrkPDIw\nA86MZDXlK9gH/JCT+0SPNQNDboYFgyrUj+naT6zDJbTNhTqLyMTjapXSneoX7dJr\nRj7eALbY6VdYf73FOLjlmDlfMZwzq0C2h3w0ugpcUwrLn7YNLsbcQtLz9iV+98aQ\newciFQPOzsicnM2QRxRLfQ==\n-----END PRIVATE KEY-----\n",
-      "client_email": "barber-80@online-barber-85e57.iam.gserviceaccount.com",
-      "client_id": "103132873409992062945",
+      "private_key_id": "15fa5da91810f402d810e5404a2269bc047550a1",
+      "private_key":
+          "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDDXkBer7FL1vgi\nGQvsNEfOE/8fd2aGYADC7Db/lmhGvs30pX/A/ZjuRmGhATOFKGmLmpJKyzRa3NNy\nccSfEz+byg98VpD3L1aU9hu3Q9dne/8D2L4AfFVv5PRK2YJzRARa2NJh/Q6AdOYT\nyaK6tXFMAahZfWCNsp0WaYHWGCDn2rcy2e3clZGYPNHI47W3343hUjj4ahrN/EE+\nvRGJd4+lMWrMf29ekNpWgF6M9Iz9flxT8NhEWJUCgxowjQGEWrGT/8QzPBYc2UbU\n+Rv4aINc+i0DksTxK4bpm8Mvys9xXqnf4uuEbBCt3fuYKH9vemneus5xaC5t5wj8\nVLmAOwSpAgMBAAECggEAWvy4SeDVV5bEdUzo6pbmoilZ9hOrogVwFVfhvWMVKW2P\nidLSDtWMtdv9d/iRQAC0NxpD66V7up2BtJkbk2Jpi2qtj6DZXuWjEzkTa2SjG0T6\nXZZB1wQQ3k3pIDrwsDILPSwhvxUV/elzhd+wc/gwzc8v0o27vAJlepykpUsTeCbo\nyPT4rBOOmnGfJfNC9Vci3eH/Da2nlxj3LtnCLhgFoHl5LzqDYG4mjjfl7r5QMTGy\nLxzDDDBmuexnKIrApFn8ULaoO6MKnOEvLmzLkOMHB0MCJUvV2/U7RiwFDbs6YWEw\nCGQaLVUCgndDU2eMj2uEkbIe8B29gboo2GM/j7+KCQKBgQD7xvpZQ8H6RwwMpnT0\nzcr6gV+F5qigGNxZrpFmWEPc4q386PhdSlEem22H6v7uMGTO3cq+OVQzLKl92Roz\nMIpkX5nux0QHOod3SKLWnoYTNKe0rp4vPJwYAd2Vcaf3cQ9yXWsC+rUJVtNaWrvZ\nxampBH/5LkGeDejLuTgBP6gvbwKBgQDGpRPR++E03a1tSd3g/966FRvF6QD+qx9I\nEe6zVEa9cPH2D4N+FYLS/om4VP6jJmSXZvWwOD8eqphdT5CnuCe55kCvtaZhLovA\nFcovS4DpBHUU1opw5zYDZpDxjo958JyjLHrOPWWBKbOA2+e9pKXtabLih3f5pCbh\nOyj/0meBZwKBgQCaoHw2ADgMdj+/MSeZBR5ItNWujZc4I6yIY36mpUSgTpLeRVHr\nMW4aZwhgtgD01cHDjlEqfFjqyN4bDQ9bKs+Dj3chPz3XVqnFp1Vii576ApeQjsFV\nb1rKH7MvScsHW2dKLHdBMCmo36sTza+ashtdUwcpSLBB2ncDTvBHTAoFfwKBgCmn\nB6bqN+jL6seVy46YWG2Qa4huOSUtYJvOFs1HiKXEfxfnXN0dSZdQhDRArjwrmsAc\neLwAr0uQ3e4C9wQUG1BhtYKihkauaeNXLlQIcvlpU9uQuOq/sJW59f6QtAkPqOiW\nNRH10cjpo5gLhGZBlgFYPog9e6y+/OARdaFezxFVAoGBAPLi7TvEv1T5CWzeDWuN\nDzplrYwvUpjbB10cwhID+JaCb1HokfXp36dem2AKAG0OZgzCYd7mAxIiH1vi1k6m\nn0CQ/9ceEeY3jeYS6faRtfZ5iyAUz4Px1pMbWYjEYPArySi+0krfk58rVLBAbtbq\nmQKXsgEvsI2cD3gbSnFOU+Te\n-----END PRIVATE KEY-----\n",
+      "client_email":
+          "getonlinebarber@online-barber-85e57.iam.gserviceaccount.com",
+      "client_id": "110233518098990916594",
       "auth_uri": "https://accounts.google.com/o/oauth2/auth",
       "token_uri": "https://oauth2.googleapis.com/token",
-      "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-      "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/barber-80%40online-barber-85e57.iam.gserviceaccount.com",
+      "auth_provider_x509_cert_url":
+          "https://www.googleapis.com/oauth2/v1/certs",
+      "client_x509_cert_url":
+          "https://www.googleapis.com/robot/v1/metadata/x509/getonlinebarber%40online-barber-85e57.iam.gserviceaccount.com",
       "universe_domain": "googleapis.com"
     };
     List<String> scopes = [
@@ -37,20 +41,21 @@ class PushNotificationService{
     );
 
     auth.AccessCredentials credentials =
-    await auth.obtainAccessCredentialsViaServiceAccount(
-        auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
-        scopes,
-        client);
+        await auth.obtainAccessCredentialsViaServiceAccount(
+            auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
+            scopes,
+            client);
 
     client.close();
 
     return credentials.accessToken.data;
   }
 
-  static sendNotification(String token, BuildContext context, String message, String notificationBody) async {
-
+  static sendNotification(String token, BuildContext context, String message,
+      String notificationBody) async {
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
+    String endpointFirebaseCloudMessaging =
+        'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
@@ -59,9 +64,7 @@ class PushNotificationService{
           'title': message,
           'body': notificationBody,
         },
-        'data': {
-          'name': 'name'
-        }
+        'data': {'name': 'name'}
       }
     };
     final http.Response response = await http.post(
@@ -80,9 +83,11 @@ class PushNotificationService{
     }
   }
 
-  static Future<void> sendNotificationToUser(String token, BuildContext context, String message, String notificationBody) async {
+  static Future<void> sendNotificationToUser(String token, BuildContext context,
+      String message, String notificationBody) async {
     final String serverkey = await getAccessToken();
-    String endpointFirebaseCloudMessaging = 'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
+    String endpointFirebaseCloudMessaging =
+        'https://fcm.googleapis.com/v1/projects/online-barber-85e57/messages:send';
 
     final Map<String, dynamic> notificationMessage = {
       'message': {
@@ -91,9 +96,7 @@ class PushNotificationService{
           'title': message,
           'body': notificationBody,
         },
-        'data': {
-          'name': 'name'
-        }
+        'data': {'name': 'name'}
       }
     };
     final http.Response response = await http.post(
@@ -111,7 +114,6 @@ class PushNotificationService{
       log("Notification not sent: ${response.body}");
     }
   }
-
 
   static void _showDialog(BuildContext context, String title, String content) {
     showDialog(
@@ -128,8 +130,4 @@ class PushNotificationService{
       ),
     );
   }
-
 }
-
-
-

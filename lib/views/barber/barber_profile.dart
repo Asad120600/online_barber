@@ -10,7 +10,6 @@ import 'package:online_barber_app/utils/alert_dialog.dart';
 import 'package:online_barber_app/utils/button.dart';
 import 'package:online_barber_app/utils/cutom_google_map.dart';
 import 'package:online_barber_app/utils/loading_dialog.dart';
-import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/barber/barber_panel.dart';
 
 class BarberProfile extends StatefulWidget {
@@ -26,6 +25,8 @@ class _BarberProfileState extends State<BarberProfile> {
   late TextEditingController _addressController;
   late TextEditingController _shopNameController;
   late TextEditingController _nameController;
+  late TextEditingController
+      _totalSeatsController; // Add controller for total seats
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File? _imageFile;
   String? _imageUrl;
@@ -39,24 +40,44 @@ class _BarberProfileState extends State<BarberProfile> {
     _addressController = TextEditingController();
     _shopNameController = TextEditingController();
     _nameController = TextEditingController();
+    _totalSeatsController =
+        TextEditingController(); // Initialize total seats controller
     _fetchBarberData();
   }
 
   void _fetchBarberData() async {
     try {
-      DocumentSnapshot snapshot = await _firestore.collection('barbers').doc(_currentUser?.uid).get();
+      // Fetch the barber data from Firestore using the current user's UID
+      DocumentSnapshot snapshot =
+          await _firestore.collection('barbers').doc(_currentUser?.uid).get();
+
       if (snapshot.exists) {
+        // Update UI with fetched data
         setState(() {
-          _phoneController.text = snapshot['phoneNumber'] ?? '';
+          _nameController.text =
+              snapshot['firstName'] ?? ''; // Change 'name' to 'firstName'
+          _phoneController.text =
+              snapshot['phone'] ?? ''; // Change 'phoneNumber' to 'phone'
           _addressController.text = snapshot['address'] ?? '';
           _shopNameController.text = snapshot['shopName'] ?? '';
-          _nameController.text = snapshot['name'] ?? '';
           _imageUrl = snapshot['imageUrl'];
           _rating = snapshot['rating']?.toDouble() ?? 0.0;
+          _totalSeatsController.text =
+              snapshot['totalSeats']?.toString() ?? ''; // Fetch totalSeats
         });
+      } else {
+        print('Barber document does not exist.');
+        // Optionally, show a message if the document doesn't exist
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No barber data found')),
+        );
       }
     } catch (e) {
       print('Error fetching barber data: $e');
+      // Show a snackbar or alert in case of error
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Error fetching barber data: $e')),
+      // );
     }
   }
 
@@ -76,7 +97,8 @@ class _BarberProfileState extends State<BarberProfile> {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return const Center(child: LoadingDialog(message: 'Profile is Updating'));
+        return const Center(
+            child: LoadingDialog(message: 'Profile is Updating'));
       },
     );
 
@@ -86,7 +108,8 @@ class _BarberProfileState extends State<BarberProfile> {
 
       // Get latitude and longitude from address
       if (_addressController.text.isNotEmpty) {
-        List<Location> locations = await locationFromAddress(_addressController.text);
+        List<Location> locations =
+            await locationFromAddress(_addressController.text);
         latitude = locations.first.latitude;
         longitude = locations.first.longitude;
       }
@@ -105,6 +128,8 @@ class _BarberProfileState extends State<BarberProfile> {
           'latitude': latitude,
           'longitude': longitude,
         },
+        'totalSeats': int.tryParse(_totalSeatsController.text) ??
+            0, // Add totalSeats to Firestore
       }, SetOptions(merge: true));
 
       Navigator.of(context).pop();
@@ -119,7 +144,9 @@ class _BarberProfileState extends State<BarberProfile> {
             onPressed: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => BarberPanel(barberId: _currentUser!.uid)),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        BarberPanel(barberId: _currentUser!.uid)),
               );
             },
           );
@@ -136,8 +163,10 @@ class _BarberProfileState extends State<BarberProfile> {
 
   Future<String> _uploadImage(File imageFile) async {
     try {
-      String imageName = _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = FirebaseStorage.instance.ref().child('barber_images/$imageName.jpg');
+      String imageName =
+          _currentUser?.uid ?? DateTime.now().millisecondsSinceEpoch.toString();
+      Reference ref =
+          FirebaseStorage.instance.ref().child('barber_images/$imageName.jpg');
       await ref.putFile(imageFile);
       String downloadUrl = await ref.getDownloadURL();
       return downloadUrl;
@@ -150,11 +179,12 @@ class _BarberProfileState extends State<BarberProfile> {
   Future<void> _openMap() async {
     final address = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => CustomGoogleMap()),
+      MaterialPageRoute(builder: (context) => const CustomGoogleMap()),
     );
     if (address != null) {
       setState(() {
-        _addressController.text = address; // Update the address field with the selected address
+        _addressController.text =
+            address; // Update the address field with the selected address
       });
     }
   }
@@ -165,6 +195,7 @@ class _BarberProfileState extends State<BarberProfile> {
     _addressController.dispose();
     _shopNameController.dispose();
     _nameController.dispose();
+    _totalSeatsController.dispose(); // Dispose the total seats controller
     super.dispose();
   }
 
@@ -189,29 +220,29 @@ class _BarberProfileState extends State<BarberProfile> {
                     backgroundColor: Colors.orange,
                     child: _imageFile != null
                         ? ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.file(
-                        _imageFile!,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    )
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.file(
+                              _imageFile!,
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                            ),
+                          )
                         : _imageUrl != null
-                        ? ClipRRect(
-                      borderRadius: BorderRadius.circular(50),
-                      child: Image.network(
-                        _imageUrl!,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                        : const Icon(
-                      Icons.cut, // Barber-related icon
-                      size: 100,
-                      color: Colors.white,
-                    ),
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(50),
+                                child: Image.network(
+                                  _imageUrl!,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.cut, // Barber-related icon
+                                size: 100,
+                                color: Colors.white,
+                              ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -259,8 +290,10 @@ class _BarberProfileState extends State<BarberProfile> {
                     labelText: 'Address',
                     icon: const Icon(Icons.location_on, color: Colors.orange),
                     suffixIcon: IconButton(
-                      icon: const Icon(Icons.pin_drop_rounded, color: Colors.orange),
-                      onPressed: _openMap, // Call the method to open Google Maps
+                      icon: const Icon(Icons.pin_drop_rounded,
+                          color: Colors.orange),
+                      onPressed:
+                          _openMap, // Call the method to open Google Maps
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
@@ -281,6 +314,25 @@ class _BarberProfileState extends State<BarberProfile> {
                   decoration: InputDecoration(
                     labelText: 'Shop Name',
                     icon: const Icon(Icons.business, color: Colors.orange),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.orange),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: const BorderSide(color: Colors.grey),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _totalSeatsController,
+                  decoration: InputDecoration(
+                    labelText: 'Total Seats',
+                    icon: const Icon(Icons.event_seat, color: Colors.orange),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12.0),
                     ),

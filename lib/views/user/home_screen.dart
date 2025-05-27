@@ -1,11 +1,9 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:online_barber_app/controllers/language_change_controller.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/user/Drawer%20Pages/notifications.dart';
 import 'package:online_barber_app/views/user/barber_list.dart';
-import 'package:provider/provider.dart';
 import '../../models/service_model.dart';
 import '../../utils/button.dart';
 import 'user_drawer_widget.dart';
@@ -50,44 +48,71 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchServices() async {
-    final querySnapshot = await FirebaseFirestore.instance.collection('services').get();
-    final allServices = querySnapshot.docs.map((doc) => Service.fromSnapshot(doc)).toList();
+    final querySnapshot =
+        await FirebaseFirestore.instance.collection('services').get();
+    final allServices =
+        querySnapshot.docs.map((doc) => Service.fromSnapshot(doc)).toList();
 
     setState(() {
-      _hairStyles = allServices.where((service) => service.category == 'Hair Styles').toList();
-      _beardStyles = allServices.where((service) => service.category == 'Beard Styles').toList();
-      _checkedHairStyles = List<bool>.generate(_hairStyles.length, (index) => false);
-      _checkedBeardStyles = List<bool>.generate(_beardStyles.length, (index) => false);
+      _hairStyles = allServices
+          .where((service) => service.category == 'Hair Styles')
+          .toList();
+      _beardStyles = allServices
+          .where((service) => service.category == 'Beard Styles')
+          .toList();
+      _checkedHairStyles =
+          List<bool>.generate(_hairStyles.length, (index) => false);
+      _checkedBeardStyles =
+          List<bool>.generate(_beardStyles.length, (index) => false);
     });
   }
 
-  void _showFullImage(BuildContext context, String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          child: Container(
-            padding: const EdgeInsets.all(15.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                imageUrl != null
-                    ? Image.network(imageUrl)
-                    : Image.asset('assets/img/default_image.png'), // Use a default image if none is available
-                const SizedBox(height: 8),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(AppLocalizations.of(context)!.close),
-                ),
-              ],
+void _showFullImage(BuildContext context, String imageUrl) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            InteractiveViewer( // allows pinch-to-zoom
+              child: Center(
+                child: imageUrl.isNotEmpty
+                    ? Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Image.asset(
+                            'assets/img/default_image.png',
+                            fit: BoxFit.contain,
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        'assets/img/default_image.png',
+                        fit: BoxFit.contain,
+                      ),
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+            Positioned(
+              top: 30,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            )
+          ],
+        ),
+      );
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -105,33 +130,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         actions: [
-          // Consumer<LanguageChangeController>(
-          //   builder: (context, provider, child) {
-          //     return PopupMenuButton(
-          //       onSelected: (Language item) {
-          //         if (Language.english.name == item.name) {
-          //           provider.changeLanguage(Locale("en"));
-          //         } else if(Language.urdu.name == item.name) {
-          //           provider.changeLanguage(Locale("ur"));
-          //         } else if(Language.arabic.name == item.name){
-          //           provider.changeLanguage(Locale("ar"));
-          //         }else if(Language.spanish.name == item.name){
-          //           provider.changeLanguage(Locale("es"));
-          //         }
-          //         else if(Language.french.name == item.name){
-          //           provider.changeLanguage(Locale("fr"));
-          //         }
-          //       },
-          //       itemBuilder: (BuildContext context) => <PopupMenuEntry<Language>>[
-          //         PopupMenuItem(value: Language.english, child: Text(AppLocalizations.of(context)!.english)),
-          //         PopupMenuItem(value: Language.urdu, child: Text(AppLocalizations.of(context)!.urdu)),
-          //         PopupMenuItem(value: Language.arabic, child: Text(AppLocalizations.of(context)!.arabic)),
-          //         PopupMenuItem(value: Language.spanish, child: Text(AppLocalizations.of(context)!.spanish)),
-          //         PopupMenuItem(value: Language.french, child: Text(AppLocalizations.of(context)!.french)),
-          //       ],
-          //     );
-          //   },
-          // ),
           Stack(
             children: [
               IconButton(
@@ -141,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => NotificationsScreen(uid: LocalStorage.getUserID().toString()),
+                      builder: (context) => NotificationsScreen(
+                          uid: LocalStorage.getUserID().toString()),
                     ),
                   );
                 },
@@ -200,12 +199,21 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
               children: [
-                _buildCategorySection(AppLocalizations.of(context)!.hair_styles, _hairStyles, _checkedHairStyles, 'assets/img/haircut1.jpeg'),
-                _buildCategorySection(AppLocalizations.of(context)!.beard_styles, _beardStyles, _checkedBeardStyles, 'assets/img/beard1.jpeg'),
+                _buildCategorySection(
+                    AppLocalizations.of(context)!.hair_styles,
+                    _hairStyles,
+                    _checkedHairStyles,
+                    'assets/img/haircut1.jpeg'),
+                _buildCategorySection(
+                    AppLocalizations.of(context)!.beard_styles,
+                    _beardStyles,
+                    _checkedBeardStyles,
+                    'assets/img/beard1.jpeg'),
               ],
             ),
           ),
-          if (_checkedHairStyles.contains(true) || _checkedBeardStyles.contains(true))
+          if (_checkedHairStyles.contains(true) ||
+              _checkedBeardStyles.contains(true))
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Button(
@@ -226,7 +234,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BarberList(selectedServices: selectedServices),
+                      builder: (context) =>
+                          BarberList(selectedServices: selectedServices),
                     ),
                   );
                 },
@@ -238,7 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategorySection(String title, List<Service> services, List<bool> checked, String defaultImage) {
+  Widget _buildCategorySection(String title, List<Service> services,
+      List<bool> checked, String defaultImage) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -265,16 +275,38 @@ class _HomeScreenState extends State<HomeScreen> {
             child: ListTile(
               contentPadding: const EdgeInsets.all(16.0),
               leading: GestureDetector(
-                onTap: () {
-                  _showFullImage(context, service.imageUrl ?? defaultImage);
-                },
-                child: CircleAvatar(
-                  backgroundImage: service.imageUrl != null
-                      ? NetworkImage(service.imageUrl!)
-                      : AssetImage(defaultImage) as ImageProvider,
-                  radius: 25,
-                ),
-              ),
+  onTap: () {
+    _showFullImage(context, service.imageUrl ?? defaultImage);
+  },
+  child: CircleAvatar(
+    radius: 25,
+    backgroundColor: Colors.grey.shade200,
+    child: ClipOval(
+      child: service.imageUrl != null
+          ? Image.network(
+              service.imageUrl!,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  defaultImage,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                );
+              },
+            )
+          : Image.asset(
+              defaultImage,
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
+            ),
+    ),
+  ),
+),
+
               title: Text(service.name),
               subtitle: Text(service.price.toStringAsFixed(2)),
               trailing: Checkbox(

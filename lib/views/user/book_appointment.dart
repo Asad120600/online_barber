@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'package:online_barber_app/controllers/appointment_controller.dart';
@@ -48,10 +47,10 @@ class _BookAppointmentState extends State<BookAppointment> {
   bool isBooking = false;
   String _userName = '';
   bool _isHomeService = false;
-  String _selectedPaymentMethod = 'Cash'; // Default payment method
-  List<ProductDetails> _products = [];
-  final InAppPurchase _iap = InAppPurchase.instance;
-  bool _available = true;
+  // String _selectedPaymentMethod = 'Cash'; // Default payment method
+  // List<ProductDetails> _products = [];
+  // final InAppPurchase _iap = InAppPurchase.instance;
+  // bool _available = true;
 
   @override
   void initState() {
@@ -83,29 +82,24 @@ class _BookAppointmentState extends State<BookAppointment> {
   //     _handlePurchaseUpdates();
   //   }
   // }
-
-  Future<void> _loadProducts() async {
-    // Create a set to store product IDs dynamically from selected services
-    Set<String> serviceProductIds = widget.selectedServices.map((service) {
-      // Assuming each service has a corresponding product ID in the app store
-      return service
-          .productId; // Ensure your Service model has a 'productId' field
-    }).toSet();
-
-    // Query the product details using the service product IDs
-    final ProductDetailsResponse response =
-        await _iap.queryProductDetails(_serviceProductIds);
-
-    // if (response.notFoundIDs.isNotEmpty) {
-    //   log('Error: Some product IDs not found - ${response.notFoundIDs}');
-    // }
-
-    // setState(() {
-    //   _products = response.productDetails;
-    // });
-  }
-
-  // void _handlePurchaseUpdates() {
+  // Future<void> _loadProducts() async {
+  //   // Create a set to store product IDs dynamically from selected services
+  //   Set<String> serviceProductIds = widget.selectedServices.map((service) {
+  //     // Assuming each service has a corresponding product ID in the app store
+  //     return service
+  //         .productId; // Ensure your Service model has a 'productId' field
+  //   }).toSet();
+  // Query the product details using the service product IDs
+  //   final ProductDetailsResponse response =
+  //       await _iap.queryProductDetails(_serviceProductIds);
+  // if (response.notFoundIDs.isNotEmpty) {
+  //   log('Error: Some product IDs not found - ${response.notFoundIDs}');
+  // }
+  //   // setState(() {
+  //   //   _products = response.productDetails;
+  //   // });
+  // }
+// void _handlePurchaseUpdates() {
   //   final Stream<List<PurchaseDetails>> purchaseUpdated = _iap.purchaseStream;
   //   purchaseUpdated.listen((List<PurchaseDetails> purchaseDetailsList) {
   //     for (var purchase in purchaseDetailsList) {
@@ -117,8 +111,7 @@ class _BookAppointmentState extends State<BookAppointment> {
   //     }
   //   });
   // }
-
-  // Future<void> _purchaseService(ProductDetails product) async {
+// Future<void> _purchaseService(ProductDetails product) async {
   //   final PurchaseParam purchaseParam = PurchaseParam(productDetails: product);
   //   _iap.buyConsumable(purchaseParam: purchaseParam); // Initiating the purchase
   // }
@@ -182,149 +175,295 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
+  // Future<void> _bookAppointment() async {
+  //   final localization = AppLocalizations.of(context);
+
+  //   // Validate inputs
+  //   if (_timeController.text.isEmpty) {
+  //     _showErrorDialog(localization!.pleaseSelectTimeSlot);
+  //     return;
+  //   }
+  //   if (_isHomeService && _addressController.text.isEmpty) {
+  //     _showErrorDialog(localization!.addressCannotBeEmpty);
+  //     return;
+  //   }
+  //   if (_phoneNumberController.text.isEmpty) {
+  //     _showErrorDialog(localization!.phoneNumberCannotBeEmpty);
+  //     return;
+  //   }
+  //   if (_isHomeService) {
+  //     try {
+  //       double.parse(_homeServicePriceController.text);
+  //     } catch (_) {
+  //       _showErrorDialog(localization!.invalidHomeServicePrice);
+  //       return;
+  //     }
+  //   }
+
+  //   setState(() {
+  //     isBooking = true;
+  //   });
+
+  //   try {
+  //     await _completeAppointment();
+  //   } catch (e) {
+  //     _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
+  //   } finally {
+  //     setState(() {
+  //       isBooking = false;
+  //     });
+  //   }
+  // }
+
+  // Future<void> _completeAppointment() async {
+  //   try {
+  //     // Get the start and end of the current day
+  //     final todayStart = DateTime(
+  //         DateTime.now().year, DateTime.now().month, DateTime.now().day);
+  //     final todayEnd = todayStart.add(const Duration(days: 1));
+
+  //     final todayStartTimestamp = Timestamp.fromDate(todayStart);
+  //     final todayEndTimestamp = Timestamp.fromDate(todayEnd);
+
+  //     // Fetch barber document to get total seats
+  //     final barberDoc = await FirebaseFirestore.instance
+  //         .collection('barbers')
+  //         .doc(widget.barberId)
+  //         .get();
+
+  //     if (!barberDoc.exists) {
+  //       _showErrorDialog("Barber not found.");
+  //       return;
+  //     }
+
+  //     final totalSeats = barberDoc['totalSeats'] ?? 0;
+  //     print("Total seats for barber: $totalSeats");
+
+  //     // Fetch appointments for the barber on the current day
+  //     final appointmentsSnapshot = await FirebaseFirestore.instance
+  //         .collection('appointments')
+  //         .where('barberId', isEqualTo: widget.barberId)
+  //         .where('date', isGreaterThanOrEqualTo: todayStartTimestamp)
+  //         .where('date', isLessThan: todayEndTimestamp)
+  //         .get();
+
+  //     final currentAppointmentsCount = appointmentsSnapshot.docs.length;
+  //     print("Current appointments count: $currentAppointmentsCount");
+
+  //     // Check if there are available seats
+  //     if (currentAppointmentsCount >= totalSeats) {
+  //       // Show snackbar if no seats are available
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('This barber is fully booked for today.')),
+  //       );
+  //       return;
+  //     }
+
+  //     // Calculate total price
+  //     final totalPrice = _calculateTotalPrice();
+
+  //     // Create and book the appointment
+  //     final timestamp = Timestamp.fromDate(selectedDay);
+  //     final appointment = Appointment(
+  //       id: DateTime.now().toIso8601String(),
+  //       date: timestamp,
+  //       time: _timeController.text,
+  //       services: widget.selectedServices,
+  //       address:
+  //           _isHomeService ? _addressController.text : widget.barberAddress,
+  //       phoneNumber: _phoneNumberController.text,
+  //       uid: widget.uid,
+  //       barberName: widget.barberName,
+  //       barberAddress: widget.barberAddress,
+  //       clientName: _userName,
+  //       barberId: widget.barberId,
+  //       isHomeService: _isHomeService,
+  //       homeServicePrice: _isHomeService
+  //           ? double.parse(_homeServicePriceController.text)
+  //           : 0.0,
+  //       totalPrice: totalPrice,
+  //     );
+
+  //     await _appointmentController.bookAppointment(appointment);
+
+  //     // Prepare and send notification
+  //     final services = widget.selectedServices.map((s) => s.name).join(', ');
+  //     final notificationBody = '''
+  //   New Appointment Booked!
+  //   Client: $_userName
+  //   Barber: ${widget.barberName}
+  //   Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+  //   Time: ${_timeController.text}
+  //   Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
+  //   Phone: ${_phoneNumberController.text}
+  //   Services: $services
+  //   Home Service: $_isHomeService
+  //   Total Price: ${totalPrice.toStringAsFixed(2)}
+  //   Payment Method: Cash
+  //   ''';
+
+  //     final barberDeviceToken = await getBarberDeviceToken(widget.barberId);
+  //     await PushNotificationService.sendNotification(
+  //       barberDeviceToken,
+  //       context,
+  //       'You have a new appointment booked!',
+  //       notificationBody,
+  //     );
+
+  //     await _sendEmailNotification(notificationBody);
+  //     _showSuccessDialog();
+  //   } catch (e) {
+  //     _showErrorDialog(e.toString());
+  //   }
+  // }
+
+
   Future<void> _bookAppointment() async {
-    final localization = AppLocalizations.of(context);
+  final localization = AppLocalizations.of(context);
 
-    // Check for necessary inputs
-    if (_timeController.text.isEmpty) {
-      _showErrorDialog(localization!.pleaseSelectTimeSlot);
-      return;
-    }
-    if (_isHomeService && _addressController.text.isEmpty) {
-      _showErrorDialog(localization!.addressCannotBeEmpty);
-      return;
-    }
-    if (_phoneNumberController.text.isEmpty) {
-      _showErrorDialog(localization!.phoneNumberCannotBeEmpty);
-      return;
-    }
-    if (_isHomeService) {
-      try {
-        double.parse(_homeServicePriceController.text);
-      } catch (e) {
-        _showErrorDialog(localization!.invalidHomeServicePrice);
-        return;
-      }
-    }
-
-    setState(() {
-      isBooking = true;
-    });
-
-    // try {
-    //   // Check if any service requires in-app purchase
-    //   if (_products.isNotEmpty) {
-    //     // Assuming the first product matches the selected service
-    //     final ProductDetails product = _products.first; // Adjust this as needed
-
-    //     // Initiate in-app purchase
-    //     await _purchaseService(product);
-    //     // The rest of the booking process will continue after successful payment
-    //   } else {
-    //     // If no IAP is needed, proceed with appointment booking
-    //     await _completeAppointment(); // Proceed to complete booking
-    //   }
-    // } catch (e) {
-    //   _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
-    // } finally {
-    //   setState(() {
-    //     isBooking = false;
-    //   });
-    // }
+  if (_timeController.text.isEmpty) {
+    _showErrorDialog(localization!.pleaseSelectTimeSlot);
+    return;
   }
-
-  Future<void> _completeAppointment() async {
+  if (_isHomeService && _addressController.text.isEmpty) {
+    _showErrorDialog(localization!.addressCannotBeEmpty);
+    return;
+  }
+  if (_phoneNumberController.text.isEmpty) {
+    _showErrorDialog(localization!.phoneNumberCannotBeEmpty);
+    return;
+  }
+  if (_isHomeService) {
     try {
-      String id =
-          FirebaseFirestore.instance.collection('appointments').doc().id;
-      Timestamp timestamp = Timestamp.fromDate(selectedDay);
-
-      // Fetch client and barber documents
-      DocumentSnapshot clientDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.uid)
-          .get();
-      DocumentSnapshot barberDoc = await FirebaseFirestore.instance
-          .collection('barbers')
-          .doc(widget.barberId)
-          .get();
-
-      // Calculate total price for the appointment
-      double totalPrice = _calculateTotalPrice();
-
-      // Create appointment object
-      final appointment = Appointment(
-          id: DateTime.now().toIso8601String(),
-          date: timestamp,
-          time: _timeController.text,
-          services: widget.selectedServices,
-          address:
-              _isHomeService ? _addressController.text : widget.barberAddress,
-          phoneNumber: _phoneNumberController.text,
-          uid: widget.uid,
-          barberName: widget.barberName,
-          barberAddress: widget.barberAddress,
-          clientName: _userName,
-          barberId: widget.barberId,
-          isHomeService: _isHomeService,
-          homeServicePrice: _isHomeService
-              ? double.parse(_homeServicePriceController.text)
-              : 0.0,
-          totalPrice: totalPrice,
-          paymentMethod: _selectedPaymentMethod);
-
-      // Book the appointment in Firestore
-      await _appointmentController.bookAppointment(appointment);
-
-      // Prepare notification message with barber name
-      String services = widget.selectedServices.map((s) => s.name).join(', ');
-      String notificationBody = '''
-      New Appointment Booked!
-      Client: $_userName
-      Barber: ${widget.barberName}
-      Date: ${selectedDay.toLocal().toString().split(' ')[0]}
-      Time: ${_timeController.text}
-      Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
-      Phone: ${_phoneNumberController.text}
-      Services: $services
-      Home Service: $_isHomeService
-      Total Price: ${totalPrice.toStringAsFixed(2)}
-      Payment Method:$_selectedPaymentMethod
-    ''';
-
-      // Send notification to the barber
-      final String barberDeviceToken =
-          await getBarberDeviceToken(widget.barberId);
-      await PushNotificationService.sendNotification(
-        barberDeviceToken,
-        context,
-        'You have a new appointment booked!',
-        notificationBody,
-      );
-
-      await _sendEmailNotification(notificationBody);
-
-      _showSuccessDialog();
-    } catch (e) {
-      _showErrorDialog(e.toString());
+      double.parse(_homeServicePriceController.text);
+    } catch (_) {
+      _showErrorDialog(localization!.invalidHomeServicePrice);
+      return;
     }
   }
 
-// Function to send an email notification
+  setState(() => isBooking = true);
+
+  try {
+    await _completeAppointment();
+  } catch (e, stack) {
+    log('❌ Error in booking: $e\n$stack');
+    _showErrorDialog('${localization!.errorOccurred}: ${e.toString()}');
+  } finally {
+    setState(() => isBooking = false);
+  }
+}
+Future<void> _completeAppointment() async {
+  try {
+    final todayStart = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    final todayEnd = todayStart.add(const Duration(days: 1));
+
+    final todayStartTimestamp = Timestamp.fromDate(todayStart);
+    final todayEndTimestamp = Timestamp.fromDate(todayEnd);
+
+    final barberDoc = await FirebaseFirestore.instance
+        .collection('barbers')
+        .doc(widget.barberId)
+        .get();
+
+    if (!barberDoc.exists) {
+      _showErrorDialog("Barber not found.");
+      return;
+    }
+
+    final totalSeats = barberDoc['totalSeats'] ?? 0;
+    log("🪑 Total seats for barber: $totalSeats");
+
+    final appointmentsSnapshot = await FirebaseFirestore.instance
+        .collection('appointments')
+        .where('barberId', isEqualTo: widget.barberId)
+        .where('date', isGreaterThanOrEqualTo: todayStartTimestamp)
+        .where('date', isLessThan: todayEndTimestamp)
+        .get();
+
+    final currentAppointmentsCount = appointmentsSnapshot.docs.length;
+    log("📅 Current appointments count: $currentAppointmentsCount");
+
+    if (currentAppointmentsCount >= totalSeats) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('This barber is fully booked for today.')),
+      );
+      return;
+    }
+
+    final totalPrice = _calculateTotalPrice();
+    final timestamp = Timestamp.fromDate(selectedDay);
+
+    final appointment = Appointment(
+      id: DateTime.now().toIso8601String(),
+      date: timestamp,
+      time: _timeController.text,
+      services: widget.selectedServices,
+      address: _isHomeService ? _addressController.text : widget.barberAddress,
+      phoneNumber: _phoneNumberController.text,
+      uid: widget.uid,
+      barberName: widget.barberName,
+      barberAddress: widget.barberAddress,
+      clientName: _userName,
+      barberId: widget.barberId,
+      isHomeService: _isHomeService,
+      homeServicePrice: _isHomeService
+          ? double.parse(_homeServicePriceController.text)
+          : 0.0,
+      totalPrice: totalPrice,
+    );
+
+    await _appointmentController.bookAppointment(appointment);
+    log("✅ Appointment saved to Firestore");
+
+    final services = widget.selectedServices.map((s) => s.name).join(', ');
+    final notificationBody = '''
+New Appointment Booked!
+Client: $_userName
+Barber: ${widget.barberName}
+Date: ${selectedDay.toLocal().toString().split(' ')[0]}
+Time: ${_timeController.text}
+Address: ${_isHomeService ? _addressController.text : widget.barberAddress}
+Phone: ${_phoneNumberController.text}
+Services: $services
+Home Service: $_isHomeService
+Total Price: ${totalPrice.toStringAsFixed(2)}
+Payment Method: Cash
+''';
+
+    final barberDeviceToken = await getBarberDeviceToken(widget.barberId);
+    await PushNotificationService.sendNotification(
+      barberDeviceToken,
+      context,
+      'You have a new appointment booked!',
+      notificationBody,
+    );
+
+    await _sendEmailNotification(notificationBody);
+    _showSuccessDialog();
+  } catch (e, stack) {
+    log('❌ Error completing appointment: $e\n$stack');
+    _showErrorDialog(e.toString());
+  }
+}
+
+
   Future<void> _sendEmailNotification(String notificationBody) async {
     final smtpServer = gmail('oakmate1206@gmail.com', 'tmzlvintkyvpindv');
-
     final message = Message()
       ..from = const Address('ios.cypersol@gmail.com', 'Online Barber')
-      ..recipients.add('oakmate1206@gmail.com') // Recipient's email address
+      ..recipients.add('oakmate1206@gmail.com')
       ..subject = 'New Appointment Booked!'
       ..text = notificationBody;
 
     try {
       final sendReport = await send(message, smtpServer);
-      print('Email sent: $sendReport');
+      log('Email sent successfully: $sendReport');
     } on MailerException catch (e) {
-      print('Email not sent. \n$e');
+      log('❌ Email not sent. Reason: ${e.toString()}');
+      for (var p in e.problems) {
+        log('Problem: ${p.code}: ${p.msg}');
+      }
     }
   }
 
@@ -373,7 +512,9 @@ class _BookAppointmentState extends State<BookAppointment> {
     }
   }
 
-  void _showSuccessDialog() {
+
+void _showSuccessDialog() {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -382,10 +523,11 @@ class _BookAppointmentState extends State<BookAppointment> {
         actions: [
           TextButton(
             onPressed: () {
+              log("✅ Navigating to HomeScreen after booking.");
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const HomeScreen()),
-                (Route<dynamic> route) => false,
+                (route) => false,
               );
             },
             child: const Text('OK'),
@@ -393,9 +535,14 @@ class _BookAppointmentState extends State<BookAppointment> {
         ],
       ),
     );
-  }
+  });
+}
 
-  void _showErrorDialog(String message) {
+
+void _showErrorDialog(String message) {
+  log("❌ Booking Error: $message");
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -403,15 +550,56 @@ class _BookAppointmentState extends State<BookAppointment> {
         content: Text(message),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             child: const Text('OK'),
           ),
         ],
       ),
     );
-  }
+  });
+}
+
+  // void _showSuccessDialog() {
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: const Text('Success'),
+  //       content: const Text('Appointment booked successfully'),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.pushAndRemoveUntil(
+  //               context,
+  //               MaterialPageRoute(builder: (context) => const HomeScreen()),
+  //               (Route<dynamic> route) => false,
+  //             );
+  //           },
+  //           child: const Text('OK'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  // void _showErrorDialog(String message) {
+  //   log("Booking Error: $message"); // ✅ Log error in console
+
+  //   showDialog(
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       title: Text(AppLocalizations.of(context)!.error),
+  //       content: Text(message),
+  //       actions: [
+  //         TextButton(
+  //           onPressed: () {
+  //             Navigator.pop(context);
+  //           },
+  //           child: const Text('OK'),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   void _selectTime() async {
     TimeOfDay? pickedTime = await showTimePicker(
@@ -430,7 +618,7 @@ class _BookAppointmentState extends State<BookAppointment> {
     final String? result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CustomGoogleMap(),
+        builder: (context) => const CustomGoogleMap(),
       ),
     );
     if (result != null) {
@@ -612,9 +800,9 @@ class _BookAppointmentState extends State<BookAppointment> {
                       ? const LoadingDots()
                       : Button(
                           onPressed: () async {
-                            if (_selectedPaymentMethod == 'Cash') {
-                              await _bookAppointment();
-                            }
+                            // if (_selectedPaymentMethod == 'Cash') {
+                            await _bookAppointment();
+                            // }
                           },
                           child: Text(localizations.bookAppointment),
                         ),

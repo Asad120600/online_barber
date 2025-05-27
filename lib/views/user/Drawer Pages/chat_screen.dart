@@ -107,7 +107,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                   ),
-                  child: Text('Send'),
+                  child: const Text('Send'),
                 ),
               ],
             ),

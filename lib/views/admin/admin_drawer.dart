@@ -3,18 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:online_barber_app/views/admin/admin_csv_upload.dart';
+import 'package:get/get.dart';
 import 'package:online_barber_app/views/admin/admin_shop/add_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/all_products.dart';
 import 'package:online_barber_app/views/admin/admin_shop/orders.dart';
 import 'package:online_barber_app/views/admin/announcement_screen_send.dart';
 import 'package:online_barber_app/views/admin/app_settings/faqs_settings.dart';
-import 'package:online_barber_app/views/admin/barber%20admin/barber_stats.dart';
+import 'package:online_barber_app/views/admin/barber admin/barber_stats.dart';
 import 'package:online_barber_app/views/admin/chat/admin_contact_reply.dart';
 import 'package:online_barber_app/views/admin/claim_request.dart';
 import 'package:online_barber_app/views/admin/services/manage_services.dart';
 import 'package:online_barber_app/views/admin/services/service_list.dart';
-import 'package:online_barber_app/views/admin/slideshow/slideshow_mnage.dart';
 import 'package:online_barber_app/views/auth/login_screen.dart';
 import 'package:online_barber_app/views/admin/users/active_users.dart';
 import 'package:online_barber_app/views/admin/users/deleted_users.dart';
@@ -60,6 +59,14 @@ class _AdminDrawerState extends State<AdminDrawer> {
     }
   }
 
+  /// ✅ Safe navigation helper using GetX and post-frame callback
+  void navigateSafe(Widget page) {
+    Get.back(); // Close drawer
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Get.to(() => page);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final localization = AppLocalizations.of(context)!;
@@ -71,9 +78,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
           padding: EdgeInsets.zero,
           children: <Widget>[
             DrawerHeader(
-              decoration: const BoxDecoration(
-                color: Colors.orange,
-              ),
+              decoration: const BoxDecoration(color: Colors.orange),
               child: Row(
                 children: [
                   const CircleAvatar(
@@ -86,10 +91,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   Expanded(
                     child: Text(
                       localization.hello_admin(_firstName ?? ''),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 24),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -99,258 +101,125 @@ class _AdminDrawerState extends State<AdminDrawer> {
             ListTile(
               leading: const Icon(Icons.person),
               title: Text(localization.profile),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminProfile(),
-                  ),
-                );
-              },
+              onTap: () => navigateSafe(const AdminProfile()),
             ),
             ExpansionTile(
               leading: const Icon(Icons.shopping_cart_outlined),
               title: Text(localization.shop),
-              children: <Widget>[
+              children: [
                 ListTile(
                   leading: const Icon(Icons.production_quantity_limits_sharp),
                   title: Text(localization.all_products),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AllProductsPage(),
-                      ),
-                    );
-                  },
+                  onTap: () => navigateSafe(const AllProductsPage()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.add),
                   title: Text(localization.add_products),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AddProducts(),
-                      ),
-                    );
-                  },
+                  onTap: () => navigateSafe(const AddProducts()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.history_toggle_off),
                   title: Text(localization.orders),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AdminOrdersPage(),
-                      ),
-                    );
-                  },
+                  onTap: () => navigateSafe(const AdminOrdersPage()),
                 ),
               ],
             ),
             ExpansionTile(
               leading: const Icon(Icons.supervised_user_circle_sharp),
               title: Text(localization.users),
-              children: <Widget>[
+              children: [
                 ListTile(
                   leading: const Icon(Icons.group),
                   title: Text(localization.active_users),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ActiveUsers()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const ActiveUsers()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.group_off),
                   title: Text(localization.deleted_users),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => DeletedUsers()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const DeletedUsers()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.content_cut),
                   title: Text(localization.barbers),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => BarberListScreen()),
-                    );
-                  },
+                  onTap: () => navigateSafe(BarberListScreen()),
                 ),
               ],
             ),
             ExpansionTile(
               leading: const Icon(Icons.settings),
               title: Text(localization.app_settings),
-              children: <Widget>[
+              children: [
                 ListTile(
                   title: Text(localization.privacy_policy),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const PrivacySettings()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const PrivacySettings()),
                 ),
-                ListTile(
-                  title: Text(localization.slide_show_settings),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const AdminSlideshowScreen()),
-                    );
-                  },
-                ),
+                // ListTile(
+                //   title: Text(localization.slide_show_settings),
+                //   onTap: () => navigateSafe(const AdminSlideshowScreen()),
+                // ),
                 ListTile(
                   title: Text(localization.faqs_settings),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const FAQsSettings()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const FAQsSettings()),
                 ),
               ],
             ),
             ExpansionTile(
               leading: const Icon(Icons.miscellaneous_services_outlined),
               title: Text(localization.services),
-              children: <Widget>[
+              children: [
                 ListTile(
                   leading: const Icon(Icons.add),
                   title: Text(localization.add_services),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ManageService()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const ManageService()),
                 ),
                 ListTile(
                   leading: const Icon(Icons.manage_history),
                   title: Text(localization.manage_services),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const ServiceList()),
-                    );
-                  },
+                  onTap: () => navigateSafe(const ServiceList()),
                 ),
               ],
             ),
             ListTile(
               leading: const Icon(Icons.query_stats_rounded),
               title: Text(localization.barberStats),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => BarberStatsScreen()),
-                );
-              },
+              onTap: () => navigateSafe(BarberStatsScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.chat),
               title: Text(localization.chat),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const AdminScreen()),
-                );
-              },
+              onTap: () => navigateSafe(const AdminScreen()),
             ),
-            // ListTile(
-            //   leading: const Icon(Icons.cut),
-            //   title: Text(localization.upload_barbers),
-            //   onTap: () {
-            //     Navigator.pop(context);
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(builder: (context) => AdminCsvUploadPage()),
-            //     );
-            //   },
-            // ),
             ListTile(
               leading: const Icon(Icons.campaign),
               title: Text(localization.announcement),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const AnnouncementScreen()),
-                );
-              },
+              onTap: () => navigateSafe(const AnnouncementScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.request_page_outlined),
               title: Text(localization.claim_requests),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ClaimRequestsScreen()),
-                );
-              },
+              onTap: () => navigateSafe(const ClaimRequestsScreen()),
             ),
             ListTile(
               leading: const Icon(Icons.logout),
               title: Text(localization.signOut),
               onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text(localization.confirmSignOut),
-                      content: Text(localization.signOutConfirmation),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text(localization.cancel),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            await FirebaseAuth.instance.signOut();
-                            Navigator.of(context).pop();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginScreen()),
-                            );
-                          },
-                          child: Text(localization.signOut),
-                        ),
-                      ],
-                    );
+                Get.defaultDialog(
+                  title: localization.confirmSignOut,
+                  middleText: localization.signOutConfirmation,
+                  textCancel: localization.cancel,
+                  textConfirm: localization.signOut,
+                  confirmTextColor: Colors.white,
+                  onConfirm: () async {
+                    try {
+                      await FirebaseAuth.instance.signOut();
+                      Get.back(); // close dialog
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        Get.offAll(() => const LoginScreen());
+                      });
+                    } catch (e) {
+                      log('Sign-out error: $e');
+                      Get.snackbar('Error', 'Failed to sign out. Try again.');
+                    }
                   },
                 );
               },

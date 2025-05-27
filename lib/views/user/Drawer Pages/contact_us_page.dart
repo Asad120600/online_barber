@@ -113,7 +113,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
                     ),
-                    child: Text('Submit'),
+                    child: const Text('Submit'),
                   ),
                 ],
               ),

@@ -3,6 +3,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
   static late SharedPreferences prefs;
+  static String? getUserType() {
+    return prefs.getString('userType');
+  }
 
   static Future initStorage() async {
     prefs = await SharedPreferences.getInstance();
@@ -38,15 +41,11 @@ class LocalStorage {
     prefs.setString('userType', userType);
   }
 
-  static String? getUserType() {
-    return prefs.getString('userType');
-  }
-
   static void setFirebaseToken(String token) {
     prefs.setString('token', token);
   }
 
-   String? getFirebaseToken() {
+  String? getFirebaseToken() {
     return prefs.getString('token');
   }
 
@@ -65,6 +64,7 @@ class LocalStorage {
   static String? getImageUrl() {
     return prefs.getString('imageUrl');
   }
+
   static void logout() {
     prefs.clear();
   }

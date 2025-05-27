@@ -156,15 +156,21 @@ class _LoginScreenState extends State<LoginScreen> {
     _showLoadingDialog(); // Show the loading dialog
 
     try {
-      User? user = await _authController.signInWithGoogle(context);
+      // Call the signInWithGoogle method from the AuthController
+      User? user = await _authController.signInWithGoogle(isBarberSelected
+          ? '2'
+          : isAdminSelected
+              ? '1'
+              : '3');
 
       if (user != null) {
+        // Save the user data in LocalStorage
         LocalStorage.setUserID(userID: user.uid);
         String userType = isAdminSelected
-            ? '1'
+            ? '1' // Admin
             : isBarberSelected
-                ? '2'
-                : '3';
+                ? '2' // Barber
+                : '3'; // Regular User
 
         if (isBarberSelected) {
           LocalStorage.setBarberId(user.uid);
@@ -174,6 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         Navigator.of(context).pop(); // Dismiss the loading dialog
 
+        // Navigate to the appropriate screen based on the user type
         switch (userType) {
           case '1': // Admin
             Navigator.pushReplacement(
@@ -201,6 +208,7 @@ class _LoginScreenState extends State<LoginScreen> {
             break;
         }
       } else {
+        // If the user is null, show a failure message and dismiss the loading dialog
         Navigator.of(context).pop(); // Dismiss the loading dialog
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -210,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      // Log the error using debugPrint
+      // Log the error and show the error message
       debugPrint('Error during Google sign-in: $e');
 
       Navigator.of(context).pop(); // Dismiss the loading dialog

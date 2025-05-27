@@ -1,263 +1,250 @@
-import 'dart:developer';
-
+import 'dart:developer'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:online_barber_app/utils/shared_pref.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../models/user_model.dart';
-import '../models/admin_model.dart';
-import '../models/barber_model.dart';
+import '../utils/shared_pref.dart';
 
 class AuthController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  
-  Future<bool> signUpWithEmail(
-      String email,
-      String password,
-      String firstName,
-      String lastName,
-      String phone,
-      String userType,
-      BuildContext context
-      ) async {
-    try {
-      // Step 1: Check if phone number already exists
-      var existingUserQuery = await _firestore
-          .collection('barbers')
-          .where('phoneNumber', isEqualTo: phone)
-          .get();
 
-      if (existingUserQuery.docs.isNotEmpty) {
-        // If a user with the same phone number exists, show error and return
-        log("Sign Up Error: Phone number already registered.");
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Phone number is already registered."))
-        );
-        return false; // Stop signup if phone number is already in use
-      }
+  // Sign up with email and password
+Future<bool> signUpWithEmail(
+  String email,
+  String password,
+  String firstName,
+  String lastName,
+  String phone,
+  String userType,
+  BuildContext context,
+) async {
+  try {
+    // Create user with email and password.
+    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
 
-      // Step 2: Proceed with signup if phone number is unique
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      User? user = userCredential.user;
+    User? user = userCredential.user;
 
-      if (user != null) {
-        String? token = await _firebaseMessaging.getToken();
+    if (user != null) {
+      String? token;
+      if (!kIsWeb) {
+        token = await _firebaseMessaging.getToken();
         if (token != null) {
           LocalStorage.setFirebaseToken(token);
         }
-
-        var userData = BaseUserModel(
-          uid: user.uid,
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          userType: userType,
-          phone: phone,
-          token: token ?? '',
-        ).toMap();
-
-        // Set user data based on user type
-        switch (userType) {
-          case '1': // Admin
-            userData = AdminModel(
-              uid: user.uid,
-              email: email,
-              firstName: firstName,
-              lastName: lastName,
-              userType: userType,
-              phone: phone,
-              token: token ?? '',
-            ).toMap();
-            await _firestore.collection('admins').doc(user.uid).set(userData);
-            break;
-          case '2': // Barber
-            userData = Barber(
-              id: user.uid,
-              email: email,
-              name: firstName,
-              userType: userType,
-              phoneNumber: phone,
-              address: '',
-              imageUrl: '',
-              token: token ?? '',
-              shopName: '', latitude: 0.0, longitude: 0.0,
-            ).toMap();
-            await _firestore.collection('barbers').doc(user.uid).set(userData);
-            break;
-          case '3': // User
-            userData = BaseUserModel(
-              uid: user.uid,
-              email: email,
-              firstName: firstName,
-              lastName: lastName,
-              userType: userType,
-              phone: phone,
-              token: token ?? '',
-            ).toMap();
-            await _firestore.collection('users').doc(user.uid).set(userData);
-            break;
-          default: // Regular user
-            break;
-        }
-        return true; // Return true on successful signup
       }
-      return false; // Return false if user is null
+
+      // Create user data model.
+      var userData = BaseUserModel(
+        uid: user.uid,
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        userType: userType,
+        phone: phone,
+        token: token ?? '',
+      ).toMap();
+
+      // Store user data in Firestore based on user type.
+      switch (userType) {
+        case '1': // Admin
+          await _firestore.collection('admins').doc(user.uid).set(userData);
+          break;
+        case '2': // Barber
+          await _firestore.collection('barbers').doc(user.uid).set(userData);
+          break;
+        default: // Regular User
+          await _firestore.collection('users').doc(user.uid).set(userData);
+          break;
+      }
+
+      // Send email verification only for non-admin users.
+      if (userType != '1') {
+        await sendEmailVerification(user);
+      }
+
+      return true;
+    }
+    return false;
+  } catch (e) {
+    log("Sign-Up Error: ${e.toString()}");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Sign-Up Error: ${e.toString()}")),
+    );
+    return false;
+  }
+}
+
+  // Send email verification
+  Future<void> sendEmailVerification(User user) async {
+    try {
+      await user.sendEmailVerification();
+      log("Verification email sent.");
     } catch (e) {
-      log("Sign Up Error: ${e.toString()}");
-      return false; // Return false on error
+      log("Error sending verification email: $e");
     }
   }
 
+  // Check if the user's email is verified
+  Future<bool> checkEmailVerification() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      await user.reload(); // Reload user data to get the latest info
+      return user.emailVerified;
+    }
+    return false;
+  }
 
+  // Sign in with email and password
   Future<User?> signInWithEmail(String email, String password, String userType) async {
     try {
       UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
       User? user = userCredential.user;
 
       if (user != null) {
-        String? token = await _firebaseMessaging.getToken();
-        if (token != null) {
-          await updateTokenInFirestore(user.uid, token);
-          LocalStorage.setFirebaseToken(token);
+        String? token;
+        if (!kIsWeb) {
+          token = await _firebaseMessaging.getToken();
+          if (token != null) {
+            await updateTokenInFirestore(user.uid, token);
+            LocalStorage.setFirebaseToken(token);
+          }
         }
 
+        // Retrieve user document based on type.
         DocumentSnapshot userDoc;
-
         switch (userType) {
-          case '1': // Admin
+          case '1':
             userDoc = await _firestore.collection('admins').doc(user.uid).get();
-            if (userDoc.exists) {
-              log("Admin logged in");
-              // Navigate to admin panel or perform admin-specific actions
-            } else {
-              log("Admin document does not exist for uid: ${user.uid}");
-              await _auth.signOut(); // Sign out user if trying to login as admin with user credentials
-              return null;
-            }
             break;
-          case '2': // Barber
+          case '2':
             userDoc = await _firestore.collection('barbers').doc(user.uid).get();
-            if (userDoc.exists) {
-              log("Barber logged in");
-              // Navigate to barber dashboard or perform barber-specific actions
-            } else {
-              log("Barber document does not exist for uid: ${user.uid}");
-              await _auth.signOut(); // Sign out user if trying to login as barber with user credentials
-              return null;
-            }
             break;
-          default: // Regular user
+          default:
             userDoc = await _firestore.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-              log("Regular user logged in");
-              // Navigate to user home screen or perform user-specific actions
-            } else {
-              log("User document does not exist for uid: ${user.uid}");
-              await _auth.signOut(); // Sign out user if trying to login as regular user with admin/barber credentials
-              return null;
-            }
             break;
         }
+
+        if (!userDoc.exists) {
+          log("User document not found for type: $userType");
+          await _auth.signOut();
+          return null;
+        }
+
+        // Skip email verification for admin users.
+        if (userType != '1') {
+          bool isVerified = await checkEmailVerification(); // This is the correct method to call
+          if (!isVerified) {
+            log("Email is not verified.");
+            await _auth.signOut();
+            return null;
+          }
+        }
+
         return user;
       }
-      return null; // Return null if user is null
+      return null;
     } catch (e) {
-      log("Sign In Error: ${e.toString()}");
-      return null; // Return null on error
+      log("Sign-In Error: ${e.toString()}");
+      return null;
     }
   }
 
-  Future<User?> signInWithGoogle(BuildContext context) async {
+  // Sign in with Google
+  Future<User?> signInWithGoogle(String userType) async {
     try {
+      // Trigger the Google Sign-In flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
       if (googleUser == null) {
-        log("Google sign-in aborted by user.");
-        return null; // User aborted Google sign-in
+        log("Google Sign-In failed.");
+        return null; // The user canceled the sign-in
       }
 
+      // Obtain the Google authentication details
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
+      // Create a new credential for Firebase
+      final OAuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
+      // Sign in with Firebase using the Google credential
       UserCredential userCredential = await _auth.signInWithCredential(credential);
       User? user = userCredential.user;
 
       if (user != null) {
-        String? token = await _firebaseMessaging.getToken();
-        if (token != null) {
-          await updateTokenInFirestore(user.uid, token);
-          LocalStorage.setFirebaseToken(token);
+        String? token;
+        if (!kIsWeb) {
+          token = await _firebaseMessaging.getToken();
+          if (token != null) {
+            await updateTokenInFirestore(user.uid, token);
+            LocalStorage.setFirebaseToken(token);
+          }
         }
 
-        final userDoc = await _firestore.collection('users').doc(user.uid).get();
+        // Store user data in Firestore based on user type
+        DocumentSnapshot userDoc;
+        switch (userType) {
+          case '1':
+            userDoc = await _firestore.collection('admins').doc(user.uid).get();
+            break;
+          case '2':
+            userDoc = await _firestore.collection('barbers').doc(user.uid).get();
+            break;
+          default:
+            userDoc = await _firestore.collection('users').doc(user.uid).get();
+            break;
+        }
+
         if (!userDoc.exists) {
-          var userData = {
-            'uid': user.uid,
-            'email': user.email,
-            'firstName': user.displayName?.split(" ")[0] ?? '',
-            'lastName': user.displayName?.split(" ")[1] ?? '',
-            'userType': '3', // Default userType for Google sign-in
-            'phone': user.phoneNumber ?? '',
-            'token': token ?? '',
-          };
-
-          await _firestore.collection('users').doc(user.uid).set(userData);
+          log("User document not found for type: $userType");
+          await _auth.signOut();
+          return null;
         }
+
         return user;
       }
-      return null; // Return null if user is null
+
+      return null;
     } catch (e) {
       log("Google Sign-In Error: ${e.toString()}");
-      return null; // Return null on error
+      return null;
     }
   }
 
+  // Update Firebase token in Firestore
+  Future<void> updateTokenInFirestore(String userId, String token) async {
+    try {
+      await _firestore.collection('users').doc(userId).update({'token': token});
+    } catch (e) {
+      log("Failed to update token: $e");
+    }
+  }
+
+  // Sign out the user
   Future<void> signOut() async {
     try {
       await _auth.signOut();
-      await _googleSignIn.signOut();
-    } catch (e) {
-      log("Sign Out Error: ${e.toString()}");
-    }
-  }
-
-  Future<void> updateTokenInFirestore(String userId, String token) async {
-    try {
-      // Check user type and update the corresponding collection
-      var userDoc = await _firestore.collection('admins').doc(userId).get();
-      if (userDoc.exists) {
-        await _firestore.collection('admins').doc(userId).update({'token': token});
-        return;
-      }
-
-      userDoc = await _firestore.collection('barbers').doc(userId).get();
-      if (userDoc.exists) {
-        await _firestore.collection('barbers').doc(userId).update({'token': token});
-        return;
-      }
-
-      userDoc = await _firestore.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        await _firestore.collection('users').doc(userId).update({'token': token});
-        return;
+      if (!kIsWeb) {
+        await _googleSignIn.signOut();
       }
     } catch (e) {
-      log("Failed to update token in Firestore: $e");
+      log("Sign-Out Error: ${e.toString()}");
     }
   }
 }

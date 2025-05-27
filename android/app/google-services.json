@@ -39,10 +39,10 @@
               "client_type": 3
             },
             {
-              "client_id": "563327464865-v4593itln3oe3e7h7o891uad3jgd17c6.apps.googleusercontent.com",
+              "client_id": "563327464865-bibe40nigtp8c7p0d1b65t5tj086da8d.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.onlineBarberApp"
+                "bundle_id": "com.getbarber.online"
               }
             }
           ]
@@ -83,10 +83,10 @@
               "client_type": 3
             },
             {
-              "client_id": "563327464865-v4593itln3oe3e7h7o891uad3jgd17c6.apps.googleusercontent.com",
+              "client_id": "563327464865-bibe40nigtp8c7p0d1b65t5tj086da8d.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.onlineBarberApp"
+                "bundle_id": "com.getbarber.online"
               }
             }
           ]

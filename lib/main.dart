@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
 import 'package:online_barber_app/controllers/language_change_controller.dart';
+import 'package:online_barber_app/firebase_options.dart';
 import 'package:online_barber_app/utils/shared_pref.dart';
 import 'package:online_barber_app/views/splash_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -18,14 +20,16 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SharedPreferences sp = await SharedPreferences.getInstance();
   final String languageCode = sp.getString('language_code') ?? '';
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   LocalStorage.initStorage();
   runApp(MyApp(locale: languageCode));
 }
 
 class MyApp extends StatefulWidget {
   final String locale;
-  const MyApp({Key? key, required this.locale}) : super(key: key);
+  const MyApp({super.key, required this.locale});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -191,11 +195,12 @@ class _MyAppState extends State<MyApp> {
             }
           }
 
-          return MaterialApp(
+          return GetMaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'Online Barber App',
-            locale: provider.appLocale ?? Locale(widget.locale.isEmpty ? 'en' : widget.locale),
-            localizationsDelegates: [
+            locale: provider.appLocale ??
+                Locale(widget.locale.isEmpty ? 'en' : widget.locale),
+            localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,

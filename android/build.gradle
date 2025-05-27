@@ -1,3 +1,14 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0' // ✅ Updated AGP version
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0' // or your current Kotlin version
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -8,10 +19,7 @@ allprojects {
 rootProject.buildDir = "../build"
 
 subprojects {
-    // Set build directory for subprojects
     project.buildDir = "${rootProject.buildDir}/${project.name}"
-
-    // Ensure subprojects are evaluated after :app
     project.evaluationDependsOn(":app")
 }
 

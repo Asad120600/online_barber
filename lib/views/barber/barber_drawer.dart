@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:online_barber_app/models/service_model.dart';
@@ -9,6 +8,7 @@ import 'package:online_barber_app/views/barber/barber_profile.dart';
 import 'package:online_barber_app/views/barber/barber_stats.dart';
 import 'package:online_barber_app/views/barber/set_price.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class BarberDrawer extends StatefulWidget {
   const BarberDrawer({super.key, required this.screenWidth});
@@ -20,7 +20,6 @@ class BarberDrawer extends StatefulWidget {
 }
 
 class _BarberDrawerState extends State<BarberDrawer> {
-
   User? _currentUser;
   String? _firstName;
   String? _imageUrl;
@@ -78,7 +77,7 @@ class _BarberDrawerState extends State<BarberDrawer> {
                   const SizedBox(width: 10),
                   Flexible(
                     child: Text(
-                      localizations.hello( _firstName?? localizations.defaultName),
+                      localizations.hello(_firstName ?? localizations.defaultName),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
@@ -94,59 +93,77 @@ class _BarberDrawerState extends State<BarberDrawer> {
               leading: const Icon(Icons.person),
               title: Text(localizations.profile),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const BarberProfile(),
-                  ),
-                );
+                Navigator.pop(context); // Close the drawer
+                // Use addPostFrameCallback to ensure navigation happens after the current frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BarberProfile(),
+                    ),
+                  );
+                });
               },
             ),
             ListTile(
               leading: const Icon(Icons.price_change),
               title: Text(localizations.setPrices),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SetServicePrices(service: Service(
-                      id: '',
-                      name: '',
-                      price: 0.0,
-                      category: 'Hair Styles',
-                      imageUrl: null,
-                      barberPrices: null, isHomeService: false, homeServicePrice: 0.0, productId: '',
-                    ), barberId: '', ),
-                  ),
-                );
+                Navigator.pop(context); // Close the drawer
+                // Use addPostFrameCallback to ensure navigation happens after the current frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SetServicePrices(
+                        service: Service(
+                          id: '',
+                          name: '',
+                          price: 0.0,
+                          category: 'Hair Styles',
+                          imageUrl: null,
+                          barberPrices: null,
+                          isHomeService: false,
+                          homeServicePrice: 0.0,
+                          productId: '',
+                        ),
+                        barberId: '',
+                      ),
+                    ),
+                  );
+                });
               },
             ),
             ListTile(
               leading: const Icon(Icons.query_stats_sharp),
               title: Text(localizations.stats),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Stats(barberId: LocalStorage.getBarberId().toString(),),
-                  ),
-                );
+                Navigator.pop(context); // Close the drawer
+                // Use addPostFrameCallback to ensure navigation happens after the current frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Stats(barberId: LocalStorage.getBarberId().toString()),
+                    ),
+                  );
+                });
               },
             ),
             ListTile(
               leading: const Icon(Icons.campaign),
               title: Text(localizations.makeAnnouncement),
               onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AnnouncementScreen(),
-                  ),
-                );
+                Navigator.pop(context); // Close the drawer
+                // Use addPostFrameCallback to ensure navigation happens after the current frame
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AnnouncementScreen(),
+                    ),
+                  );
+                });
               },
             ),
             ListTile(
@@ -170,12 +187,15 @@ class _BarberDrawerState extends State<BarberDrawer> {
                           onPressed: () async {
                             await FirebaseAuth.instance.signOut();
                             Navigator.of(context).pop();
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const LoginScreen(),
-                              ),
-                            );
+                            // Ensure navigation happens after the current frame
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const LoginScreen(),
+                                ),
+                              );
+                            });
                           },
                           child: Text(localizations.signOutButton),
                         ),
